@@ -1,0 +1,5 @@
+# Mark videos watched when opened from the tracker
+
+The normal action for opening a saved video opens it in a new tab, marks it watched, and removes it from the active list, while retaining history hidden from ordinary views. This deliberately trades certainty about actual viewing for the user's preferred workflow: they should not have to return to the tracker to confirm completion. Explicit watched and dismissed actions remain available, and the watched status must not be interpreted as verified playback completion.
+
+The rule also applies to videos already marked unavailable and to bulk opening: successfully creating the browser tab counts as opening, without requiring successful video playback. Failure to create the tab leaves the video in its active list; a video that becomes available later can be queued again through the repeat-save review.
