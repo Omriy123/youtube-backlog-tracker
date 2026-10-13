@@ -4,7 +4,7 @@ The user completed this throwaway prototype and selected refined A on 2026-10-13
 
 ## Source
 
-The archive branch is `archive/library-layout`. Its source directory is `.scratch/video-backlog/prototypes/library-layout/`, including the original comparison and first refinement. The main branch keeps the accepted design docs; `.scratch/` is normally ignored.
+The archive branch is [archive/library-layout](https://github.com/Omriy123/youtube-backlog-tracker/tree/archive/library-layout/.scratch/video-backlog/prototypes/library-layout), captured at commit `a547c769bdfc037a36334c40de18a5a7b0894e07`. Its source directory is `.scratch/video-backlog/prototypes/library-layout/`, including the original comparison and first refinement. The main branch keeps the accepted design docs; `.scratch/` is normally ignored.
 
 The current local workspace may still contain the source. For a new checkout, obtain the archive branch in a separate checkout so production work and prototype code stay distinct.
 

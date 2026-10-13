@@ -154,4 +154,4 @@ Second-refinement walkthrough: verified insertion markers above/below rows agree
 
 Fourth-refinement browser check: initial load and Reset demo use Thumbnails (24 Inbox thumbnails). Search is below the list heading rather than in the global header. Searching Studio North returns 3 Inbox results, toggling Library returns 10, toggling back restores the 3 Inbox results and unchanged query, and selecting Tonight narrows to its 1 match.
 
-The original local prototype ticket is preserved on the archive branch at `.scratch/video-backlog/issues/01-library-layout-prototype.md`. Current requirements: [product spec](../specs/video-backlog.md).
+Completed work: [GitHub issue #1](https://github.com/Omriy123/youtube-backlog-tracker/issues/1). The original local prototype ticket is preserved on the archive branch at `.scratch/video-backlog/issues/01-library-layout-prototype.md`. Current requirements: [product spec](../specs/video-backlog.md).

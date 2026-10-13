@@ -27,4 +27,6 @@ GitHub's open/closed state records whether an issue remains actionable. Triage l
 
 The Library prototype has been selected and its feedback incorporated. Continue resolving the product spec's open decisions before preparing the implementation plan. Prototype completion does not authorize shipping its throwaway code as the extension.
 
+The completed prototype is recorded in [issue #1](https://github.com/Omriy123/youtube-backlog-tracker/issues/1). Continue the design interview through [issue #2](https://github.com/Omriy123/youtube-backlog-tracker/issues/2).
+
 The initial repository setup is a baseline commit. Subsequent implementation follows the issue/branch/PR cycle above.

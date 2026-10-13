@@ -4,6 +4,8 @@ A personal desktop browser extension for collecting video links, sorting them in
 
 The product is in design. The Library layout prototype is complete; production implementation has not started.
 
+[GitHub repository](https://github.com/Omriy123/youtube-backlog-tracker) · [Issues](https://github.com/Omriy123/youtube-backlog-tracker/issues) · [Next: finish the design](https://github.com/Omriy123/youtube-backlog-tracker/issues/2)
+
 ## Design
 
 - [Product specification](docs/specs/video-backlog.md)

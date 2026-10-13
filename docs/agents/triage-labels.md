@@ -1,6 +1,6 @@
 # Triage labels
 
-Use these role names as task status strings:
+Use these five role names as GitHub issue labels:
 
 | Role | Meaning |
 | --- | --- |

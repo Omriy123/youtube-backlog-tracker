@@ -2,6 +2,8 @@
 
 Design status: open decisions remain; production implementation is not yet approved.
 
+Task tracking: [finalize the design, issue #2](https://github.com/Omriy123/youtube-backlog-tracker/issues/2).
+
 This design is being developed through an interview. Confirmed requirements below do not constitute approval of a complete design or implementation.
 
 ## Purpose
