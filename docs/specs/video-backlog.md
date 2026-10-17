@@ -127,6 +127,8 @@ Overarching approval covers the visual direction above. Q39 separately adopts th
 
 ### Sorting contract adopted at Q39
 
+The later approved [organization and browsing contract](library-organization.md) records explicit refinements: filtered arranging is temporary, selected groups can be arranged together, and ordinary arrivals fit by publication date around saved/imported Manual relative order. It also settles selection, channel-count and deletion-navigation details and uses Entire Library as the across-list view label. Apply that focused contract where the historical rules or source-audit defaults below differ; the remaining Q39/Q40 commitments stay in force.
+
 - Clickable title, channel, destination, duration, and publication headers are available in both densities. Library date sorts are expandable buttons, and Manual stays beside Select all. Grouped channel results expose Title, Published, and Duration shortcuts plus Library dates and Manual.
 - Clicking the current non-Manual sort reverses its direction; selecting a different non-publication sort starts ascending. Publication direction follows the selected list's remembered oldest/newest choice. Choosing publication direction in All active applies that direction to all lists, as the prototype does. Missing values remain last in either direction.
 - Manual returns to the saved arrangement, including source order initialized when a new list is imported (Q46). Only lists without an imported or manually rearranged order continue following their publication-date direction in Manual. There is no separate global manual video order; Library-wide Manual keeps each destination's arrangement.
