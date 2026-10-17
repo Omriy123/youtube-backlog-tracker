@@ -9,7 +9,7 @@ The entire collection of saved videos, across Inbox, Backlog, watch lists, and r
 _Avoid_: Backlog when referring to the entire collection
 
 **Inbox**:
-The list of videos awaiting a placement decision, normally newly saved videos. Previously sorted videos may return through Undo or an explicit move when their custom list is deleted, but not through ordinary moves or repeat saves.
+The list of videos awaiting a placement decision, normally newly saved videos. A previously sorted video may return through Undo, an explicit move when its custom list is deleted, or a deliberate Keep decision when a generic repeat save reveals it was watched or dismissed.
 _Avoid_: Unsorted
 
 **Backlog**:
@@ -25,14 +25,18 @@ The user-defined ranking of watch lists from more important to less important. I
 _Avoid_: Priority score, video priority
 
 **Manual video order**:
-The saved arrangement of videos within a list, following release-date order until the user manually rearranges it. Viewing another sort order does not replace the saved arrangement.
+The saved arrangement of videos within a list, initially following release-date order until manually rearranged, or preserving source order for a newly imported list. Viewing another sort order does not replace the saved arrangement.
 
 **First saved date**:
 The date a video was first added to the Library, regardless of its later list moves or repeat watches.
 _Avoid_: Upload date when referring to saving into the extension
 
+**Personal title**:
+A title deliberately given to a saved video by the user, distinct from the title supplied by its page or provider.
+_Avoid_: Provider title, fetched title
+
 **First Inbox-exit date**:
-The date a video first left Inbox. Later list moves do not replace this date.
+The date a video first completed its initial placement decision, either by leaving Inbox or by being saved directly into Backlog or a watch list. Later list moves do not replace this date.
 
 **Latest list-entry date**:
 The date of the video's most recent entry into a list.
@@ -48,10 +52,21 @@ _Avoid_: Playback completed
 A video the user has decided not to watch. Dismissed videos are retained but hidden from active lists by default.
 
 **History**:
-A record of changes to a saved video, including its previous list and when it was moved, removed, or marked watched or dismissed.
+A record of changes in the Library, including videos' previous destinations and when they were moved, removed, or marked watched or dismissed.
+
+**Library snapshot**:
+A saved copy of the Library's state at a particular time, including its videos, lists, arrangements, and history. Snapshots may be saved automatically or deliberately by the user.
+_Avoid_: Watch event, open-tab session
+
+**Library restoration**:
+Returning the Library's user-controlled organization, status, history, and authored values to a retained point or snapshot, reversing later user changes together. Automatic metadata remains at its latest valid values or missing, rather than returning stale provider responses.
 
 **Watch event**:
 An occasion when a video was marked watched, through opening it from the tracker or an explicit action. A video may have multiple watch events when watched again.
 
 **Possible duplicate**:
 A different upload whose metadata suggests it may repeat an existing video's content. It is a suggestion for user review, not a confirmed match or an automatic merge.
+
+**Exact duplicate**:
+Another reference to the same underlying upload as a video already in the Library. It represents the existing video, not a second saved record or another active list membership.
+_Avoid_: Possible duplicate, reupload

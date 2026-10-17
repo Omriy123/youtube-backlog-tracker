@@ -2,13 +2,15 @@
 
 A personal desktop browser extension for collecting video links, sorting them into watch lists, and deciding what to watch next. YouTube is the primary provider; Twitch VODs and generic video links are also in scope.
 
-The product is in design. The Library layout prototype is complete; production implementation has not started.
+The overarching product design and first save/find/open/recover slice are approved. The first slice has five implementation tickets under [issue #3](https://github.com/Omriy123/youtube-backlog-tracker/issues/3), starting with [save/find, issue #4](https://github.com/Omriy123/youtube-backlog-tracker/issues/4). The Library layout prototype is complete; production implementation has not started.
 
-[GitHub repository](https://github.com/Omriy123/youtube-backlog-tracker) · [Issues](https://github.com/Omriy123/youtube-backlog-tracker/issues) · [Next: finish the design](https://github.com/Omriy123/youtube-backlog-tracker/issues/2)
+[GitHub repository](https://github.com/Omriy123/youtube-backlog-tracker) · [Issues](https://github.com/Omriy123/youtube-backlog-tracker/issues) · [Remaining product roadmap, issue #9](https://github.com/Omriy123/youtube-backlog-tracker/issues/9)
 
 ## Design
 
 - [Product specification](docs/specs/video-backlog.md)
+- [Feature-design areas and first usable slice](docs/design/feature-map.md)
+- [Approved first-slice spec and delivery tickets](docs/specs/first-end-to-end-slice.md)
 - [Domain glossary](GLOSSARY.md)
 - [Accepted layout and prototype feedback](docs/design/library-layout.md)
 - [Prototype source and preview instructions](docs/prototypes/library-layout.md)
