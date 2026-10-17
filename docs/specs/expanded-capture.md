@@ -143,7 +143,7 @@ Persist the record's placement/status, pending review, previous activity referen
 - Closing/cancelling the dialog leaves pending review intact. Failed review persistence leaves the prior saved state/flag intact and reports failure.
 - After Leave here & open, successful new-tab creation alone marks watched, removes active membership, and adds one watch event. Failed tab creation leaves the reviewed record active with its review resolved. Tracking failure after tab creation preserves the first-slice recoverable/failure contract; do not claim completed tracking or partial history.
 - Single opening retains focused new tabs, inclusion of known-unavailable records, and persistent safe Undo opening. Undo opening restores the reviewed pre-open state; it does not revive a review the user already resolved or erase older events.
-- Selected/whole-list opening and batch move/status callers must honor this gate and cannot mark unresolved records watched or silently interpret selection as Keep. Their detailed review grouping, focus, tab-group behavior, and partial-open continuation are owned by the existing opening/organization planning questions, not invented in this capture slice.
+- Selected/whole-list opening and batch move/status callers must honor this gate and cannot mark unresolved records watched or silently interpret selection as Keep. The [focused opening/history contract](opening-and-watch-history.md) now specifies review before initial grouped opening, explicit leave-in-review exclusion, named groups, focus and ordered retry/partial outcomes. Organization retains its selection/move questions. These consumer contracts do not add a mandatory review wizard to saving itself.
 
 ### Results, failures, and reopening
 
