@@ -8,6 +8,7 @@ The overarching product design and first save/find/open/recover slice are approv
 
 ## Design
 
+- [Wayfinder map: recorded answers and remaining planning questions](https://github.com/Omriy123/youtube-backlog-tracker/issues/10)
 - [Product specification](docs/specs/video-backlog.md)
 - [Feature-design areas and first usable slice](docs/design/feature-map.md)
 - [Approved first-slice spec and delivery tickets](docs/specs/first-end-to-end-slice.md)

@@ -10,4 +10,4 @@ Use these five role names as GitHub issue labels:
 | ready-for-human | Requires human implementation |
 | wontfix | Will not be actioned |
 
-On GitHub these are issue labels. Use one current triage role per open issue. Use GitHub's open/closed state for completion; a project-board column, if introduced later, represents workflow progress separately.
+On GitHub these are delivery-task labels. Use one current triage role per open delivery issue. Wayfinder maps and decision tickets use only their `wayfinder:*` labels; see [Wayfinding operations](issue-tracker.md#wayfinding-operations). Use GitHub's open/closed state for completion; a project-board column, if introduced later, represents workflow progress separately.

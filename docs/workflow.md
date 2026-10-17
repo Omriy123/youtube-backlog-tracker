@@ -6,12 +6,15 @@
 | --- | --- |
 | Code, tests, and durable design docs | This Git repository |
 | Scope, acceptance criteria, dependencies, and task discussion | GitHub Issues |
+| Planning decisions, recorded answers, and unresolved decision dependencies | [Wayfinder map](https://github.com/Omriy123/youtube-backlog-tracker/issues/10) and its decision children |
 | Implementation changes and validation | Pull requests |
 | Domain terms | Root `GLOSSARY.md` |
 | Lasting architecture decisions | `docs/adr/` |
 | Temporary experiments, imports, and working notes | Ignored `.scratch/` |
 
 Issues link to the relevant spec instead of maintaining a second copy. Local issue files from the initial design interview are historical artifacts, not an active second tracker. Preserve prototype source on its archive branch and record accepted decisions in the main branch's docs.
+
+The [Wayfinder map](https://github.com/Omriy123/youtube-backlog-tracker/issues/10) retrospectively indexes the existing approved answers and charts unresolved planning questions. Read a relevant historical resolution before interviewing; the map's open children and native blockers identify the remaining frontier. It complements the delivery roadmap: closing a planning decision does not mean the feature has shipped. See [Wayfinding operations](agents/issue-tracker.md#wayfinding-operations) when continuing the map.
 
 ## From design to implementation
 
