@@ -8,6 +8,10 @@ A personal video collection for keeping up with saved videos and deciding what t
 The entire collection of saved videos, across Inbox, Backlog, watch lists, and retained history. It is the container for the collection, not a destination list of its own.
 _Avoid_: Backlog when referring to the entire collection
 
+**Entire Library view**:
+A browsing view of active videos across Inbox, Backlog, and watch lists. Retained watched and dismissed records remain available through History.
+_Avoid_: All active as the visible name of this view
+
 **Inbox**:
 The list of videos awaiting a placement or rediscovery decision, normally newly saved videos. A previously sorted video may return through Undo, an explicit move when its custom list is deleted, or a generic repeat save with a pending review when it was watched or dismissed.
 _Avoid_: Unsorted
