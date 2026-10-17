@@ -27,6 +27,9 @@ _Avoid_: Priority score, video priority
 **Manual video order**:
 The saved arrangement of videos within a list, initially following release-date order until manually rearranged, or preserving source order for a newly imported list. Viewing another sort order does not replace the saved arrangement.
 
+**Temporary filtered order**:
+An arrangement of videos that applies only to their filtered view. It leaves the saved Manual video order unchanged and ends when the filter is cleared.
+
 **First saved date**:
 The date a video was first added to the Library, regardless of its later list moves or repeat watches.
 _Avoid_: Upload date when referring to saving into the extension
