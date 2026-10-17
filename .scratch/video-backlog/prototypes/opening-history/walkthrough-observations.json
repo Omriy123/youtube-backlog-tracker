@@ -1,0 +1,1207 @@
+﻿{
+    "id":  4,
+    "result":  {
+                   "result":  {
+                                  "type":  "object",
+                                  "value":  {
+                                                "notes":  [
+                                                              {
+                                                                  "label":  "Naming prompt: no viewing tabs yet; default Selected videos",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes"
+                                                                           ],
+                                                                  "groups":  [
+
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "Camera basics: getting the exposure right",
+                                                                                     "How a bridge carries its load",
+                                                                                     "Rust ownership with practical examples"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Weekend",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+
+                                                                              ],
+                                                                  "draft":  {
+                                                                                "ids":  [
+                                                                                            "camera",
+                                                                                            "bridge",
+                                                                                            "rust"
+                                                                                        ],
+                                                                                "excluded":  [
+
+                                                                                             ],
+                                                                                "name":  "Selected videos",
+                                                                                "grouped":  true
+                                                                            },
+                                                                  "message":  "Review the request and choose the group name. No tabs have opened."
+                                                              },
+                                                              {
+                                                                  "label":  "Custom group name, Library focus, completed rows disappear",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes",
+                                                                               "Camera basics: getting the exposure right",
+                                                                               "How a bridge carries its load",
+                                                                               "Rust ownership with practical examples"
+                                                                           ],
+                                                                  "groups":  [
+                                                                                 {
+                                                                                     "name":  "Tonight learning",
+                                                                                     "tabs":  [
+                                                                                                  "camera",
+                                                                                                  "bridge",
+                                                                                                  "rust"
+                                                                                              ]
+                                                                                 }
+                                                                             ],
+                                                                  "activeRows":  [
+
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+                                                                                  {
+                                                                                      "id":  "camera",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "bridge",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "rust",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  }
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "3 opened and saved · 0 could not open · 0 watched update not saved · 0 left in review. Library stays focused."
+                                                              },
+                                                              {
+                                                                  "label":  "Explicit focus goes to viewing tab",
+                                                                  "focus":  "video-rust-2-5",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes",
+                                                                               "Camera basics: getting the exposure right",
+                                                                               "How a bridge carries its load",
+                                                                               "Rust ownership with practical examples"
+                                                                           ],
+                                                                  "groups":  [
+                                                                                 {
+                                                                                     "name":  "Tonight learning",
+                                                                                     "tabs":  [
+                                                                                                  "camera",
+                                                                                                  "bridge",
+                                                                                                  "rust"
+                                                                                              ]
+                                                                                 }
+                                                                             ],
+                                                                  "activeRows":  [
+
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+                                                                                  {
+                                                                                      "id":  "camera",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "bridge",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "rust",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  }
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "Focus moved to the last opened video tab in this simulator."
+                                                              },
+                                                              {
+                                                                  "label":  "One named group; three distinct opening outcomes",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes",
+                                                                               "Camera basics: getting the exposure right",
+                                                                               "Rust ownership with practical examples"
+                                                                           ],
+                                                                  "groups":  [
+                                                                                 {
+                                                                                     "name":  "Watch these",
+                                                                                     "tabs":  [
+                                                                                                  "camera",
+                                                                                                  "rust"
+                                                                                              ]
+                                                                                 }
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "How a bridge carries its load",
+                                                                                     "Rust ownership with practical examples"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Weekend",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+                                                                                   "rust"
+                                                                               ],
+                                                                  "results":  [
+                                                                                  {
+                                                                                      "id":  "camera",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "bridge",
+                                                                                      "kind":  "failed",
+                                                                                      "text":  "Could not create a tab. Still active; no watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "rust",
+                                                                                      "kind":  "tracking",
+                                                                                      "text":  "The tab exists, but saving its watched status and history failed. The Library change is incomplete. Keep this recoverable record until saving can be retried."
+                                                                                  }
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "1 opened and saved · 1 could not open · 1 watched update not saved · 0 left in review. Library stays focused."
+                                                              },
+                                                              {
+                                                                  "label":  "Retry inserts Bridge between Camera and Rust in the same group",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes",
+                                                                               "Camera basics: getting the exposure right",
+                                                                               "Rust ownership with practical examples",
+                                                                               "How a bridge carries its load"
+                                                                           ],
+                                                                  "groups":  [
+                                                                                 {
+                                                                                     "name":  "Watch these",
+                                                                                     "tabs":  [
+                                                                                                  "camera",
+                                                                                                  "bridge",
+                                                                                                  "rust"
+                                                                                              ]
+                                                                                 }
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "Rust ownership with practical examples"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Weekend",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+                                                                                   "rust"
+                                                                               ],
+                                                                  "results":  [
+                                                                                  {
+                                                                                      "id":  "camera",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "rust",
+                                                                                      "kind":  "tracking",
+                                                                                      "text":  "The tab exists, but saving its watched status and history failed. The Library change is incomplete. Keep this recoverable record until saving can be retried."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "bridge",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  }
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "2 opened and saved · 0 could not open · 1 watched update not saved · 0 left in review. Library stays focused."
+                                                              },
+                                                              {
+                                                                  "label":  "Saving watched update leaves tab count unchanged and removes Rust active row",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes",
+                                                                               "Camera basics: getting the exposure right",
+                                                                               "Rust ownership with practical examples",
+                                                                               "How a bridge carries its load"
+                                                                           ],
+                                                                  "groups":  [
+                                                                                 {
+                                                                                     "name":  "Watch these",
+                                                                                     "tabs":  [
+                                                                                                  "camera",
+                                                                                                  "bridge",
+                                                                                                  "rust"
+                                                                                              ]
+                                                                                 }
+                                                                             ],
+                                                                  "activeRows":  [
+
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+                                                                                  {
+                                                                                      "id":  "camera",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "rust",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Tracking repaired for the already-open tab. One watch event saved; no additional tab."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "bridge",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  }
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "Watched status and history saved for the already-open tab. No new tab or duplicate event. The video has left active views."
+                                                              },
+                                                              {
+                                                                  "label":  "Review gate before any tabs; final open disabled",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes"
+                                                                           ],
+                                                                  "groups":  [
+
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "Camera basics: getting the exposure right",
+                                                                                     "How a bridge carries its load",
+                                                                                     "Rust ownership with practical examples"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  true,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+
+                                                                              ],
+                                                                  "draft":  {
+                                                                                "ids":  [
+                                                                                            "camera",
+                                                                                            "bridge",
+                                                                                            "rust"
+                                                                                        ],
+                                                                                "excluded":  [
+
+                                                                                             ],
+                                                                                "name":  "Selected videos",
+                                                                                "grouped":  true
+                                                                            },
+                                                                  "message":  "Review the request and choose the group name. No tabs have opened."
+                                                              },
+                                                              {
+                                                                  "label":  "Contextual group review",
+                                                                  "text":  "You are reviewing this video for the pending group. Leave here resolves review without opening. Finish reviewing the request, then use its final Open button to create the tabs together in the shown order.",
+                                                                  "hasImmediateSingleOpen":  false
+                                                              },
+                                                              {
+                                                                  "label":  "Leave here resolves review with no tab or new watch event",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes"
+                                                                           ],
+                                                                  "groups":  [
+
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "Camera basics: getting the exposure right",
+                                                                                     "How a bridge carries its load",
+                                                                                     "Rust ownership with practical examples"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+
+                                                                              ],
+                                                                  "draft":  {
+                                                                                "ids":  [
+                                                                                            "camera",
+                                                                                            "bridge",
+                                                                                            "rust"
+                                                                                        ],
+                                                                                "excluded":  [
+
+                                                                                             ],
+                                                                                "name":  "Selected videos",
+                                                                                "grouped":  true
+                                                                            },
+                                                                  "message":  "Review resolved. The video remains in Tonight. No tab or watch event was created. Use Open explicitly when ready."
+                                                              },
+                                                              {
+                                                                  "label":  "Reviewed three videos open together in original order",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes",
+                                                                               "Camera basics: getting the exposure right",
+                                                                               "How a bridge carries its load",
+                                                                               "Rust ownership with practical examples"
+                                                                           ],
+                                                                  "groups":  [
+                                                                                 {
+                                                                                     "name":  "Tonight in order",
+                                                                                     "tabs":  [
+                                                                                                  "camera",
+                                                                                                  "bridge",
+                                                                                                  "rust"
+                                                                                              ]
+                                                                                 }
+                                                                             ],
+                                                                  "activeRows":  [
+
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  3
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+                                                                                  {
+                                                                                      "id":  "camera",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "bridge",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "rust",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  }
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "3 opened and saved · 0 could not open · 0 watched update not saved · 0 left in review. Library stays focused."
+                                                              },
+                                                              {
+                                                                  "label":  "Explicitly left review: group has Camera and Rust; Bridge remains pending",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes",
+                                                                               "Camera basics: getting the exposure right",
+                                                                               "Rust ownership with practical examples"
+                                                                           ],
+                                                                  "groups":  [
+                                                                                 {
+                                                                                     "name":  "Only the ready videos",
+                                                                                     "tabs":  [
+                                                                                                  "camera",
+                                                                                                  "rust"
+                                                                                              ]
+                                                                                 }
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "How a bridge carries its load"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  true,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+                                                                                  {
+                                                                                      "id":  "camera",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "rust",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  },
+                                                                                  {
+                                                                                      "id":  "bridge",
+                                                                                      "kind":  "review",
+                                                                                      "text":  "Left in review by your choice. Not opened or included in this group."
+                                                                                  }
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "2 opened and saved · 0 could not open · 0 watched update not saved · 0 left in review. Library stays focused."
+                                                              },
+                                                              {
+                                                                  "label":  "Cancel creates no tabs; already-confirmed review stays resolved",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes"
+                                                                           ],
+                                                                  "groups":  [
+
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "Camera basics: getting the exposure right",
+                                                                                     "How a bridge carries its load",
+                                                                                     "Rust ownership with practical examples"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "Opening cancelled. No tabs created. Any review decisions you already confirmed remain saved."
+                                                              },
+                                                              {
+                                                                  "label":  "Mark watched removes Camera from active view without a tab",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes"
+                                                                           ],
+                                                                  "groups":  [
+
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "How a bridge carries its load",
+                                                                                     "Rust ownership with practical examples"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Weekend",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "1 video(s) marked watched and removed from active views. No browser tab was opened. Earlier watch events remain in retained history."
+                                                              },
+                                                              {
+                                                                  "label":  "Dismiss removes Rust without adding a watch event",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes"
+                                                                           ],
+                                                                  "groups":  [
+
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "How a bridge carries its load"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "1 video(s) dismissed and removed from active views. No browser tab was opened. Earlier watch events remain in retained history."
+                                                              },
+                                                              {
+                                                                  "label":  "Explicit retained history view",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes"
+                                                                           ],
+                                                                  "groups":  [
+
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "Camera basics: getting the exposure right",
+                                                                                     "Rust ownership with practical examples",
+                                                                                     "Forest walk: a return visit",
+                                                                                     "An older recording I decided to skip"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  2
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "1 video(s) dismissed and removed from active views. No browser tab was opened. Earlier watch events remain in retained history."
+                                                              },
+                                                              {
+                                                                  "label":  "Full information popup",
+                                                                  "text":  "Forest walk: a return visit\nAll available information · fictional example\nClose\nVideo and Library information\nDisplayed title\nForest walk: a return visit\nPersonal title\nNone in this example\nAutomatic title\nForest walk: a return visit (fictional captured title)\nSaved link\nhttps://example.com/videos/forest\nChannel / creator\nField Notes\nDuration\n32 min\nRelease date\n2026-06-10\nCurrent status\nwatched\nCurrent destination\nOutside active lists\nFirst saved\n2026-08-01 10:00\nFirst Inbox exit\n2026-08-02 09:30\nLatest list entry\n2026-09-01 12:00\nWatch count\n2\nLatest watch\n2026-09-12 19:30\nLast dismissal\nNone recorded\nAvailability\nUnknown\nTitle source\nFictional captured page title; no provider request\nDescription\nFictional example description. The real popup should expose the complete available description, without replacing missing information with guesses.\nOther available metadata\nNo additional values in this fixture. Unknown values do not block opening.\nAll recorded watch events\n\nAn opening event means a tab was created. It does not verify playback.\n\n2026-09-12 19:30 · Opened from Library\n\nPrior destination: Weekend\n\n2026-08-20 18:10 · Marked watched\n\nPrior destination: Tonight\n\nPlacement and status history\n2026-08-01 10:00 · Saved to Inbox\n2026-08-02 09:30 · Placed in Tonight\n2026-09-01 12:00 · Moved to Weekend\nChanges made during this example\n\nNo new action in this example.\n\nRecovery and corrections\n\nNo reversed events in this fixture. The approved real feature retains correction audit, preserves older watches, and leaves browser tabs alone. This demo does not implement durable Undo or conflict detection."
+                                                              },
+                                                              {
+                                                                  "label":  "Another watch increments Forest without opening",
+                                                                  "focus":  "library",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes"
+                                                                           ],
+                                                                  "groups":  [
+
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "Camera basics: getting the exposure right",
+                                                                                     "Rust ownership with practical examples",
+                                                                                     "Forest walk: a return visit",
+                                                                                     "An older recording I decided to skip"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  3
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "1 video(s) marked watched and removed from active views. No browser tab was opened. Earlier watch events remain in retained history."
+                                                              },
+                                                              {
+                                                                  "label":  "Open again adds one tab and one event",
+                                                                  "focus":  "video-forest-3-3",
+                                                                  "tabs":  [
+                                                                               "Mail",
+                                                                               "Library",
+                                                                               "Notes",
+                                                                               "Forest walk: a return visit"
+                                                                           ],
+                                                                  "groups":  [
+
+                                                                             ],
+                                                                  "activeRows":  [
+                                                                                     "Camera basics: getting the exposure right",
+                                                                                     "Rust ownership with practical examples",
+                                                                                     "Forest walk: a return visit",
+                                                                                     "An older recording I decided to skip"
+                                                                                 ],
+                                                                  "videos":  [
+                                                                                 {
+                                                                                     "id":  "camera",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  1
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bridge",
+                                                                                     "status":  "active",
+                                                                                     "list":  "Tonight",
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "rust",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "forest",
+                                                                                     "status":  "watched",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  4
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "draft",
+                                                                                     "status":  "dismissed",
+                                                                                     "list":  null,
+                                                                                     "pending":  false,
+                                                                                     "watches":  0
+                                                                                 }
+                                                                             ],
+                                                                  "tracking":  [
+
+                                                                               ],
+                                                                  "results":  [
+                                                                                  {
+                                                                                      "id":  "forest",
+                                                                                      "kind":  "success",
+                                                                                      "text":  "Opened and marked watched. One watch event added."
+                                                                                  }
+                                                                              ],
+                                                                  "draft":  null,
+                                                                  "message":  "1 opened and saved · 0 could not open · 0 watched update not saved · 0 left in review. "
+                                                              }
+                                                          ],
+                                                "viewport":  {
+                                                                 "width":  1440,
+                                                                 "documentWidth":  1425
+                                                             },
+                                                "title":  "Opening and watch history — discussion prototype"
+                                            }
+                              }
+               }
+}

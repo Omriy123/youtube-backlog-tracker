@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Opening and watch history — discussion prototype</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#203044;background:#f4f6f8;font-size:16px}*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer;background:white;border:1px solid #a4afbb;border-radius:7px;padding:8px 12px;color:inherit}button:hover{background:#edf2f8}button:focus-visible,a:focus-visible{outline:3px solid #527cce;outline-offset:3px}button:disabled{opacity:.45;cursor:default}.primary{background:#244b86;color:white;border-color:#244b86}.primary:hover{background:#193b70}h1{font-size:26px;margin:0 0 8px}h2{font-size:19px;margin:0 0 12px}h3{font-size:16px;margin:20px 0 8px}p{line-height:1.5;margin:8px 0}.muted{color:#566578;font-size:14px}.wrap{max-width:1300px;margin:auto;padding:24px}.intro{border-left:4px solid #244b86;padding:12px 18px;background:white;margin-bottom:18px}.nav,.controls,.actions{display:flex;gap:8px;flex-wrap:wrap}.nav{margin:16px 0}.nav [aria-pressed=true]{background:#244b86;color:white}.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:18px}.panel{padding:20px;border:1px solid #ccd3dc;border-radius:10px;background:white;margin-bottom:18px;min-width:0}.notice{padding:12px 14px;background:#edf3fc;border-left:4px solid #244b86;margin:14px 0;line-height:1.5}.row{border-top:1px solid #e0e5eb;padding:16px 0;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px}.row input{margin-top:6px;width:18px;height:18px}.title{font-weight:650;overflow-wrap:anywhere}.actions{margin-top:9px}.pill{font-size:14px;padding:4px 9px;border-radius:16px;border:2px solid #52749d;background:#f2f6fd;display:inline-block;margin:5px 4px 0 0}.pill.pending{border-style:dashed}.pill.failure{border-style:double;border-width:3px;background:#fff8e9;color:#573d08}.pill.neutral{border-color:#7a8797;background:#f6f7f9}.result{padding:12px 0;border-top:1px solid #dce2ea}.result strong{display:block}.tabs{display:flex;gap:6px;flex-wrap:wrap}.browser-tab{padding:9px;border:1px solid #bdc7d4;border-radius:7px;background:#f5f7fa;font-size:14px;overflow-wrap:anywhere}.browser-tab.focus{border:2px solid #244b86;background:#e9f0fd}.tabgroup{border:2px solid #6684ad;border-radius:8px;padding:12px;margin-top:12px}.tabgroup>strong{display:block;margin-bottom:8px}.steps{display:grid;gap:8px}.steps button{text-align:left}.details-grid{display:grid;grid-template-columns:165px minmax(0,1fr);gap:9px 14px}.details-grid dt{color:#566578}.details-grid dd{margin:0;overflow-wrap:anywhere}dialog{border:1px solid #9daabb;border-radius:12px;width:min(860px,94vw);max-height:88vh;padding:0;color:#203044}dialog::backdrop{background:#17243788}.modal-head{padding:18px 22px;border-bottom:1px solid #d5dce5;display:flex;justify-content:space-between;align-items:start;gap:16px;position:sticky;top:0;background:white;z-index:1}.modal-body{padding:5px 22px 24px;overflow-wrap:anywhere}.event{padding:12px 0;border-bottom:1px solid #dce2ea}.audit{max-height:250px;overflow:auto;padding-left:22px}.audit li{padding:5px 0;line-height:1.4}.small{font-size:14px}.badge-line{margin:8px 0}.columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}.state-summary{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0}.state-summary strong{font-size:21px;display:block}a{color:#244b86}.scene-text{min-height:44px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.wrap{padding:14px}.details-grid{grid-template-columns:1fr;gap:3px}.details-grid dd{margin-bottom:10px}.columns{grid-template-columns:1fr}.panel{padding:16px}.modal-head{padding:14px}.modal-body{padding:0 14px 18px}.actions button{font-size:14px}h1{font-size:23px}}
+</style>
+<div class="wrap">
+<div class="intro"><h1>Opening videos &amp; watch history</h1><p><strong>Discussion prototype — fictional videos, simulated tabs, memory only.</strong> Nothing opens, saves, or changes in your real Library.</p><p class="muted">Accepted interaction direction: choose the group name; resolve or explicitly leave reviews before opening; retry into the original group in the requested order; hide completed videos from active views. Retained history and repeat-watch controls are available separately. Later accepted missing-group and uncertain-outcome recovery policies are in the focused spec; they are not simulated here.</p></div>
+<div class="nav" id="scenes" aria-label="Examples"></div>
+<div class="grid"><main>
+<section class="panel"><h2 id="scene-title"></h2><p id="scene-text" class="scene-text"></p><div id="notice" class="notice" role="status" aria-live="polite"></div><div id="controls" class="controls"></div><h3>Opening results</h3><div id="results"></div><h3>Browse videos</h3><div id="view-controls" class="controls"></div><div id="records"></div></section>
+</main><aside>
+<section class="panel"><h2>Simulated browser</h2><p class="muted">These boxes represent browser tabs. The outlined tab has focus.</p><div id="browser"></div></section>
+<section class="panel"><h2>Current Library state</h2><div id="summary" class="state-summary"></div><p class="muted">Watch counts reflect recorded opening/status actions. Playback is never checked. Pending reviews and incomplete tracking remain visible.</p><h3>Action history in this example</h3><ol class="audit" id="audit"></ol></section>
+<section class="panel"><h2>Guided walkthrough</h2><p id="guide-text" class="muted"></p><div id="steps" class="steps"></div><p><button data-action="reset">Reset this example</button></p><p class="muted">Each example resets to known fictional records. You can also select rows and use their actions freely. No real persistence, recovery, browser grouping or retry mechanism is validated by this demo.</p></section>
+</aside></div></div>
+<dialog id="popup"><div class="modal-head"><div><h2 id="popup-title"></h2><div id="popup-subtitle" class="muted"></div></div><button id="close-popup" aria-label="Close popup">Close</button></div><div id="popup-body" class="modal-body"></div></dialog>
+<dialog id="bulk-popup" aria-labelledby="bulk-title"><div class="modal-head"><div><h2 id="bulk-title">Review &amp; open videos</h2><p class="muted">No tabs open until you confirm below.</p></div><button data-action="cancel-open">Cancel opening</button></div><div id="bulk-body" class="modal-body"></div></dialog>
+<script>
+// Pure, fictional state model. No browser, network, storage, or DOM calls.
+const Model = (()=>{
+ const clone=x=>JSON.parse(JSON.stringify(x));
+ const initialEvents=[{time:'2026-09-12 19:30',source:'Opened from Library',destination:'Weekend'},{time:'2026-08-20 18:10',source:'Marked watched',destination:'Tonight'}];
+ function seed(scene='groups'){
+  const base={scene,view:'active',draft:null,batch:null,serial:0,selected:['camera','bridge','rust'],records:[
+   {id:'camera',title:'Camera basics: getting the exposure right',list:'Tonight',status:'active',pending:false,events:[],outcome:'success',channel:'Field Notes',duration:'18 min 42 sec',published:'2026-08-03',url:'https://example.com/videos/camera',availability:'No current availability observation'},
+   {id:'bridge',title:'How a bridge carries its load',list:'Tonight',status:'active',pending:false,events:[],outcome:'success',channel:'Engineering Notes',duration:'24 min 10 sec',published:'2026-07-12',url:'https://example.com/videos/bridge',availability:'Unavailable — fictional provider observation: private, checked 2026-10-16 11:20'},
+   {id:'rust',title:'Rust ownership with practical examples',list:'Weekend',status:'active',pending:false,events:[],outcome:'success',channel:'Code Workshop',duration:'Unknown',published:'Unknown',url:'https://example.com/videos/rust',availability:'Unknown; an opening failure does not establish unavailability'},
+   {id:'forest',title:'Forest walk: a return visit',list:null,status:'watched',pending:false,events:clone(initialEvents),outcome:'success',channel:'Field Notes',duration:'32 min',published:'2026-06-10',url:'https://example.com/videos/forest',availability:'Unknown'},
+   {id:'draft',title:'An older recording I decided to skip',list:null,status:'dismissed',pending:false,events:[],outcome:'success',channel:'Unknown',duration:'Unknown',published:'Unknown',url:'https://example.com/videos/draft',availability:'Unknown',dismissed:'2026-10-10 16:00'}
+  ],tabs:[{id:'mail',title:'Mail'},{id:'library',title:'Library'},{id:'notes',title:'Notes'}],focus:'library',groups:[],results:[],tracking:[],audit:[],message:'Choose an action or follow the walkthrough.',clock:0};
+  if(scene==='failures'){base.records[1].outcome='tab-failure';base.records[2].outcome='tracking-failure';base.message='Three requested: Camera will succeed, Bridge cannot create a tab, Rust opens but tracking fails.';}
+  if(scene==='reviews'){base.records[1].pending=true;base.records[1].events=clone(initialEvents);base.records[2].list='Tonight';base.message='Tonight has three videos. Bridge needs review. Open first prompts for review and a group name; no tabs open yet.';}
+  if(scene==='status'){base.selected=['camera'];base.message='Try Mark watched on Camera without opening any tab. Forest already has two watch events.';}
+  if(scene==='details'){base.selected=[];base.view='history';base.message='Retained history is an explicit view. Click Full information on Forest for all known video details and its two watch events.';}
+  return base;
+ }
+ const record=(s,id)=>s.records.find(v=>v.id===id);
+ function stamp(s){s.clock++;return '2026-10-17 '+String(20+Math.floor(s.clock/60)).padStart(2,'0')+':'+String(s.clock%60).padStart(2,'0');}
+ function watch(s,v,source){const previous=v.list||v.events[0]?.destination||'Unknown';const time=stamp(s);v.events.unshift({time,source,destination:previous});v.status='watched';v.list=null;v.pending=false;s.audit.unshift(`${time}: ${v.title} — ${source}; prior destination: ${previous}.`);}
+ function open(s,ids,retry=false,batch=null){
+  const requested=ids.map(id=>record(s,id)).filter(Boolean);
+  if(retry&&s.batch?.groupMissing){s.message='The original group is no longer available. The approved direction prompts before recreating it; this demo does not implement that later recovery path.';return;}
+  if(!retry){s.results=[];s.batch=batch;if(batch?.grouped)s.focus='library';}
+  for(const v of requested){
+   let result;
+   if(s.tracking.includes(v.id)){result={id:v.id,kind:'tracking',text:'Already opened; tracking incomplete. Repair tracking instead of opening another tab.'};}
+   else if(v.pending){result={id:v.id,kind:'review',text:'Not opened — review previous activity first.'};}
+   else if(v.outcome==='tab-failure'&&!retry){result={id:v.id,kind:'failed',text:'Could not create a tab. Still active; no watch event added.'};}
+   else{
+    const tab={id:'video-'+v.id+'-'+s.clock+'-'+s.tabs.length,title:v.title,record:v.id};s.tabs.push(tab);
+    if(s.batch?.grouped){let group=s.groups.find(g=>g.id===s.batch.id);if(!group){group={id:s.batch.id,name:s.batch.name,tabs:[]};s.groups.push(group);}group.tabs.push(tab.id);group.tabs.sort((a,b)=>s.batch.order.indexOf(s.tabs.find(t=>t.id===a).record)-s.batch.order.indexOf(s.tabs.find(t=>t.id===b).record));}
+    else{s.focus=tab.id;}
+    if(v.outcome==='tracking-failure'&&!retry){s.tracking.push(v.id);result={id:v.id,kind:'tracking',text:'The tab exists, but saving its watched status and history failed. The Library change is incomplete. Keep this recoverable record until saving can be retried.'};}
+    else{watch(s,v,'Opened from Library');result={id:v.id,kind:'success',text:'Opened and marked watched. One watch event added.'};}
+   }
+   s.results=s.results.filter(r=>r.id!==v.id);s.results.push(result);
+  }
+  const counts=k=>s.results.filter(r=>r.kind===k).length;
+  s.selected=s.selected.filter(id=>record(s,id)?.status==='active');
+  s.message=`${counts('success')} opened and saved · ${counts('failed')} could not open · ${counts('tracking')} watched update not saved · ${counts('review')} left in review. ${s.batch?.grouped?'Library stays focused.':''}`;
+ }
+ function update(current,a){
+  if(a.type==='reset')return seed(a.scene||current.scene);
+  const s=clone(current),v=record(s,a.id);
+  if(a.type==='select'){s.selected=s.selected.includes(a.id)?s.selected.filter(id=>id!==a.id):[...s.selected,a.id];}
+  if(a.type==='view')s.view=a.view;
+  if(a.type==='open'){
+   const ids=(a.ids||s.selected).filter(id=>record(s,id));
+   if(!ids.length){s.message='Select at least one video.';return s;}
+   if(ids.length===1&&!record(s,ids[0]).pending)open(s,ids);
+   else{s.draft={ids,excluded:[],name:'Selected videos',grouped:ids.length>1};s.message='Review the request and choose the group name. No tabs have opened.';}
+  }
+  if(a.type==='name'&&s.draft)s.draft.name=a.name;
+  if(a.type==='exclude'&&s.draft)s.draft.excluded=s.draft.excluded.includes(a.id)?s.draft.excluded.filter(id=>id!==a.id):[...s.draft.excluded,a.id];
+  if(a.type==='cancel-open'){s.draft=null;s.message='Opening cancelled. No tabs created. Any review decisions you already confirmed remain saved.';}
+  if(a.type==='confirm-open'&&s.draft){
+   const d=s.draft;
+   const blocked=d.ids.filter(id=>record(s,id).pending&&!d.excluded.includes(id));
+   if(blocked.length){s.message='Review pending videos or explicitly leave them in review before opening.';return s;}
+   const ids=d.ids.filter(id=>!d.excluded.includes(id)&&record(s,id).status!=='dismissed');
+   if(!ids.length){s.message='No videos are ready to open in this request.';return s;}
+   const batch={id:'group-'+(++s.serial),name:d.name.trim()||'Selected videos',order:[...ids],grouped:d.grouped};
+   const omitted=d.ids.filter(id=>!ids.includes(id));s.draft=null;open(s,ids,false,batch);
+   for(const id of omitted)s.results.push({id,kind:record(s,id).pending?'review':'dismissed',text:record(s,id).pending?'Left in review by your choice. Not opened or included in this group.':'Dismissed during review. Not opened or included in this group.'});
+  }
+  if(a.type==='retry'){const ids=s.results.filter(r=>r.kind==='failed').map(r=>r.id);if(ids.length)open(s,ids,true);else s.message='No failed tab creations to retry. Tracking repairs do not create tabs.';}
+  if(a.type==='repair'){
+   for(const id of [...s.tracking]){const r=record(s,id);watch(s,r,'Opened from Library');s.results=s.results.map(x=>x.id===id?{id,kind:'success',text:'Tracking repaired for the already-open tab. One watch event saved; no additional tab.'}:x);}
+   s.tracking=[];s.selected=s.selected.filter(id=>record(s,id)?.status==='active');s.message='Watched status and history saved for the already-open tab. No new tab or duplicate event. The video has left active views.';
+  }
+  if(a.type==='watched'||a.type==='dismiss'){
+   const ids=a.ids||[a.id];let changed=0;
+   for(const id of ids){const r=record(s,id);if(!r)continue;
+    if(a.type==='watched'&&(r.pending||s.tracking.includes(id))){s.message=r.pending?'Review previous activity before marking watched.':'This tab is already open. Repair its tracking first.';continue;}
+    if(a.type==='watched'){if(r.status!=='active'&&!a.repeat){s.message='This video is already retained. Use its explicit Record another watch action to add a new event.';continue;}watch(s,r,'Marked watched');changed++;}
+    else if(r.status!=='dismissed'){r.status='dismissed';r.pending=false;r.list=null;r.dismissed=stamp(s);s.audit.unshift(`${r.dismissed}: ${r.title} — Dismissed; earlier watch events retained.`);changed++;}
+   }
+   s.selected=s.selected.filter(id=>record(s,id)?.status==='active');
+   if(changed)s.message=`${changed} video(s) ${a.type==='watched'?'marked watched':'dismissed'} and removed from active views. No browser tab was opened. Earlier watch events remain in retained history.`;
+  }
+  if(a.type==='keep'&&v){v.pending=false;s.audit.unshift(`${stamp(s)}: ${v.title} — Review resolved: Leave here.`);s.message='Review resolved. The video remains in Tonight. No tab or watch event was created. Use Open explicitly when ready.';s.results=s.results.map(r=>r.id===v.id?{...r,kind:'ready',text:'Reviewed and ready. Not opened; choose Open explicitly.'}:r);}
+  if(a.type==='focus'){const tab=s.tabs.filter(t=>t.record).at(-1);if(tab){s.focus=tab.id;s.message='Focus moved to the last opened video tab in this simulator.';}}
+  if(a.type==='inspect-group')s.message=s.groups.length?'The named group shows the confirmed video order. Completed videos are no longer in active views.':'No group has been opened yet. Finish the review/name dialog and explicitly confirm opening.';
+  if(a.type==='group-fail'){s.groups=[];if(s.batch)s.batch.groupMissing=true;s.message='Simulated grouping failure: viewing tabs remain open and successful watched updates remain saved. Tabs are ungrouped; this is not a video-opening failure.';}
+  return s;
+ }
+ return {seed,record,update};
+})();
+</script>
+<script>
+const examples={
+ groups:{title:'Q1 · Grouping & focus',text:'Camera and Bridge are from Tonight; Rust is from Weekend. Open selected prompts for a group name, starting with Selected videos. Confirm to create one group while staying on the Library. This fixture does not settle cross-source ordering.',steps:[['Open selected and choose the group name',{type:'open'}],['After confirming the dialog, go to the opened tabs',{type:'focus'}]]},
+ failures:{title:'Q2 · Partial failures',text:'After the naming dialog, Camera opens normally, Bridge cannot create a tab, and Rust opens but saving its watched update fails. Retry inserts Bridge between Camera and Rust in the same named group. Saving Rust’s update creates no new tab.',steps:[['Open selected, name the group, and confirm',{type:'open'}],['Retry the failed tab into its original position in that group',{type:'retry'}],['Save the watched update for the already-open Rust tab',{type:'repair'}]]},
+ reviews:{title:'Q3 · Review before opening',text:'Tonight has Camera, Bridge and Rust in that requested order. Open selected first asks you to review Bridge. Leave here resolves review but opens nothing. Confirm the complete request afterward to open all three in the same group and order. Or explicitly leave Bridge in review; it will not join this group.',steps:[['Open selected to review the request before creating any tabs',{type:'open'}],['After confirming your choices, inspect the original group',{type:'inspect-group'}]]},
+ status:{title:'Q4 · Status actions',text:'Completed Open, Mark watched and Dismiss remove rows from active views. Retained history is a separate explicit view. Open again and Record another watch preserve previous events and keep the video outside active lists.',steps:[['Mark Camera watched: its active row disappears',{type:'watched',id:'camera'}],['Dismiss Rust: its active row disappears without a watch event',{type:'dismiss',id:'rust'}],['Show retained history explicitly',{type:'view',view:'history'}],['Inspect Forest’s two recorded watches',{type:'details',id:'forest'}],['Record another watch of Forest without opening',{type:'watched',id:'forest',repeat:true}],['Open Forest again: create a viewing tab and another event',{type:'open',ids:['forest']}]]},
+ details:{title:'Q5 · Full information popup',text:'A readable popup shows all information available for the fictional record. Unknown information stays unknown. The real feature would display available data; this prototype adds no metadata collection.',steps:[['Open Forest’s full information popup',{type:'details',id:'forest'}],['Inspect the known-unavailable Bridge record',{type:'details',id:'bridge'}]]}
+};
+let state=Model.seed(),step=0,modalRecord=null;
+const esc=x=>String(x??'Unknown').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function button(label,action,id='',klass=''){return `<button class="${klass}" data-action="${action}" ${id?`data-id="${id}"`:''}>${label}</button>`;}
+function send(a){state=Model.update(state,a);render();}
+function render(){
+ const scene=examples[state.scene];document.querySelector('#scenes').innerHTML=Object.entries(examples).map(([id,x])=>`<button data-scene="${id}" aria-pressed="${id===state.scene}">${x.title}</button>`).join('');
+ document.querySelector('#scene-title').textContent=scene.title;document.querySelector('#scene-text').textContent=scene.text;document.querySelector('#notice').textContent=state.message;
+ document.querySelector('#controls').innerHTML=button(`Open selected (${state.selected.length})`,'open','','primary')+button('Mark selected watched','mark-selected')+button('Dismiss selected','dismiss-selected')+button('Go to opened tabs','focus');
+ document.querySelector('#view-controls').innerHTML=`<button data-view="active" aria-pressed="${state.view==='active'}">Active lists</button><button data-view="history" aria-pressed="${state.view==='history'}">Retained watched / dismissed</button>`;
+ const visible=state.records.filter(v=>state.view==='active'?v.status==='active':v.status!=='active');
+ document.querySelector('#records').innerHTML=visible.length?visible.map(v=>`<div class="row"><input type="checkbox" aria-label="Select ${esc(v.title)}" data-select="${v.id}" ${state.selected.includes(v.id)?'checked':''}><div><div class="title">${esc(v.title)}</div><div class="muted">${esc(v.list||'Retained history')} · ${esc(v.status)} · ${v.events.length} watch event${v.events.length===1?'':'s'}</div><div class="badge-line">${v.pending?'<button class="pill pending" data-action="review" data-id="'+v.id+'">! Previous activity · review needed</button>':''}${state.tracking.includes(v.id)?'<span class="pill failure">! Already open · watched update not saved</span>':''}${v.id==='bridge'?'<span class="pill neutral">Unavailable record · opening is still allowed</span>':''}</div><div class="actions">${button('Full information','details',v.id)}${button(v.status==='active'?'Open':'Open again','open-one',v.id)}${v.status==='active'?button('Mark watched','watched',v.id):button('Record another watch','watched',v.id)}${v.status!=='dismissed'?button('Dismiss','dismiss',v.id):''}</div></div></div>`).join(''):'<p>No videos remain in this view. Watched and dismissed records are available through retained history.</p>';
+ document.querySelector('#results').innerHTML=state.results.length?state.results.map(r=>`<div class="result"><strong>${esc(Model.record(state,r.id).title)}</strong><span class="pill ${r.kind==='success'?'':r.kind==='review'?'pending':'failure'}">${esc(r.kind==='success'?'✓ Opened & saved':r.kind==='failed'?'× Could not open':r.kind==='tracking'?'! Tab open · Library update not saved':r.kind==='review'?'! Left in review':r.kind==='dismissed'?'Dismissed · not opened':'Ready · not opened')}</span><p>${esc(r.text)}</p>${r.kind==='review'?button('Review previous activity','review',r.id):''}</div>`).join('')+`<div class="controls">${state.results.some(r=>r.kind==='failed')?button('Retry failed tabs in the same group','retry'):''}${state.tracking.length?button('Retry saving watched updates — no new tabs','repair'):''}</div>`:'<p class="muted">No opening action yet. Per-video results appear here.</p>';
+ const grouped=new Set(state.groups.flatMap(g=>g.tabs));document.querySelector('#browser').innerHTML=`<div class="tabs">${state.tabs.filter(t=>!grouped.has(t.id)).map(tabHtml).join('')}</div>`+state.groups.map(g=>`<div class="tabgroup"><strong>${esc(g.name)}</strong><div class="tabs">${g.tabs.map(id=>tabHtml(state.tabs.find(t=>t.id===id))).join('')}</div></div>`).join('');
+ const count=key=>state.records.filter(v=>v.status===key).length;document.querySelector('#summary').innerHTML=[['Active',count('active')],['Watched',count('watched')],['Dismissed',count('dismissed')],['Watch events',state.records.reduce((n,v)=>n+v.events.length,0)]].map(([label,n])=>`<div><strong>${n}</strong>${label}</div>`).join('');
+ document.querySelector('#audit').innerHTML=state.audit.length?state.audit.map(x=>`<li>${esc(x)}</li>`).join(''):'<li>No changes made in this example yet.</li>';
+ document.querySelector('#guide-text').textContent='Press the steps in order, then try the row actions. Reset returns to the start.';document.querySelector('#steps').innerHTML=scene.steps.map(([label],i)=>`<button data-step="${i}" ${i!==step?'disabled':''}>${i<step?'✓':i+1+'.'} ${esc(label)}</button>`).join('');
+ renderBulk();
+}
+function renderBulk(){
+ const dlg=document.querySelector('#bulk-popup'),body=document.querySelector('#bulk-body'),d=state.draft;
+ if(!d){if(dlg.open)dlg.close();return;}
+ const before=dlg.scrollTop;
+ const eligible=d.ids.filter(id=>!d.excluded.includes(id)&&Model.record(state,id).status!=='dismissed');
+ const blocked=eligible.filter(id=>Model.record(state,id).pending);
+ body.innerHTML=(d.grouped?`<h3><label for="group-name">Tab group name</label></h3><input id="group-name" style="width:100%;padding:10px;border:1px solid #a4afbb;border-radius:6px" value="${esc(d.name)}"><p class="muted">Default: Selected videos. Retrying a failed tab uses this same group.</p>`:'')+`<h3>Requested order</h3><p>Resolve previous-activity reviews before opening, or explicitly leave those videos in review. No video opens just because you choose Leave here.</p>`+d.ids.map((id,i)=>{const v=Model.record(state,id);return `<div class="result"><strong>${i+1}. ${esc(v.title)}</strong><p>${esc(v.list||'Outside active lists')} · ${v.pending?'Review needed':v.status==='dismissed'?'Dismissed — not included':'Ready'}</p>${v.pending?button('Review previous activity','review',id)+`<p><label><input type="checkbox" data-exclude="${id}" ${d.excluded.includes(id)?'checked':''}> Leave in review for now — exclude from this group</label></p>`:''}</div>`;}).join('')+(blocked.length?`<div class="notice">${blocked.length} review(s) still required. Review above or choose Leave in review for now.</div>`:'')+(eligible.length>10?`<div class="notice">${eligible.length} tabs will open. This may take time.</div>`:'')+`<p><button class="primary" data-action="confirm-open" ${blocked.length||!eligible.length?'disabled':''}>${d.grouped?'Open '+eligible.length+' videos in this group':'Open video'}</button></p>`;
+ if(!dlg.open)dlg.showModal();dlg.scrollTop=before;
+}
+function tabHtml(t){return `<div class="browser-tab ${state.focus===t.id?'focus':''}">${esc(t.title)}${state.focus===t.id?' · focused':''}</div>`;}
+function details(id,review=false){
+ const v=Model.record(state,id);modalRecord=id;const dlg=document.querySelector('#popup');document.querySelector('#popup-title').textContent=review?'Review previous activity':v.title;document.querySelector('#popup-subtitle').textContent=review?v.title:'All available information · fictional example';
+ const fields=[['Displayed title',v.title],['Personal title','None in this example'],['Automatic title',v.title+' (fictional captured title)'],['Saved link',v.url],['Channel / creator',v.channel],['Duration',v.duration],['Release date',v.published],['Current status',v.status+(v.pending?' · pending rediscovery review':'')],['Current destination',v.list||'Outside active lists'],['First saved','2026-08-01 10:00'],['First Inbox exit','2026-08-02 09:30'],['Latest list entry',v.pending?'2026-10-17 19:00':(['rust','forest'].includes(v.id)?'2026-09-01 12:00':'2026-08-02 09:30')],['Watch count',v.events.length],['Latest watch',v.events[0]?.time||'No watch event recorded'],['Last dismissal',v.dismissed||'None recorded'],['Availability',v.availability],['Title source','Fictional captured page title; no provider request'],['Description','Fictional example description. The real popup should expose the complete available description, without replacing missing information with guesses.'],['Other available metadata','No additional values in this fixture. Unknown values do not block opening.']];
+ document.querySelector('#popup-body').innerHTML=(review?'<div class="notice">This video remains unopened while review is pending. Keep/Leave here alone clears review and does not open it.</div>':'')+'<h3>Video and Library information</h3><dl class="details-grid">'+fields.map(([k,x])=>`<dt>${esc(k)}</dt><dd>${esc(x)}</dd>`).join('')+'</dl><h3>All recorded watch events</h3><p class="muted">An opening event means a tab was created. It does not verify playback.</p>'+(v.events.length?v.events.map(e=>`<div class="event"><strong>${esc(e.time)} · ${esc(e.source)}</strong><p>Prior destination: ${esc(e.destination)}</p></div>`).join(''):'<p>No watch events recorded.</p>')+'<h3>Placement and status history</h3><div class="event">2026-08-01 10:00 · Saved to Inbox</div><div class="event">2026-08-02 09:30 · Placed in Tonight</div><div class="event">2026-09-01 12:00 · Moved to Weekend</div>'+(v.pending?'<div class="event">2026-10-17 19:00 · Re-saved into Tonight with previous-activity review pending. No watch event.</div>':'')+(v.dismissed?`<div class="event">${esc(v.dismissed)} · Dismissed</div>`:'')+'<h3>Changes made during this example</h3>'+(state.audit.filter(x=>x.includes(v.title)).map(x=>`<div class="event">${esc(x)}</div>`).join('')||'<p>No new action in this example.</p>')+'<h3>Recovery and corrections</h3><p>No reversed events in this fixture. The approved real feature retains correction audit, preserves older watches, and leaves browser tabs alone. This demo does not implement durable Undo or conflict detection.</p>'+(review?`<div class="controls">${button(v.list==='Inbox'?'Keep in Inbox':'Leave here','keep',id,'primary')}${button('Dismiss','review-dismiss',id)}${v.list!=='Inbox'?button('Leave here & open','keep-open',id):''}</div>`:'');
+ if(review&&state.draft?.ids.includes(id)){document.querySelector('#popup-body [data-action="keep-open"]')?.remove();document.querySelector('#popup-body .notice').textContent='You are reviewing this video for the pending group. Leave here resolves review without opening. Finish reviewing the request, then use its final Open button to create the tabs together in the shown order.';}
+ if(!dlg.open)dlg.showModal();dlg.scrollTop=0;
+}
+document.addEventListener('input',e=>{if(e.target.id==='group-name')state=Model.update(state,{type:'name',name:e.target.value});});
+document.addEventListener('change',e=>{if(e.target.matches('[data-select]'))send({type:'select',id:e.target.dataset.select});if(e.target.matches('[data-exclude]'))send({type:'exclude',id:e.target.dataset.exclude});});
+document.addEventListener('click',e=>{
+ const el=e.target.closest('button');if(!el)return;
+ if(el.dataset.scene){step=0;send({type:'reset',scene:el.dataset.scene});return;}
+ if(el.dataset.view){send({type:'view',view:el.dataset.view});return;}
+ if(el.dataset.step!==undefined){const a=examples[state.scene].steps[step][1];step++;run(a);render();return;}
+ const type=el.dataset.action,id=el.dataset.id;
+ if(type==='open-one'){const v=Model.record(state,id);if(v.pending)details(id,true);else send({type:'open',ids:[id]});}
+ else if(type==='details'||type==='review')details(id,type==='review');
+ else if(type==='keep'||type==='review-dismiss'||type==='keep-open'){document.querySelector('#popup').close();if(type==='review-dismiss')send({type:'dismiss',id});else{send({type:'keep',id});if(type==='keep-open')send({type:'open',ids:[id]});}}
+ else if(type==='watched'){const v=Model.record(state,id);if(v.pending)details(id,true);else send({type:'watched',id,repeat:v.status!=='active'});}
+ else if(type==='mark-selected')send({type:'watched',ids:state.selected});
+ else if(type==='dismiss-selected')send({type:'dismiss',ids:state.selected});
+ else if(type){if(type==='reset')step=0;send({type,id});}
+});
+function run(a){if(a.type==='details'||a.type==='review')details(a.id,a.type==='review');else send(a);}
+document.querySelector('#close-popup').onclick=()=>document.querySelector('#popup').close();
+document.querySelector('#bulk-popup').addEventListener('cancel',e=>{e.preventDefault();send({type:'cancel-open'});});
+render();
+</script>
+</html>
+
