@@ -4,6 +4,8 @@ Design status: complete slice design approved on 2026-10-14; formalized with to-
 
 Parent: [approved product design](video-backlog.md). Scope ownership: [feature-design map](../design/feature-map.md). Published specification: [issue #3](https://github.com/Omriy123/youtube-backlog-tracker/issues/3).
 
+Later contract note: [expanded capture and pending rediscovery review](expanded-capture.md) explicitly changes generic watched/dismissed rediscovery when that later behavior is delivered: save into Inbox with pending review, then Keep confirms staying there. The pre-save prompt below remains this first slice's approved historical baseline. Its five-ticket scope, opening/recovery safeguards, and original approval are preserved.
+
 ## Problem Statement
 
 The user has accumulated saved video tabs and needs a trustworthy way to save a video, find it later, open it, and recover an accidental change. The existing layout prototype uses fictional data and simulated opening; it does not establish that actual browser capture, persistence, tab creation, and recovery work together.

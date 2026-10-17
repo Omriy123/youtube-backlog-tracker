@@ -9,7 +9,7 @@ The entire collection of saved videos, across Inbox, Backlog, watch lists, and r
 _Avoid_: Backlog when referring to the entire collection
 
 **Inbox**:
-The list of videos awaiting a placement decision, normally newly saved videos. A previously sorted video may return through Undo, an explicit move when its custom list is deleted, or a deliberate Keep decision when a generic repeat save reveals it was watched or dismissed.
+The list of videos awaiting a placement or rediscovery decision, normally newly saved videos. A previously sorted video may return through Undo, an explicit move when its custom list is deleted, or a generic repeat save with a pending review when it was watched or dismissed.
 _Avoid_: Unsorted
 
 **Backlog**:
@@ -50,6 +50,9 @@ _Avoid_: Playback completed
 
 **Dismissed**:
 A video the user has decided not to watch. Dismissed videos are retained but hidden from active lists by default.
+
+**Pending rediscovery review**:
+An unresolved decision about a saved video's previous watched or dismissed activity. The video remains in Inbox after a generic repeat save, or in its explicitly chosen destination, until the user confirms keeping it there or dismisses it.
 
 **History**:
 A record of changes in the Library, including videos' previous destinations and when they were moved, removed, or marked watched or dismissed.
