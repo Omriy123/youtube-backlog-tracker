@@ -61,6 +61,13 @@ _Avoid_: Watch event, open-tab session
 **Library restoration**:
 Returning the Library's user-controlled organization, status, history, and authored values to a retained point or snapshot, reversing later user changes together. Automatic metadata remains at its latest valid values or missing, rather than returning stale provider responses.
 
+**Selective recovery**:
+Reversing one recorded Library action while preserving unrelated later user decisions. A batch is recovered as one action, and conflicting later decisions must be resolved before reversal.
+
+**Library backup**:
+A portable copy of the Library and its retained recovery information, saved outside extension storage for later restoration. Automatic backups preserve separate versions; restoration is deliberate.
+_Avoid_: Sync when referring to restoring a saved backup version
+
 **Watch event**:
 An occasion when a video was marked watched, through opening it from the tracker or an explicit action. A video may have multiple watch events when watched again.
 
