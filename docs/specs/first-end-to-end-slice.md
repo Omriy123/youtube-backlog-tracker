@@ -22,13 +22,15 @@ This is one bounded first milestone that can be divided into several vertical ti
 
 ## Approved delivery slicing
 
+On 2026-10-20 the owner explicitly invoked to-tickets, reviewed the five proposed titles, delivered workflows and blocking edges, and approved them with 'yes sounds good'. The active series below was published through that skill. Earlier equivalent replacement issues 36-40 are superseded, not completed implementation; this changes delivery references, not the approved feature behavior.
+
 The user approved splitting the initial build into save/find followed by open/recover, keeping each ticket small enough to verify independently. UI work is part of the relevant workflow ticket, not a separate prerequisite layer:
 
-1. [Save and find with retained capture titles in a real Chrome extension](https://github.com/Omriy123/youtube-backlog-tracker/issues/36): toolbar popup, durable capture/title observations, minimal Library/Inbox/search, identity protection and save failures.
-2. [Open videos with safe tracking repair and persistent Undo](https://github.com/Omriy123/youtube-backlog-tracker/issues/37): focused tabs, coherent watched transitions, durable Undo, safe write repair and uncertain outcomes. This completes the first usable save/find/open/recover path.
-3. [Handle URL variants and pending Inbox rediscovery review](https://github.com/Omriy123/youtube-backlog-tracker/issues/38): URL boundaries, immediate pending Inbox requeue, prior-details Keep/Dismiss and action gates.
-4. [Edit personal titles and search retained capture-title history](https://github.com/Omriy123/youtube-backlog-tracker/issues/39): authored editing, Original/Latest fallback, historical title search/independent scopes and bounded version inspection; independent of opening/rediscovery after save/find.
-5. [Verify recovery across pending review, title history and failures](https://github.com/Omriy123/youtube-backlog-tracker/issues/40): integrated review/edit/open/Undo, later-decision protection, retained title observations, restart/failure cases and the completed milestone build.
+1. [Save and find with retained capture titles](https://github.com/Omriy123/youtube-backlog-tracker/issues/41): toolbar popup, durable capture/title observations, minimal Library/Inbox/search, identity protection and save failures.
+2. [Open videos and recover accidental openings](https://github.com/Omriy123/youtube-backlog-tracker/issues/42): focused tabs, coherent watched transitions, durable Undo, safe write repair and uncertain outcomes. This completes the first usable save/find/open/recover path.
+3. [Handle URL variants and pending rediscovery review](https://github.com/Omriy123/youtube-backlog-tracker/issues/43): URL boundaries, immediate pending Inbox requeue, prior-details Keep/Dismiss and action gates.
+4. [Edit personal titles and search title history](https://github.com/Omriy123/youtube-backlog-tracker/issues/44): authored editing, Original/Latest fallback, historical title search/independent scopes and bounded version inspection; independent of opening/rediscovery after save/find.
+5. [Recover safely across rediscovery, edits and failures](https://github.com/Omriy123/youtube-backlog-tracker/issues/45): integrated review/edit/open/Undo, later-decision protection, retained title observations, restart/failure cases and the completed milestone build.
 
 GitHub Issues hold current task status, acceptance criteria and native blocking relationships. Each ticket includes its own validation; the final workflow does not postpone earlier testing. Opening depends on save/find; rediscovery on opening; title editing on save/find; integrated recovery on rediscovery and title editing. The [next-slice checkpoint](https://github.com/Omriy123/youtube-backlog-tracker/issues/32) waits for the replacement final workflow, and the [remaining-scope roadmap](https://github.com/Omriy123/youtube-backlog-tracker/issues/9) preserves later capabilities. Original implementation issues 4–8 are superseded, not evidence of completed implementation; their historical approvals remain intact.
 
