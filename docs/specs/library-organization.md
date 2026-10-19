@@ -123,6 +123,8 @@ Preserve Q39 except its explicitly revised filtered-persistence and single-video
 
 Search available personal/automatic titles, URL, channel and description; combine it with channel and current list/Entire Library scope. Missing metadata does not invent values or prevent browsing. Ordinary results exclude retained watched/dismissed history. Both Library-scope controls operate the same scope, preserve query/channel and can return to the originating list. Explicit sidebar navigation narrows to that list while preserving filters.
 
+The later [approved metadata contract](provider-enrichment.md#default-search-behavior) extends title/description matching to every retained source version by default, with independent Personal / Original / Intermediate / Latest checkboxes, all initially enabled. Historical-only matches identify their source version/time and open it in details. Metadata history does not broaden ordinary record scope to retained watched/dismissed videos. Personal title leads, otherwise original title with a differing latest title below; title sorting follows that display. Refresh may update current metadata sorts, but never rewrites saved/imported Manual or placement dates.
+
 Selection survives query, channel, scope, list navigation, sort, density, Rows/Columns and resizing. It uses record identity rather than a frozen copy of title/destination. Rearranging retains selection. Completed moves/removals deselect processed records; failed or excluded records remain available for retry, and unrelated selections remain selected. Opening/status callers apply their approved per-record outcomes; never discard an opened-but-unsaved recoverable record as though its Library update succeeded.
 
 #### Selection controls and presentation

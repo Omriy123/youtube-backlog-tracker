@@ -42,6 +42,21 @@ _Avoid_: Upload date when referring to saving into the extension
 A title deliberately given to a saved video by the user, distinct from the title supplied by its page or provider.
 _Avoid_: Provider title, fetched title
 
+**Original title**:
+The first usable automatic title recorded for a saved video, with its actual source and observation time. It is distinct from a Personal title and remains recognizable when later source titles change.
+
+**Latest title**:
+The most recently recorded automatic source title for a saved video. Its observation time describes when it was known, not a guarantee of the source's title now.
+
+**Metadata history**:
+The retained observations of a saved video's automatic information, including original, intermediate and latest values and their sources and times. It is distinct from History, which records user-controlled Library changes.
+
+**Current enrichment**:
+The retrieved information currently used to present a saved video. Clearing it leaves Metadata history available.
+
+**Enrichment pause**:
+A user choice to stop automatic metadata retrieval for particular saved videos until explicitly resumed. A deliberate one-off retrieval does not itself end the pause.
+
 **First Inbox-exit date**:
 The date a video first completed its initial placement decision, either by leaving Inbox or by being saved directly into Backlog or a watch list. Later list moves do not replace this date.
 
