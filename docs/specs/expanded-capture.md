@@ -84,7 +84,7 @@ The latest human decision supersedes historical Q44's generic-save placement tim
 
 An explicit destination shortcut instead places the existing watched/dismissed record in that destination with pending review. Dismiss / Leave here and the explicit Leave here & open action apply there. Ordinary active exact duplicates still stay in their existing destination, including an already-active pending record saved again.
 
-This later contract replaces the generic interaction when expanded capture is delivered. The first-slice spec and its original approval remain the historical baseline, not retroactively rewritten evidence.
+Originally this replacement was deferred until expanded capture delivery. On 2026-10-19 the owner explicitly requested replacing the five first-slice implementation tickets with contradictory later wayfinder decisions taking precedence. The [current first slice](first-end-to-end-slice.md) therefore includes generic pending-Inbox review and its relevant open/edit gates now, while destination shortcuts, window/link capture and other expanded modes retain their later delivery scope. Original approvals remain historical evidence.
 
 ### User workflows
 
