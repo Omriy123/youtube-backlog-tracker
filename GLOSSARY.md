@@ -13,7 +13,7 @@ A browsing view of active videos across Inbox, Backlog, and watch lists. Retaine
 _Avoid_: All active as the visible name of this view
 
 **Inbox**:
-The list of videos awaiting a placement or rediscovery decision, normally newly saved videos. A previously sorted video may return through Undo, an explicit move when its custom list is deleted, or a generic repeat save with a pending review when it was watched or dismissed.
+The list of videos awaiting a placement or rediscovery decision, normally newly saved videos. A previously sorted video may return through Undo, an explicit move when its custom list is deleted, a deliberately confirmed import move, or a generic repeat save with a pending review when it was watched or dismissed.
 _Avoid_: Unsorted
 
 **Backlog**:
@@ -102,3 +102,12 @@ A different upload whose metadata suggests it may repeat an existing video's con
 **Exact duplicate**:
 Another reference to the same underlying upload as a video already in the Library. It represents the existing video, not a second saved record or another active list membership.
 _Avoid_: Possible duplicate, reupload
+
+**Source reference**:
+One link entry supplied by capture or import. Several source references may identify the same upload and therefore share one Library record.
+
+**Source group**:
+A group of references supplied by an import source. Its original boundary and sequence are distinct from the Library destination chosen for its videos.
+
+**Import batch**:
+The confirmed Library changes from one import, including its list, placement, and review decisions. They form one recoverable action; preview choices alone are not Library changes.

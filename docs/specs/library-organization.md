@@ -168,6 +168,8 @@ Keep the actual behavior quiet. Do not restore the rejected giant temporary-orde
 
 Use an actual **Video / From / To** table, with readable origins and no Elsewhere boxes in the preview. Source-grouped rows are acceptable: use current sidebar destination order and each source's current displayed sort, including applicable temporary view order. Checkbox-click chronology never determines this preview. Provide Set the same destination for all, per-row overrides and Keep in the current list. Ordinary destination choices exclude Inbox. Freeze and show the explicit set for confirmation rather than silently adding later arrivals.
 
+The later [focused import discussion](backlog-import.md#binding-contracts-and-explicit-scope) explicitly permits Inbox in its import Leave there / Move here table. That import-specific choice does not expand this ordinary organization Move picker or change active-duplicate capture defaults. Both contracts preserve one upload record and one active destination.
+
 **Preview order does not dictate destination placement.** A publication-sorted destination shows all records in publication order. An existing saved/imported Manual arrangement preserves its existing records' relative order, while arriving videos try to fit by publication date rather than simply appending.
 
 The human accepted this example: existing saved Manual dates **Jan 1, Jan 10, Jan 5, Jan 20**, arrival Jan 7, result **Jan 1, Jan 10, Jan 5, Jan 7, Jan 20**. Leave existing videos in place; insert after the last earlier/equal-date video, before the next later-date video following that point. If none follows, append. Unknown-date arrivals append; equal-date arrivals follow existing same-date videos.
