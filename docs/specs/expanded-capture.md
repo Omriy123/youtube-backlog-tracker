@@ -84,7 +84,7 @@ The latest human decision supersedes historical Q44's generic-save placement tim
 
 An explicit destination shortcut instead places the existing watched/dismissed record in that destination with pending review. Dismiss / Leave here and the explicit Leave here & open action apply there. Ordinary active exact duplicates still stay in their existing destination, including an already-active pending record saved again.
 
-This later contract replaces the generic interaction when expanded capture is delivered. The first-slice spec and its original approval remain the historical baseline, not retroactively rewritten evidence.
+Originally this replacement was deferred until expanded capture delivery. On 2026-10-19 the owner explicitly requested replacing the five first-slice implementation tickets with contradictory later wayfinder decisions taking precedence. The [current first slice](first-end-to-end-slice.md) therefore includes generic pending-Inbox review and its relevant open/edit gates now, while destination shortcuts, window/link capture and other expanded modes retain their later delivery scope. Original approvals remain historical evidence.
 
 ### User workflows
 
@@ -95,6 +95,7 @@ This later contract replaces the generic interaction when expanded capture is de
 - Save somewhere else reveals the three most important watch lists, in saved importance order, plus Backlog. Choosing one saves immediately. Temporary list sorts and usage frequency do not rank these shortcuts. Fewer than three watch lists yields fewer shortcuts.
 - Confirmation follows durable persistence and names the actual destination/outcome. Open Library / View in Library is explicit navigation, not part of automatic saving.
 - URL/title fallback works without an API key or enrichment. Missing title falls back to the URL; unavailable metadata is not invented. Personal titles retain precedence and are never overwritten by capture.
+- The later [approved enrichment/history contract](provider-enrichment.md) preserves accepted browser/import title origins and observations, gives Personal/original titles display precedence, and enqueues optional background YouTube acquisition independently of durable saving. Preserve existing Metadata history on exact repeats, do not reset original information or user dates, and respect global automatic-off and per-video pause. This adds no new scraping or similarity detector to capture.
 - Right-click a video link or a thumbnail that links to a video to use default Inbox or the same ranked destination shortcuts. Save the linked video URL, not its image asset or containing page. No prior opening of the linked video is required. Do not pretend an arbitrary image URL identifies a video.
 - Right-click saving has the same durable success/failure/identity behavior. Its result must be discoverable through the extension's capture feedback/receipt without automatically opening the Library. The minimal browser-appropriate feedback mechanism is left to the builder and must be validated in Chrome.
 

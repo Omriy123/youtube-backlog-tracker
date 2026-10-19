@@ -123,6 +123,8 @@ Preserve Q39 except its explicitly revised filtered-persistence and single-video
 
 Search available personal/automatic titles, URL, channel and description; combine it with channel and current list/Entire Library scope. Missing metadata does not invent values or prevent browsing. Ordinary results exclude retained watched/dismissed history. Both Library-scope controls operate the same scope, preserve query/channel and can return to the originating list. Explicit sidebar navigation narrows to that list while preserving filters.
 
+The later [approved metadata contract](provider-enrichment.md#default-search-behavior) extends title/description matching to every retained source version by default, with independent Personal / Original / Intermediate / Latest checkboxes, all initially enabled. Historical-only matches identify their source version/time and open it in details. Metadata history does not broaden ordinary record scope to retained watched/dismissed videos. Personal title leads, otherwise original title with a differing latest title below; title sorting follows that display. Refresh may update current metadata sorts, but never rewrites saved/imported Manual or placement dates.
+
 Selection survives query, channel, scope, list navigation, sort, density, Rows/Columns and resizing. It uses record identity rather than a frozen copy of title/destination. Rearranging retains selection. Completed moves/removals deselect processed records; failed or excluded records remain available for retry, and unrelated selections remain selected. Opening/status callers apply their approved per-record outcomes; never discard an opened-but-unsaved recoverable record as though its Library update succeeded.
 
 #### Selection controls and presentation
@@ -165,6 +167,8 @@ Keep the actual behavior quiet. Do not restore the rejected giant temporary-orde
 ### Move preview and destination arrival order
 
 Use an actual **Video / From / To** table, with readable origins and no Elsewhere boxes in the preview. Source-grouped rows are acceptable: use current sidebar destination order and each source's current displayed sort, including applicable temporary view order. Checkbox-click chronology never determines this preview. Provide Set the same destination for all, per-row overrides and Keep in the current list. Ordinary destination choices exclude Inbox. Freeze and show the explicit set for confirmation rather than silently adding later arrivals.
+
+The later [focused import discussion](backlog-import.md#binding-contracts-and-explicit-scope) explicitly permits Inbox in its import Leave there / Move here table. That import-specific choice does not expand this ordinary organization Move picker or change active-duplicate capture defaults. Both contracts preserve one upload record and one active destination.
 
 **Preview order does not dictate destination placement.** A publication-sorted destination shows all records in publication order. An existing saved/imported Manual arrangement preserves its existing records' relative order, while arriving videos try to fit by publication date rather than simply appending.
 

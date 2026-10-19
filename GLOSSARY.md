@@ -13,7 +13,7 @@ A browsing view of active videos across Inbox, Backlog, and watch lists. Retaine
 _Avoid_: All active as the visible name of this view
 
 **Inbox**:
-The list of videos awaiting a placement or rediscovery decision, normally newly saved videos. A previously sorted video may return through Undo, an explicit move when its custom list is deleted, or a generic repeat save with a pending review when it was watched or dismissed.
+The list of videos awaiting a placement or rediscovery decision, normally newly saved videos. A previously sorted video may return through Undo, an explicit move when its custom list is deleted, a deliberately confirmed import move, or a generic repeat save with a pending review when it was watched or dismissed.
 _Avoid_: Unsorted
 
 **Backlog**:
@@ -41,6 +41,21 @@ _Avoid_: Upload date when referring to saving into the extension
 **Personal title**:
 A title deliberately given to a saved video by the user, distinct from the title supplied by its page or provider.
 _Avoid_: Provider title, fetched title
+
+**Original title**:
+The first usable automatic title recorded for a saved video, with its actual source and observation time. It is distinct from a Personal title and remains recognizable when later source titles change.
+
+**Latest title**:
+The most recently recorded automatic source title for a saved video. Its observation time describes when it was known, not a guarantee of the source's title now.
+
+**Metadata history**:
+The retained observations of a saved video's automatic information, including original, intermediate and latest values and their sources and times. It is distinct from History, which records user-controlled Library changes.
+
+**Current enrichment**:
+The retrieved information currently used to present a saved video. Clearing it leaves Metadata history available.
+
+**Enrichment pause**:
+A user choice to stop automatic metadata retrieval for particular saved videos until explicitly resumed. A deliberate one-off retrieval does not itself end the pause.
 
 **First Inbox-exit date**:
 The date a video first completed its initial placement decision, either by leaving Inbox or by being saved directly into Backlog or a watch list. Later list moves do not replace this date.
@@ -87,3 +102,12 @@ A different upload whose metadata suggests it may repeat an existing video's con
 **Exact duplicate**:
 Another reference to the same underlying upload as a video already in the Library. It represents the existing video, not a second saved record or another active list membership.
 _Avoid_: Possible duplicate, reupload
+
+**Source reference**:
+One link entry supplied by capture or import. Several source references may identify the same upload and therefore share one Library record.
+
+**Source group**:
+A group of references supplied by an import source. Its original boundary and sequence are distinct from the Library destination chosen for its videos.
+
+**Import batch**:
+The confirmed Library changes from one import, including its list, placement, and review decisions. They form one recoverable action; preview choices alone are not Library changes.
