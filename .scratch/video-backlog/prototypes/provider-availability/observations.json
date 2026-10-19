@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-19",
+  "kind": "Summarized observations from fictional local Chrome UI walkthroughs; not production tests",
+  "viewports": [{"width":1440,"height":1080},{"width":640,"height":900}],
+  "observedAtBothSizes": {
+    "defaultCheckboxes": {"Personal":true,"Original":true,"Intermediate":true,"Latest":true},
+    "intermediateTitleQuery": "Bridge loads explained",
+    "defaultMatchingRows": 1,
+    "intermediateUncheckedMatchingRows": 0,
+    "originalAndLatestRemainChecked": true,
+    "intermediateRecheckedMatchingRows": 1,
+    "historicalMatchOpensDialog": true,
+    "retainedExampleVersionsVisible": 3,
+    "latestVersionIndependentlyInspectable": true,
+    "originalMainTitle": "How bridges carry their load",
+    "latestKnownTitleCaption": "Why bridges stay standing",
+    "pageHorizontalOverflow": false
+  },
+  "earlierMockChecks": ["A/B/C variant navigation", "No-result details explain unknown cause", "Simulated retry failure preserves five saved records", "Key error leads to setup explanation", "Open action explicitly creates no real tab", "Reset restores example records"],
+  "limits": ["No provider requests", "No real Library data", "No persistent image bytes", "No actual clearing/Undo", "No scheduling/quota/backup behavior", "No production permissions/browser/restore validation"]
+}
