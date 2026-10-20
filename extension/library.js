@@ -1,14 +1,18 @@
 import { command, displayTitle } from './shared.js';
 import { appendOpenActions, renderOpeningRecovery } from './opening-ui.js';
+import { appendTitleTools } from './title-ui.js';
 const container = document.querySelector('#records');
 const search = document.querySelector('input[type=search]');
+const scopeInputs = [...document.querySelectorAll('.search-scopes input')];
 let request = 0;
 async function render() {
   const current = ++request;
-  const result = await command({ type: 'list', query: search.value });
+  const scopes = Object.fromEntries(scopeInputs.map(input => [input.name, input.checked]));
+  document.querySelector('#scope-status').textContent = scopeInputs.some(input => input.checked) ? 'URL always included.' : 'URL-only search. All title scopes are off.';
+  const result = await command({ type: 'list', query: search.value, scopes });
   if (current !== request) return;
   if (!result.ok) { document.querySelector('[role=status]').textContent = result.error; return; }
-  renderOpeningRecovery(result, { onChanged: render });
+  renderOpeningRecovery(result, { onChanged: render, onReviewRequired });
   document.querySelector('#count').textContent = `${result.records.length} saved ${result.records.length === 1 ? 'video' : 'videos'}`;
   container.replaceChildren();
   if (!result.records.length) { const empty = document.createElement('p'); empty.textContent = search.value ? 'No matching saved videos.' : 'Your Inbox is ready. Save a video from the toolbar.'; container.append(empty); }
@@ -21,18 +25,18 @@ async function render() {
     const missing = document.createElement('p'); missing.className = 'muted'; missing.textContent = 'Channel unknown · Duration unknown · Publication date unknown';
     content.append(title, url, missing);
     appendOpenActions(title, content, record, { onChanged: render, onReviewRequired });
-    const latest = record.metadata.observations.at(-1);
-    if (latest?.title && latest.title !== displayTitle(record)) {
-      const observed = document.createElement('p'); observed.className = 'muted';
-      observed.textContent = `Latest: ${latest.title} · Captured from browser · ${new Date(latest.observedAt).toLocaleString()}`;
-      content.append(observed);
-    } row.append(thumbnail, content); container.append(row);
+    appendTitleTools(content, record, {
+      onChanged(message) { document.querySelector('main > [role=status]').textContent = message; render(); },
+      onReviewRequired,
+    });
+    row.append(thumbnail, content); container.append(row);
   }
 }
 function onReviewRequired() {
-  document.querySelector('[role=status]').textContent = 'Review prior activity before opening this video.';
+  document.querySelector('main > [role=status]').textContent = 'Review prior activity before opening or editing this video.';
 }
 search.addEventListener('input', render);
+for (const input of scopeInputs) input.addEventListener('change', render);
 for (const button of document.querySelectorAll('[data-view]')) button.addEventListener('click', () => {
   document.querySelector('h1').textContent = button.dataset.view;
   for (const item of document.querySelectorAll('[data-view]')) item.removeAttribute('aria-current');

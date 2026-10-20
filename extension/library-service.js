@@ -1,13 +1,18 @@
 import { identify } from './identity.js';
 import { createOpeningCommands } from './opening-service.js';
+import { editTitle, matchRecordTitles } from './title-service.js';
 export function createLibrary(browser) {
   const openings = createOpeningCommands(browser);
   let queue = Promise.resolve();
   async function execute(command, captured) {
     const state = await browser.read() ?? { version: 1, records: [], history: [] };
+    if (command.type === 'editTitle') return editTitle(state, browser, command);
     if (command.type === 'list') {
-      const query = (command.query ?? '').trim().toLocaleLowerCase();
-      return { ok: true, ...openings.summaries(state), records: state.records.filter(record => record.user.status === 'active' && (!query || [record.url, ...record.metadata.observations.map(item => item.title)].filter(Boolean).some(value => value.toLocaleLowerCase().includes(query)))) };
+      const records = state.records.filter(record => record.user.status === 'active').flatMap(record => {
+        const match = matchRecordTitles(record, command.query, command.scopes);
+        return match.matched ? [{ ...record, historicalMatch: match.historicalMatch }] : [];
+      });
+      return { ok: true, ...openings.summaries(state), records };
     }
     if (command.type === 'save') {
       const observationResult = await captured;
