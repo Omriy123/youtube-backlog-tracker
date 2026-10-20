@@ -1,11 +1,13 @@
 import { identify } from './identity.js';
+import { createOpeningCommands } from './opening-service.js';
 export function createLibrary(browser) {
+  const openings = createOpeningCommands(browser);
   let queue = Promise.resolve();
   async function execute(command, captured) {
     const state = await browser.read() ?? { version: 1, records: [], history: [] };
     if (command.type === 'list') {
       const query = (command.query ?? '').trim().toLocaleLowerCase();
-      return { ok: true, records: state.records.filter(record => record.user.status === 'active' && (!query || [record.url, ...record.metadata.observations.map(item => item.title)].filter(Boolean).some(value => value.toLocaleLowerCase().includes(query)))) };
+      return { ok: true, ...openings.summaries(state), records: state.records.filter(record => record.user.status === 'active' && (!query || [record.url, ...record.metadata.observations.map(item => item.title)].filter(Boolean).some(value => value.toLocaleLowerCase().includes(query)))) };
     }
     if (command.type === 'save') {
       const observationResult = await captured;
@@ -30,6 +32,8 @@ export function createLibrary(browser) {
       await browser.write(state);
       return { ok: true, outcome: 'saved', record };
     }
+    const opening = await openings.execute(command, state);
+    if (opening) return opening;
     throw new Error('Unknown Library command.');
   }
   return {

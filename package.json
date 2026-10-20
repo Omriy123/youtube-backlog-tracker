@@ -5,7 +5,7 @@
   "scripts": {
     "test": "npm run test:boundary && npm run test:browser",
     "test:browser": "playwright test",
-    "test:boundary": "node --test tests/boundary.test.js"
+    "test:boundary": "node --test tests/*.test.js"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1"

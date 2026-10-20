@@ -12,6 +12,11 @@ export function createBrowserAdapter(api = chrome) {
     async write(state) { await api.storage.local.set({ [STORAGE_KEY]: state }); },
     async openLibrary() { return api.tabs.create({ url: api.runtime.getURL('library.html'), active: true }); },
     async createTab(url) { return api.tabs.create({ url, active: true }); },
+    async listTabs() { return api.tabs.query({}); },
+    async focusTab(tabId) {
+      const tab = await api.tabs.update(tabId, { active: true });
+      await api.windows.update(tab.windowId, { focused: true });
+    },
     now() { return new Date().toISOString(); },
     id() { return crypto.randomUUID(); },
   };
