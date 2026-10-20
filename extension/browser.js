@@ -10,6 +10,11 @@ export function createBrowserAdapter(api = chrome) {
     },
     async read() { return (await api.storage.local.get(STORAGE_KEY))[STORAGE_KEY] ?? null; },
     async write(state) { await api.storage.local.set({ [STORAGE_KEY]: state }); },
+    watchLibraryChanges(listener) {
+      const changed = (changes, area) => { if (area === 'local' && changes[STORAGE_KEY]) listener(); };
+      api.storage.onChanged.addListener(changed);
+      return () => api.storage.onChanged.removeListener(changed);
+    },
     async openLibrary() { return api.tabs.create({ url: api.runtime.getURL('library.html'), active: true }); },
     async createTab(url) { return api.tabs.create({ url, active: true }); },
     async listTabs() { return api.tabs.query({}); },

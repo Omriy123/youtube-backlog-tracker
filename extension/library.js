@@ -1,6 +1,8 @@
 import { command, displayTitle } from './shared.js';
 import { appendOpenActions, renderOpeningRecovery } from './opening-ui.js';
 import { appendTitleTools } from './title-ui.js';
+import { appendReviewBadge, showReview } from './review-ui.js';
+import { createBrowserAdapter } from './browser.js';
 const container = document.querySelector('#records');
 const search = document.querySelector('input[type=search]');
 const scopeInputs = [...document.querySelectorAll('.search-scopes input')];
@@ -24,6 +26,7 @@ async function render() {
     const url = document.createElement('p'); url.className = 'url'; url.textContent = record.url;
     const missing = document.createElement('p'); missing.className = 'muted'; missing.textContent = 'Channel unknown · Duration unknown · Publication date unknown';
     content.append(title, url, missing);
+    appendReviewBadge(content, record, { onChanged: reviewChanged });
     appendOpenActions(title, content, record, { onChanged: render, onReviewRequired });
     appendTitleTools(content, record, {
       onChanged(message) { document.querySelector('main > [role=status]').textContent = message; render(); },
@@ -32,10 +35,16 @@ async function render() {
     row.append(thumbnail, content); container.append(row);
   }
 }
-function onReviewRequired() {
+function reviewChanged(message) {
+  document.querySelector('main > [role=status]').textContent = message;
+  render();
+}
+function onReviewRequired(record) {
   document.querySelector('main > [role=status]').textContent = 'Review prior activity before opening or editing this video.';
+  showReview(record, { onChanged: reviewChanged });
 }
 search.addEventListener('input', render);
+createBrowserAdapter().watchLibraryChanges(render);
 for (const input of scopeInputs) input.addEventListener('change', render);
 for (const button of document.querySelectorAll('[data-view]')) button.addEventListener('click', () => {
   document.querySelector('h1').textContent = button.dataset.view;

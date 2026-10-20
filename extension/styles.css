@@ -32,6 +32,10 @@ article { display: flex; gap: 22px; padding: 23px 0; border-top: 1px solid #dfe5
 .row-content { min-width: 0; }
 .title-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .title-tools button { padding: 8px 12px; }
+.review-badge { margin-top: 12px; background: #fff6db; color: #6c5118; border-color: #c9a656; font-size: 13px; }
+.popup dialog { padding: 16px; }
+.popup dialog p { margin: 8px 0; }
+.popup dialog button { width: auto; margin: 0; }
 dialog { width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow: auto; padding: 26px; border: 1px solid #bdccc4; border-radius: 12px; color: inherit; }
 dialog::backdrop { background: #17291f66; }
 .title-version { padding: 12px 10px; border-bottom: 1px solid #dfe5df; overflow-wrap: anywhere; }
