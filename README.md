@@ -2,7 +2,7 @@
 
 A personal desktop browser extension for collecting video links, sorting them into watch lists, and deciding what to watch next. YouTube is the primary provider; Twitch VODs and generic video links are also in scope.
 
-The overarching product design and first save/find/open/recover slice are approved. The first slice has five implementation tickets under [issue #3](https://github.com/Omriy123/youtube-backlog-tracker/issues/3), starting with [save/find, issue #41](https://github.com/Omriy123/youtube-backlog-tracker/issues/41). The unpacked Chrome save/find test build is now available; [install it and run its checks](docs/installation.md).
+The overarching product design and first save/find/open/recover slice are approved. The first slice has five implementation tickets under [issue #3](https://github.com/Omriy123/youtube-backlog-tracker/issues/3), starting with [save/find, issue #41](https://github.com/Omriy123/youtube-backlog-tracker/issues/41). The unpacked Chrome save/find/open/Undo/title test build is now available; [install it and run its checks](docs/installation.md).
 
 [GitHub repository](https://github.com/Omriy123/youtube-backlog-tracker) · [Issues](https://github.com/Omriy123/youtube-backlog-tracker/issues) · [Remaining product roadmap, issue #9](https://github.com/Omriy123/youtube-backlog-tracker/issues/9)
 

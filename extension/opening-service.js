@@ -10,8 +10,8 @@ export function createOpeningCommands(browser) {
     return state.openings?.filter(item => ['created', 'completed', 'undone'].includes(item.phase) || liveEvidence.has(item.id)).at(-1);
   }
   function unresolved(opening) {
-    if (liveFailures.has(opening.id)) return { ok: false, outcome: 'creationFailed', error: 'No tab was created. Finish failed opening recovery before retrying Open.' };
     if (opening.phase === 'created' || liveEvidence.has(opening.id)) return { ...trackingFailure, attemptId: opening.id };
+    if (liveFailures.has(opening.id)) return { ok: false, outcome: 'creationFailed', error: 'No tab was created. Finish failed opening recovery before retrying Open.' };
     return { ok: false, outcome: 'uncertain', attemptId: opening.id, error: 'Opening outcome uncertain. A tab may already have opened. Inspect existing tabs or explicitly open a new tab, which may create a duplicate.' };
   }
   function summaries(state) {
@@ -20,8 +20,8 @@ export function createOpeningCommands(browser) {
     const latestRecord = latest && state.records.find(record => record.id === latest.recordId);
     return {
       recoveries: (state.openings ?? []).filter(item => ['prepared', 'created'].includes(item.phase)).map(item => {
-        const failed = liveFailures.has(item.id);
         const known = item.phase === 'created' || liveEvidence.has(item.id);
+        const failed = !known && liveFailures.has(item.id);
         const record = state.records.find(record => record.id === item.recordId);
         const safe = record?.user.revision === item.before.revision;
         return { attemptId: item.id, record, outcome: failed ? 'failed' : known ? 'known' : 'uncertain', canRepair: failed || known && safe, reason: safe || failed ? null : conflictReason, message: failed ? 'Opening failed — no tab created. The failed attempt outcome is not saved.' : known ? trackingFailure.error : 'Opening outcome uncertain. A tab may already have opened.' };
@@ -75,7 +75,7 @@ export function createOpeningCommands(browser) {
     }
     if (command.type === 'repairOpening') {
       const opening = state.openings?.find(item => item.id === command.attemptId);
-      if (opening?.phase === 'prepared' && liveFailures.has(opening.id)) {
+      if (opening?.phase === 'prepared' && liveFailures.has(opening.id) && !liveEvidence.has(opening.id)) {
         opening.phase = 'failed';
         try { await browser.write(state); }
         catch { return { ok: false, error: 'Failed opening outcome not saved. No additional tab was requested.' }; }
@@ -103,6 +103,9 @@ export function createOpeningCommands(browser) {
       (state.openings ??= []).push(opening);
       try { await browser.write(state); }
       catch { liveFailures.add(opening.id); return { ok: false, error: 'Opening preparation not saved. No tab was requested.' }; }
+      // A token may be retried after a preparation that never committed. Its old
+      // no-side-effect observation ends before this newly prepared browser action.
+      liveFailures.delete(opening.id);
       let tab;
       try { tab = await browser.createTab(record.url); }
       catch {

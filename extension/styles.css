@@ -40,5 +40,12 @@ dialog::backdrop { background: #17291f66; }
 .title-tools [aria-pressed=true] { background: #dce8de; }
 .historical-match { display: block; text-align: left; margin-top: 12px; max-width: 100%; overflow-wrap: anywhere; font-size: 13px; }
 .url { color: #64766a; font-size: 12px; overflow-wrap: anywhere; margin: 0; }
+.title-target { font: inherit; line-height: 1.5; color: inherit; background: transparent; padding: 0; text-align: left; border: 0; border-radius: 2px; }
+.title-target:hover { text-decoration: underline; }
+#opening-recovery:empty { display: none; }
+#opening-recovery { padding: 18px; margin-bottom: 24px; background: white; border: 1px solid #d7dfd7; border-radius: 7px; overflow-wrap: anywhere; }
+#opening-recovery button { margin: 4px 8px 4px 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+#opening-recovery button:disabled { cursor: not-allowed; }
+.recovery + .recovery { border-top: 1px solid #d7dfd7; margin-top: 18px; padding-top: 12px; }
 @media (max-width: 700px) { aside { width: 145px; padding: 20px 10px; } .brand { font-size: 15px; } main { padding: 28px 20px; } .thumbnail { display: none; } }
 @media (max-width: 440px) { .library { display: block; } aside { width: 100%; padding: 15px; } .brand { margin-bottom: 10px; } nav { display: flex; } nav button { margin: 0; } }

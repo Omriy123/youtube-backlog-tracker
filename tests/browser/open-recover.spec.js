@@ -72,6 +72,23 @@ test('uncertain restart offers tab inspection and an explicit warned new opening
     await expect(recovery).toContainText('Opening outcome uncertain');
     await expect(recovery).toContainText('may create a duplicate tab');
     const before = await app.worker.evaluate(() => chrome.tabs.query({}));
+    // #43 supplies the review producer; seed that public persistence boundary
+    // here so uncertain-opening fallback must consume the same shared gate.
+    await library.evaluate(async () => {
+      const { library: state } = await chrome.storage.local.get('library');
+      state.records[0].user.pendingReview = { priorStatus: 'watched' }; state.records[0].user.revision++;
+      await chrome.storage.local.set({ library: state });
+    });
+    await library.reload();
+    await library.getByRole('button', { name: 'Open a new tab anyway', exact: true }).click();
+    await expect(library.getByRole('status')).toContainText('Review prior activity');
+    expect(await app.worker.evaluate(() => chrome.tabs.query({}))).toHaveLength(before.length);
+    await library.evaluate(async () => {
+      const { library: state } = await chrome.storage.local.get('library');
+      state.records[0].user.pendingReview = null; state.records[0].user.revision++;
+      await chrome.storage.local.set({ library: state });
+    });
+    await library.reload();
     await library.getByRole('button', { name: 'Inspect existing tabs', exact: true }).click();
     await expect(recovery.getByRole('list')).toBeVisible();
     await recovery.getByRole('list').getByRole('button').first().click();
@@ -86,5 +103,36 @@ test('uncertain restart offers tab inspection and an explicit warned new opening
     expect(await app.worker.evaluate(() => chrome.tabs.query({}))).toHaveLength(before.length + 1);
     const after = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
     expect(after.latestOpening.record.user.watchEvents).toHaveLength(1);
+  } finally { await app.context.close(); }
+});
+
+test('a Personal title edit on another video keeps safe Undo available outside search results', async () => {
+  // Verifies the combined title/opening integration cannot globally invalidate recovery.
+  const app = await launch();
+  try {
+    const first = await capture(app, 'https://example.org/first-opening', 'First lecture');
+    await expect(first.popup.getByRole('status')).toContainText('Saved to Inbox');
+    const second = await capture(app, 'https://example.org/second-opening', 'Second lecture');
+    await expect(second.popup.getByRole('status')).toContainText('Saved to Inbox');
+    const library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    await library.getByRole('button', { name: 'First lecture', exact: true }).click();
+    await expect(library.getByRole('article')).toHaveCount(1);
+    await library.getByRole('button', { name: 'Edit Personal title', exact: true }).click();
+    const editor = library.getByRole('dialog', { name: 'Edit Personal title', exact: true });
+    await editor.getByRole('textbox', { name: 'Personal title', exact: true }).fill('Keep this newer title');
+    await editor.getByRole('button', { name: 'Save title', exact: true }).click();
+    await expect(editor).not.toBeVisible();
+    await library.getByRole('searchbox').fill('no matching result');
+    await expect(library.getByRole('article')).toHaveCount(0);
+    const tabs = await app.worker.evaluate(() => chrome.tabs.query({}));
+    await library.getByRole('button', { name: 'Undo opening', exact: true }).focus();
+    await library.getByRole('button', { name: 'Undo opening', exact: true }).press('Enter');
+    await expect(library.getByRole('status')).toContainText('Opening undone');
+    expect(await app.worker.evaluate(() => chrome.tabs.query({}))).toHaveLength(tabs.length);
+    await library.getByRole('searchbox').fill('');
+    await expect(library.getByRole('article')).toHaveCount(2);
+    await expect(library.getByRole('heading', { name: 'Keep this newer title', exact: true })).toBeVisible();
+    const restored = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    expect(restored.records[0].user.watchEvents).toHaveLength(0);
   } finally { await app.context.close(); }
 });

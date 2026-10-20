@@ -246,3 +246,20 @@ test('a failed Undo write leaves the opening intact and an explicit retry restor
   const undone = await library.command({ type: 'undoOpening', attemptId: open.attemptId });
   assert.equal(undone.record.user.watchEvents.length, 0); assert.equal(browser.tabs.length, 1);
 });
+
+test('retrying one token after rejected preparation cannot mislabel a later created tab as failed', async () => {
+  // Regression: stale no-tab knowledge must never discard positive creation evidence.
+  const { browser, library, open } = await saved();
+  browser.failNextWrite();
+  assert.equal((await library.command(open)).ok, false);
+  assert.equal(browser.tabs.length, 0);
+  browser.failNextWrite(2);
+  assert.equal((await library.command(open)).outcome, 'trackingFailed');
+  assert.equal(browser.tabs.length, 1);
+  assert.equal((await library.command({ type: 'list' })).recoveries[0].outcome, 'known');
+  const repaired = await library.command({ type: 'repairOpening', attemptId: open.attemptId });
+  assert.equal(repaired.outcome, 'opened');
+  assert.equal(repaired.record.user.watchEvents.length, 1);
+  assert.equal((await library.command({ ...open, attemptId: 'opening-two' })).ok, false);
+  assert.equal(browser.tabs.length, 1);
+});

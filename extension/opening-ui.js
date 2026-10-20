@@ -3,7 +3,7 @@ import { command, displayTitle } from './shared.js';
 export function appendOpenActions(title, content, record, { onChanged, onReviewRequired }) {
   async function open() {
     const result = await command({ type: 'open', recordId: record.id, expectedRevision: record.user.revision, attemptId: crypto.randomUUID() });
-    if (result.outcome === 'reviewRequired') { onReviewRequired(record); return; }
+    if (result.outcome === 'reviewRequired') { onReviewRequired(result.record); return; }
     document.querySelector('[role=status]').textContent = result.ok ? 'Opened in a new tab · Playback not verified' : result.error;
     await onChanged();
   }
@@ -12,7 +12,7 @@ export function appendOpenActions(title, content, record, { onChanged, onReviewR
   const button = document.createElement('button'); button.textContent = 'Open video'; button.addEventListener('click', open); content.append(button);
 }
 
-export function renderOpeningRecovery(result, { onChanged }) {
+export function renderOpeningRecovery(result, { onChanged, onReviewRequired }) {
   const container = document.querySelector('#opening-recovery'); container.replaceChildren();
   for (const recovery of result.recoveries ?? []) {
     const section = document.createElement('div'); section.className = 'recovery';
@@ -48,6 +48,7 @@ export function renderOpeningRecovery(result, { onChanged }) {
       const fresh = document.createElement('button'); fresh.textContent = 'Open a new tab anyway';
       fresh.addEventListener('click', async () => {
         const response = await command({ type: 'newOpening', attemptId: recovery.attemptId, newAttemptId: crypto.randomUUID(), expectedRevision: recovery.record.user.revision, acknowledgePossibleDuplicate: true });
+        if (response.outcome === 'reviewRequired') { onReviewRequired(response.record); return; }
         document.querySelector('[role=status]').textContent = response.ok ? 'Opened a new tab · The earlier attempt remains unverified' : response.error;
         await onChanged();
       });
