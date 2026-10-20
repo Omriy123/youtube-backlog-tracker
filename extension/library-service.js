@@ -1,6 +1,8 @@
 import { identify } from './identity.js';
+import { createOpeningCommands } from './opening-service.js';
 import { editTitle, matchRecordTitles } from './title-service.js';
 export function createLibrary(browser) {
+  const openings = createOpeningCommands(browser);
   let queue = Promise.resolve();
   async function execute(command, captured) {
     const state = await browser.read() ?? { version: 1, records: [], history: [] };
@@ -10,7 +12,7 @@ export function createLibrary(browser) {
         const match = matchRecordTitles(record, command.query, command.scopes);
         return match.matched ? [{ ...record, historicalMatch: match.historicalMatch }] : [];
       });
-      return { ok: true, records };
+      return { ok: true, ...openings.summaries(state), records };
     }
     if (command.type === 'save') {
       const observationResult = await captured;
@@ -35,6 +37,8 @@ export function createLibrary(browser) {
       await browser.write(state);
       return { ok: true, outcome: 'saved', record };
     }
+    const opening = await openings.execute(command, state);
+    if (opening) return opening;
     throw new Error('Unknown Library command.');
   }
   return {
