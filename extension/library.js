@@ -1,10 +1,14 @@
 import { command, displayTitle } from './shared.js';
+import { appendTitleTools } from './title-ui.js';
 const container = document.querySelector('#records');
 const search = document.querySelector('input[type=search]');
+const scopeInputs = [...document.querySelectorAll('.search-scopes input')];
 let request = 0;
 async function render() {
   const current = ++request;
-  const result = await command({ type: 'list', query: search.value });
+  const scopes = Object.fromEntries(scopeInputs.map(input => [input.name, input.checked]));
+  document.querySelector('#scope-status').textContent = scopeInputs.some(input => input.checked) ? 'URL always included.' : 'URL-only search. All title scopes are off.';
+  const result = await command({ type: 'list', query: search.value, scopes });
   if (current !== request) return;
   if (!result.ok) { document.querySelector('[role=status]').textContent = result.error; return; }
   document.querySelector('#count').textContent = `${result.records.length} saved ${result.records.length === 1 ? 'video' : 'videos'}`;
@@ -18,15 +22,15 @@ async function render() {
     const url = document.createElement('p'); url.className = 'url'; url.textContent = record.url;
     const missing = document.createElement('p'); missing.className = 'muted'; missing.textContent = 'Channel unknown · Duration unknown · Publication date unknown';
     content.append(title, url, missing);
-    const latest = record.metadata.observations.at(-1);
-    if (latest?.title && latest.title !== displayTitle(record)) {
-      const observed = document.createElement('p'); observed.className = 'muted';
-      observed.textContent = `Latest: ${latest.title} · Captured from browser · ${new Date(latest.observedAt).toLocaleString()}`;
-      content.append(observed);
-    } row.append(thumbnail, content); container.append(row);
+    appendTitleTools(content, record, {
+      onChanged(message) { document.querySelector('main > [role=status]').textContent = message; render(); },
+      onReviewRequired() { document.querySelector('main > [role=status]').textContent = 'Review this video’s previous activity before editing its Personal title.'; },
+    });
+    row.append(thumbnail, content); container.append(row);
   }
 }
 search.addEventListener('input', render);
+for (const input of scopeInputs) input.addEventListener('change', render);
 for (const button of document.querySelectorAll('[data-view]')) button.addEventListener('click', () => {
   document.querySelector('h1').textContent = button.dataset.view;
   for (const item of document.querySelectorAll('[data-view]')) item.removeAttribute('aria-current');

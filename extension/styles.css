@@ -22,10 +22,23 @@ main { max-width: 1250px; width: 100%; padding: 45px 48px; }
 .eyebrow { font-size: 11px; color: #63766c; letter-spacing: 1.8px; margin: 0; }
 #count, .muted { color: #718078; font-size: 12px; }
 .search { display: block; margin-top: 30px; color: #586b60; font-size: 12px; }
+.search-scopes { display: flex; flex-wrap: wrap; gap: 10px 20px; border: 0; padding: 0; margin: 16px 0 0; }
+.search-scopes legend { color: #586b60; font-size: 12px; margin-bottom: 8px; }
+.search-scopes label { display: flex; align-items: center; gap: 7px; }
+.search-scopes input { width: auto; margin: 0; accent-color: #326857; }
 input { display: block; margin-top: 7px; width: 100%; max-width: 700px; padding: 12px 14px; background: white; color: inherit; border: 1px solid #d7dfd7; border-radius: 7px; font: inherit; }
 article { display: flex; gap: 22px; padding: 23px 0; border-top: 1px solid #dfe5df; }
 .thumbnail { width: 146px; height: 82px; background: #e9eeea; display: grid; place-items: center; color: #7c8981; font-size: 11px; border-radius: 6px; flex-shrink: 0; }
 .row-content { min-width: 0; }
+.title-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.title-tools button { padding: 8px 12px; }
+dialog { width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow: auto; padding: 26px; border: 1px solid #bdccc4; border-radius: 12px; color: inherit; }
+dialog::backdrop { background: #17291f66; }
+.title-version { padding: 12px 10px; border-bottom: 1px solid #dfe5df; overflow-wrap: anywhere; }
+.title-version h3 { font-size: 13px; color: #50635b; }
+.matched-version { background: #edf1dc; outline: 2px solid #b68b2b; outline-offset: -2px; }
+.title-tools [aria-pressed=true] { background: #dce8de; }
+.historical-match { display: block; text-align: left; margin-top: 12px; max-width: 100%; overflow-wrap: anywhere; font-size: 13px; }
 .url { color: #64766a; font-size: 12px; overflow-wrap: anywhere; margin: 0; }
 @media (max-width: 700px) { aside { width: 145px; padding: 20px 10px; } .brand { font-size: 15px; } main { padding: 28px 20px; } .thumbnail { display: none; } }
 @media (max-width: 440px) { .library { display: block; } aside { width: 100%; padding: 15px; } .brand { margin-bottom: 10px; } nav { display: flex; } nav button { margin: 0; } }
