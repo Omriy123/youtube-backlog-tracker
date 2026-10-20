@@ -81,7 +81,8 @@ test('uncertain restart offers tab inspection and an explicit warned new opening
     });
     await library.reload();
     await library.getByRole('button', { name: 'Open a new tab anyway', exact: true }).click();
-    await expect(library.getByRole('status')).toContainText('Review prior activity');
+    await expect(library.locator('main > [role=status]')).toContainText('Review prior activity');
+    await library.getByRole('dialog', { name: 'Review prior activity', exact: true }).getByRole('button', { name: 'Cancel', exact: true }).click();
     expect(await app.worker.evaluate(() => chrome.tabs.query({}))).toHaveLength(before.length);
     await library.evaluate(async () => {
       const { library: state } = await chrome.storage.local.get('library');

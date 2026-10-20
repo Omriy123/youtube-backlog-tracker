@@ -1,12 +1,14 @@
 import { identify } from './identity.js';
 import { createOpeningCommands } from './opening-service.js';
 import { editTitle, matchRecordTitles } from './title-service.js';
+import { requeueForReview, review, persistReviewChange } from './review-service.js';
 export function createLibrary(browser) {
   const openings = createOpeningCommands(browser);
   let queue = Promise.resolve();
   async function execute(command, captured) {
     const state = await browser.read() ?? { version: 1, records: [], history: [] };
     if (command.type === 'editTitle') return editTitle(state, browser, command);
+    if (command.type === 'review') return review(state, browser, command);
     if (command.type === 'list') {
       const records = state.records.filter(record => record.user.status === 'active').flatMap(record => {
         const match = matchRecordTitles(record, command.query, command.scopes);
@@ -23,6 +25,11 @@ export function createLibrary(browser) {
       const observation = { title: capture.title?.trim() || null, source: capture.source, observedAt: capture.observedAt };
       if (existing) {
         existing.metadata.observations.push(observation);
+        const requeued = requeueForReview(state, existing, browser);
+        if (requeued) {
+          const record = await persistReviewChange(state, browser, requeued, existing.id);
+          return { ok: true, outcome: 'reviewPending', record };
+        }
         await browser.write(state);
         return { ok: true, outcome: 'alreadySaved', record: existing };
       }

@@ -1,6 +1,6 @@
 # Install and try the first test build
 
-This unpacked Manifest V3 extension delivers Save to Inbox and Library/search (#41), real single-video opening with persistent Undo and recovery (#42), and Personal titles with retained captured-title inspection/search (#44). Rediscovery review is delivered by #43. The source folder is the runnable build; no compilation or API key is needed.
+This unpacked Manifest V3 extension delivers Save to Inbox and Library/search (#41), real single-video opening with persistent Undo and recovery (#42), pending rediscovery review and URL variants (#43), and Personal titles with retained captured-title inspection/search (#44). The source folder is the runnable build; no compilation or API key is needed.
 
 1. Open `chrome://extensions` in desktop Chrome and enable **Developer mode**.
 2. Choose **Load unpacked**, then select this repository's `extension/` directory (not the repository root).
@@ -21,14 +21,24 @@ Identity recognition describes URL syntax, not playback availability. It never m
 
 | Input | Record identity |
 | --- | --- |
-| `http(s)://youtube.com/watch?v=M7lc1UVf-VE` or `www.youtube.com` | YouTube upload `M7lc1UVf-VE`; exactly one valid 11-character `v` parameter required. Timestamp, playlist/index and other query context do not create a second record. |
-| `http(s)://youtu.be/M7lc1UVf-VE?t=120` | Same upload. Exactly one 11-character path segment. |
-| `http(s)://twitch.tv/videos/335921245` or `www.twitch.tv`, optional trailing slash/time query | Twitch VOD decimal identity `335921245` (no leading zero). |
+| `http(s)://youtube.com/watch?v=M7lc1UVf-VE` on exact hosts `youtube.com`, `www.youtube.com`, `m.youtube.com`, `music.youtube.com` | YouTube upload `M7lc1UVf-VE`; exactly one valid 11-character `v` parameter required. Timestamp, playlist/index and other context do not create a second record. |
+| `/embed/M7lc1UVf-VE`, `/shorts/M7lc1UVf-VE`, `/live/M7lc1UVf-VE` on those same YouTube hosts | Same upload; optional terminal slash, no competing `v` query parameter. Shorts/live recognition describes the route, not a video's format or current availability. |
+| `http(s)://youtu.be/M7lc1UVf-VE?t=120` | Same upload. Exactly one 11-character path segment, optional terminal slash, no competing `v` query parameter. Other short-link hosts stay generic. |
+| `http(s)://twitch.tv/videos/335921245` or `www.twitch.tv`, optional terminal slash/time query | Twitch VOD positive decimal identity `335921245` (no leading zero); no competing `video`, `channel` or `clip` query target. |
+| `http(s)://player.twitch.tv/?video=v335921245&parent=example.org` | Same VOD, with one `video` parameter (bare decimal `335921245` also accepted), no `channel` or `clip` target; root path only. First saved embed/parent/time context is retained. |
 | Other HTTP(S) URLs | Conservative full-URL identity after standard URL parsing. Query, fragment and path remain identity-significant. Exact repeats merge; different links stay separate. |
-| Conflicting/repeated watch `v`, malformed ID, channel/search/playlist-only, Twitch channel/clip, lookalike host, nonstandard port, or not-yet-supported provider route/host | Generic full-URL fallback, never a manufactured known-upload match. |
+| Repeated/conflicting identity parameters, path-ID with competing query-ID, malformed ID, channel/search/playlist-only, Twitch channel/clip, lookalike host, nonstandard port, or unlisted provider route/host | Generic full-URL fallback, never a manufactured known-upload match. Same-value repeated identity parameters also stay generic. `youtube-nocookie.com` and mobile Twitch hosts are unlisted. Standard URL parsing canonicalizes default ports; nonstandard ports stay generic. |
 | Browser/internal/extension/file/javascript URLs or credentials embedded in a URL | Rejected; no record is saved. |
 
-The first saved URL remains unchanged on active repeat saves, preserving its initial timestamp/playlist/fragment context for Open. Different references to a recognized upload do not overwrite that saved context, reorder it, reset user dates or create watch events. All accepted browser-title observations, including missing titles and unchanged repetitions, are retained separately from user History. Title display uses Personal, then first usable automatic Original, then usable Latest, then saved URL. Broader YouTube embed/shorts/live/mobile/music URL normalization belongs to #43.
+The first saved URL remains unchanged on all repeat saves, preserving its initial timestamp/playlist/fragment context for Open. Different references to a recognized upload do not overwrite that context or create watch events. Active duplicates preserve placement, order, user dates and pending review. All accepted browser-title observations, including missing titles and unchanged repetitions, are retained separately from user History. Title display uses Personal, then first usable automatic Original, then usable Latest, then saved URL.
+
+## Rediscovery review
+
+Save a watched or dismissed link again to return the **same record** to Inbox immediately. **Saved to Inbox — review pending** confirms durable placement. The popup and Inbox row offer **Review prior activity** with previous status, destination, activity dates and retained watch events. Unknown details remain unknown. Watched means opened from the tracker; it does not prove playback. Open Library views refresh on local changes while preserving their search and title scopes.
+
+**Cancel**, Escape or closing the popup leaves review pending. **Keep in Inbox** clears review without another list entry, watch event or browser tab. Choose Open or Edit again afterward. **Dismiss** removes active membership and retains prior history and watches. A failed decision stays visible in its dialog and preserves the last committed review; retry explicitly or cancel. A stale dialog must be closed and reopened before deciding. Re-saving an already pending Inbox row reports **Already saved — review pending**, preserving its original pending details and dates.
+
+First saved and the original First Inbox-exit stay fixed. Actual requeue advances Latest list-entry; Keep does not. Pending rows remain searchable and title inspection stays available, while Open and Personal title editing require review first. Earlier opening Undo cannot overwrite requeue/Keep/Dismiss; Undo after a new post-Keep opening restores the resolved Inbox state and earlier watches. Pending details and decisions survive Library reopening and browser restart. Broader destinations, capture sources, organization and explicit status controls remain outside this build.
 
 ## Opening recovery
 
