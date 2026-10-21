@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { launch, capture } from './helpers.js';
+import { launch, capture, browserTabs, expectNewFocusedTab } from './helpers.js';
 
 test('Open creates a focused new tab and persistent Undo restores Inbox without closing tabs', async () => {
   // Catches fake openings, transient Undo, replaced source tabs and incoherent watched history.
@@ -10,18 +10,15 @@ test('Open creates a focused new tab and persistent Undo restores Inbox without 
     const before = await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
     const library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
     await library.setViewportSize({ width: 390, height: 780 });
-    const opened = app.context.waitForEvent('page');
+    const beforeOpening = await browserTabs(app);
     await library.getByRole('button', { name: 'Open video', exact: true }).focus();
     await library.getByRole('button', { name: 'Open video', exact: true }).press('Enter');
-    const video = await opened; await video.waitForLoadState();
-    expect(video).not.toBe(source);
     expect(source.isClosed()).toBe(false);
     await expect(library.getByRole('article')).toHaveCount(0);
+    await expectNewFocusedTab(app, beforeOpening, 'https://example.org/opening#chapter');
     const current = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
     expect(current.latestOpening.record.user.status).toBe('watched');
     expect(current.latestOpening.record.user.watchEvents).toHaveLength(1);
-    const tabs = await app.worker.evaluate(() => chrome.tabs.query({ active: true, currentWindow: true }));
-    expect(tabs[0].url).toBe('https://example.org/opening#chapter');
     const profile = app.profile; const extensionPath = app.extensionPath;
     await app.context.close(); app = await launch(profile, { extensionPath });
     const reopened = await app.context.newPage(); await reopened.goto(`${app.base}/library.html`);

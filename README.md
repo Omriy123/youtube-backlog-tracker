@@ -2,7 +2,7 @@
 
 A personal desktop browser extension for collecting video links, sorting them into watch lists, and deciding what to watch next. YouTube is the primary provider; Twitch VODs and generic video links are also in scope.
 
-The overarching product design and first save/find/open/recover slice are approved. The first slice has five implementation tickets under [issue #3](https://github.com/Omriy123/youtube-backlog-tracker/issues/3), starting with [save/find, issue #41](https://github.com/Omriy123/youtube-backlog-tracker/issues/41). The unpacked Chrome save/find/open/Undo/title test build is now available; [install it and run its checks](docs/installation.md).
+The Chrome first-slice test build supports toolbar save, Personal titles, retained-title search, real opening, watched/dismissed rediscovery review and persistent Undo opening. [Install it and follow the complete walkthrough](docs/installation.md), or inspect the [validation evidence](docs/validation/first-slice.md). The five implementation tickets are tracked under [issue #3](https://github.com/Omriy123/youtube-backlog-tracker/issues/3); broader Library organization remains planned.
 
 [GitHub repository](https://github.com/Omriy123/youtube-backlog-tracker) · [Issues](https://github.com/Omriy123/youtube-backlog-tracker/issues) · [Remaining product roadmap, issue #9](https://github.com/Omriy123/youtube-backlog-tracker/issues/9)
 
@@ -22,4 +22,4 @@ The overarching product design and first save/find/open/recover slice are approv
 
 Work locally, track tasks in GitHub Issues, and review implementation through pull requests. Durable specifications and decisions live alongside the code; `.scratch/` is for temporary local work and is ignored by Git.
 
-Read [the workflow](docs/workflow.md) and [agent instructions](AGENTS.md) before starting a task. The runnable build is `extension/`. Run `npm ci`, `npx playwright install chromium`, then `npm test`; see [installation and validation](docs/installation.md) for workflow, permissions and evidence limits.
+Read [the workflow](docs/workflow.md) and [agent instructions](AGENTS.md) before starting a task. The runnable build is `extension/`. Run `npm ci`, `npx playwright install chromium`, then `npm test`. `npm run build` prepares a standalone unpacked trial folder; `npm run validate:chrome` runs the combined walkthrough in installed desktop Chrome using an isolated profile. See [installation and validation](docs/installation.md) for setup, supported URLs and evidence limits.

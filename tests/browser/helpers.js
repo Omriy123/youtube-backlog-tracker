@@ -1,4 +1,4 @@
-import { chromium } from '@playwright/test';
+import { chromium, expect } from '@playwright/test';
 import { resolve } from 'node:path';
 import { mkdtemp, mkdir, cp, rename, writeFile } from 'node:fs/promises';
 
@@ -43,6 +43,23 @@ export async function capture(app, url, title) {
   return { source, popup };
 }
 
+export function browserTabs(app) {
+  return app.worker.evaluate(() => chrome.tabs.query({}));
+}
+
+// Extension-created tabs can begin navigating before Playwright attaches its
+// Page/router. Verify Chrome's actual effect, without requiring provider load.
+export async function expectNewFocusedTab(app, before, url) {
+  const after = await browserTabs(app);
+  expect(after).toHaveLength(before.length + 1);
+  expect(before.every(tab => after.some(item => item.id === tab.id))).toBe(true);
+  const created = after.filter(tab => !before.some(item => item.id === tab.id));
+  expect(created).toHaveLength(1);
+  expect(created[0].active).toBe(true);
+  expect(created[0].pendingUrl || created[0].url).toBe(url);
+  return created[0];
+}
+
 
 
 
@@ -57,6 +74,11 @@ export async function openActionPopup(app) {
   const { sessionId } = await cdp.send('Target.attachToTarget', { targetId: target.targetId, flatten: false });
   let nextId = 0;
   return {
+    async close() {
+      await this.evaluate('setTimeout(() => window.close(), 0); true');
+      await expect.poll(async () => (await cdp.send('Target.getTargets')).targetInfos.some(item => item.targetId === target.targetId)).toBe(false);
+      await cdp.detach();
+    },
     async evaluate(expression) {
       const id = ++nextId;
       const response = new Promise(resolve => {

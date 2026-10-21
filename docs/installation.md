@@ -2,6 +2,8 @@
 
 This unpacked Manifest V3 extension delivers Save to Inbox and Library/search (#41), real single-video opening with persistent Undo and recovery (#42), pending rediscovery review and URL variants (#43), and Personal titles with retained captured-title inspection/search (#44). The source folder is the runnable build; no compilation or API key is needed.
 
+For a portable trial folder, run `npm run build` with Node 24 or newer. The command prints a fresh `.scratch/build/video-backlog-tracker-…/` folder containing `extension/`, `INSTALLATION.md` and a short README. Copy that whole folder wherever you want to keep the build, then select its `extension/` directory in step 2. If received as a ZIP, extract it first and keep the unpacked folder in place while Chrome uses it. No `node_modules` or Node installation is needed to use the extension itself.
+
 1. Open `chrome://extensions` in desktop Chrome and enable **Developer mode**.
 2. Choose **Load unpacked**, then select this repository's `extension/` directory (not the repository root).
 3. Pin **Video Backlog Tracker** from Chrome's Extensions menu.
@@ -9,7 +11,7 @@ This unpacked Manifest V3 extension delivers Save to Inbox and Library/search (#
 5. Choose **Open Library** explicitly. Search beneath the Inbox heading using any captured title or the saved URL. Closing/reopening the Library or restarting Chrome preserves saved records.
 6. Click a saved title or **Open video**. A new focused tab opens at the first saved URL, including its saved timestamp/playlist/fragment context. The source and Library tabs stay open. Successful tab creation marks the video watched and removes it from Inbox; playback is not verified.
 7. Return to the Library and choose **Undo opening** to restore the most recent opening's prior active placement and relevant dates. The created tab stays open. Undo remains available after closing/reopening the Library and restarting Chrome, provided later relevant user decisions have not made reversal unsafe.
-8. Reload the extension on the extensions page after updating its files. Extension removal or clearing extension storage deletes this local test collection; this build has no backup/export UI.
+8. To update an existing trial, replace files in its existing unpacked folder and choose **Reload** on the extensions page. Keep that installation/folder rather than removing it or switching to a different folder. Extension removal or clearing extension storage deletes this local test collection; this build has no backup/export or migration UI.
 
 The extension requests `tabs` to read the current tab's URL and browser title and `storage` for its local Library. It has no host permissions, content scripts, provider requests, DOM scraping or API credentials. Captured titles are browser observations, with their observation time; they are not verified current provider metadata. Chrome may supply a URL-shaped browser title for an untitled page. Thumbnail, channel, duration and publication date remain explicitly unknown.
 
@@ -40,6 +42,17 @@ Save a watched or dismissed link again to return the **same record** to Inbox im
 
 First saved and the original First Inbox-exit stay fixed. Actual requeue advances Latest list-entry; Keep does not. Pending rows remain searchable and title inspection stays available, while Open and Personal title editing require review first. Earlier opening Undo cannot overwrite requeue/Keep/Dismiss; Undo after a new post-Keep opening restores the resolved Inbox state and earlier watches. Pending details and decisions survive Library reopening and browser restart. Broader destinations, capture sources, organization and explicit status controls remain outside this build.
 
+## Complete trial walkthrough
+
+1. Save one HTTP(S) video page, then use **Edit Personal title** to give it a recognizable name. Save the same link again after its browser title changes; your Personal title and first captured Original remain separate from the new observation.
+2. Search an earlier captured title. The matching row keeps your normal display title; use the dated match excerpt or **Titles → History** to inspect the retained observation and browser source/time. Clear Personal title when desired to return to Original/Latest/URL fallback.
+3. Open the video from the Library. Verify a new focused tab and the watched removal from Inbox. Return to the source page and save again: the same record returns immediately with **Review prior activity**. Inspect previous placement, dates and retained watches; Cancel or Escape leaves it pending. Search and Titles still work while pending.
+4. Close/reopen the Library or restart Chrome. Pending review remains. Choose **Keep in Inbox**; no tab opens. Choose **Open video** separately to open it a second time.
+5. Restart Chrome and open the Library. **Undo opening** restores the reviewed Inbox state, retains the first watch and every captured title, and leaves existing browser tabs alone. It does not revive the resolved review.
+6. Open again, save again and choose **Dismiss** in the review. The record leaves active Inbox. Save it once more to inspect the retained dismissal and earlier watches; choose Keep or Dismiss explicitly. Requeue, review and later Personal edits protect against an older Undo overwriting those decisions.
+
+The automated combined walkthrough uses controlled title changes and exercises Enter/Escape and a 390-pixel Library viewport. For your own trial, no page title change or provider API is required; repeated equal observations are retained too. See the validation report in the repository (`docs/validation/first-slice.md`) for actual results and screenshots. This first-slice build does not start the later recovery/enrichment real-use review clocks.
+
 ## Opening recovery
 
 Opening preparation must be saved before any browser tab is requested. A failed creation keeps the video active with no watch event. A failed Library write after a known creation shows **Tab open — Library update not saved**. Choose **Repair Library update** to finish tracking that same opening without creating a tab or a second watch event. Its watch time remains the original creation time. Repeated submissions reconcile the existing operation before changing anything.
@@ -60,6 +73,8 @@ A historical-only result keeps its normal display title and shows a dated matchi
 
 Use Node 24 or newer from the repository root:
 
+On Windows, use `npm.cmd` / `npx.cmd` in place of `npm` / `npx` if PowerShell's script policy blocks their `.ps1` launchers.
+
 ```powershell
 npm ci
 npx playwright install chromium
@@ -67,5 +82,17 @@ npm test
 ```
 
 `npm test` runs the public Library command/browser-boundary checks and the installed-extension Playwright workflows. `npm run test:browser` and `npm run test:boundary` run those separately. Browser profiles, failure-fixture extension copies, screenshots and reports go under ignored `.scratch/`. For a shared browser cache, set `PLAYWRIGHT_BROWSERS_PATH` before both install and tests. The automated suite uses bundled Chromium with `channel: 'chromium'`; load desktop Chrome manually with the steps above.
+
+To repeat the complete production-extension path in installed Chrome, run:
+
+```powershell
+# Optional when Chrome is installed somewhere else:
+$env:CHROME_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+npm run validate:chrome
+```
+
+The command creates a fresh isolated profile under `.scratch/validation/actual-chrome/`, saves five screenshots and `result.json`, and runs two full browser-process restarts. It never uses your personal Chrome profile. Its default executable is the Windows path above; set `CHROME_PATH` for another installation. Set `EXTENSION_PATH` to a packaged `extension/` folder to validate that artifact instead of repository source. Run from the repository root after `npm ci`.
+
+On the validated Chrome 155 build, automation uses CDP `Extensions.loadUnpacked` with `--enable-unsafe-extension-debugging` and removes Playwright's extension-disabling default. That automation registration must be repeated on each launch; the isolated profile's stored Library survives. This verifies data persistence, not manual Developer-mode registration persistence. Chrome's removed `--load-extension` flags are not required by this script; the primary human installation remains **Load unpacked** on `chrome://extensions`. Screenshots show the real extension UI in headless desktop Chrome; synthetic HTTPS fixture pages establish capture/tab behavior, not provider playback or availability.
 
 Playwright routes synthetic HTTPS fixture pages into real tabs; no test claims provider playback or live-provider availability. Main workflows run the actual production extension, tabs API and Chrome local storage. Deterministic failed writes, missing titles and unknown observation provenance use a test-only extension copy replacing only the existing browser/persistence adapter, retaining all real UI/service code and actual local storage for accepted writes. No production testing hooks are present. The actual toolbar popup is opened with `chrome.action.openPopup()` and inspected through CDP because Playwright does not expose it as a Page. Other repeated fixture captures load the same popup UI in an extension tab. Public-command boundary tests control capture timing, failed persistence and conflicting/pending user state that cannot reliably be induced through normal capture alone.
