@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "validate:chrome": "node scripts/validate-chrome.mjs",
     "test": "npm run test:boundary && npm run test:browser",
     "test:browser": "playwright test",
     "test:boundary": "node --test tests/*.test.js"

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { launch, capture, openActionPopup } from './helpers.js';
+import { launch, capture, openActionPopup, browserTabs, expectNewFocusedTab } from './helpers.js';
 
 test('rediscovery saves immediately and popup review Keep needs another explicit Open', async () => {
   const app = await launch();
@@ -7,10 +7,10 @@ test('rediscovery saves immediately and popup review Keep needs another explicit
     const { source, popup } = await capture(app, 'https://example.org/rediscovery#chapter', 'Rediscovery lecture');
     await expect(popup.getByRole('status')).toContainText('Saved to Inbox');
     const library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
-    const opened = app.context.waitForEvent('page');
+    const beforeOpening = await browserTabs(app);
     await library.getByRole('button', { name: 'Open video', exact: true }).click();
-    const video = await opened; await video.waitForLoadState();
     await expect(library.getByRole('article')).toHaveCount(0);
+    await expectNewFocusedTab(app, beforeOpening, 'https://example.org/rediscovery#chapter');
     await source.bringToFront();
     await popup.getByRole('button', { name: 'Save to Inbox', exact: true }).evaluate(button => button.click());
     await expect(popup.getByRole('status')).toContainText('Saved to Inbox — review pending');
@@ -34,10 +34,10 @@ test('rediscovery saves immediately and popup review Keep needs another explicit
     await library.reload();
     await expect(library.getByRole('button', { name: 'Review prior activity', exact: true })).toHaveCount(0);
     expect(source.isClosed()).toBe(false);
-    const again = app.context.waitForEvent('page');
+    const beforeAgain = await browserTabs(app);
     await library.getByRole('button', { name: 'Open video', exact: true }).click();
-    const second = await again; await second.waitForLoadState();
     await expect(library.getByRole('article')).toHaveCount(0);
+    await expectNewFocusedTab(app, beforeAgain, 'https://example.org/rediscovery#chapter');
     await library.getByRole('button', { name: 'Undo opening', exact: true }).click();
     const restored = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
     expect(restored.records[0].user.pendingReview).toBeNull();
@@ -161,12 +161,10 @@ test('URL variants share uploads while actual Open preserves the first saved con
     expect(result.records[0].url).toBe(firstUrl);
     expect(result.records[0].metadata.observations).toHaveLength(youtube.length);
     const library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
-    const opened = app.context.waitForEvent('page');
+    const beforeOpening = await browserTabs(app);
     await library.getByRole('article').filter({ hasText: 'YouTube observation 0' }).getByRole('button', { name: 'Open video', exact: true }).click();
-    const video = await opened; await video.waitForLoadState();
-    expect(video.url()).toBe(firstUrl);
-    const tabs = await app.worker.evaluate(() => chrome.tabs.query({ active: true, currentWindow: true }));
-    expect(tabs[0].url).toBe(firstUrl);
+    await expect.poll(async () => (await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }))).latestOpening?.record.user.status).toBe('watched');
+    await expectNewFocusedTab(app, beforeOpening, firstUrl);
   } finally { await app.context.close(); }
 });
 
