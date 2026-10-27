@@ -16,6 +16,6 @@ Data stays in this Chrome profile. For updates, replace the files in the **same 
 
 ## More detail
 
-- [First-slice behavior reference](https://github.com/Omriy123/youtube-backlog-tracker/blob/feat/first-end-to-end-slice/docs/first-slice-reference.md): identity, review, titles, and opening recovery.
-- [Development and validation commands](https://github.com/Omriy123/youtube-backlog-tracker/blob/feat/first-end-to-end-slice/docs/development.md): building the supplied folder and running checks. These are for the person preparing the build; they are not needed to install it.
-- [First-slice validation evidence](https://github.com/Omriy123/youtube-backlog-tracker/blob/feat/first-end-to-end-slice/docs/validation/first-slice.md): installed Chrome results, screenshots, and evidence limits.
+- [First-slice behavior reference](first-slice-reference.md): identity, review, titles, and opening recovery.
+- [Development and validation commands](development.md): building the supplied folder and running checks. These are for the person preparing the build; they are not needed to install it.
+- [First-slice validation evidence](validation/first-slice.md): installed Chrome results, screenshots, and evidence limits.

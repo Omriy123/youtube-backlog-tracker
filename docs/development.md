@@ -9,7 +9,7 @@ npm run build
 
 `npm run build` prints a new `.scratch/build/video-backlog-tracker-…/` folder containing `extension/`, `INSTALLATION.md`, and `README.txt`. Copy the whole folder before sharing it. The receiver installs the `extension/` folder and needs no Node installation.
 
-For the user-facing steps, see [Install and try](installation.md). For feature behavior, see the [first-slice reference](first-slice-reference.md).
+For user-facing steps, see the installation guide. For feature behavior, see the [first-slice reference](first-slice-reference.md).
 
 ## Run the automated checks
 

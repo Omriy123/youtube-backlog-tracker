@@ -1,6 +1,6 @@
 # First-slice behavior reference
 
-Detailed behavior for the current Chrome test build. For installation and a short trial, see [Install and try](installation.md).
+Detailed behavior for the current Chrome test build. The installation guide contains a short trial.
 
 ## Bounded identity and opening context
 
