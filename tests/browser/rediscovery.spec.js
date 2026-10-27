@@ -64,7 +64,7 @@ test('pending Library review survives restart and gates Open and Edit without bl
     await expect(library.getByRole('button', { name: 'Review prior activity', exact: true })).toBeVisible();
     await expect(library.getByRole('button', { name: 'Undo opening', exact: true })).toBeDisabled();
     await library.getByRole('searchbox').fill('Pending lecture');
-    await library.getByRole('button', { name: 'Titles', exact: true }).click();
+    await library.getByRole('button', { name: 'Captured titles', exact: true }).click();
     await expect(library.getByRole('dialog', { name: 'Captured titles', exact: true })).toBeVisible();
     await library.getByRole('button', { name: 'Close titles', exact: true }).click();
     expect((await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }))).records[0].user).toEqual(before.records[0].user);

@@ -21,12 +21,12 @@ function inspectTitles(record, selectedIndex = null) {
   const dialog = document.createElement('dialog'); dialog.setAttribute('aria-label', 'Captured titles');
   const heading = document.createElement('h2'); heading.textContent = 'Captured titles';
   const explanation = document.createElement('p'); explanation.className = 'muted';
-  explanation.textContent = 'These are retained observations, not a claim about the page’s title now. Personal titles are authored separately.';
+  explanation.textContent = 'This build captures the current browser-tab title on Save. Original and Latest can be the same observation. Captured title history is separate from Personal title edits and Library History. Latest means the most recent capture, not a fresh YouTube API lookup. Editing a Personal title does not create an Intermediate capture.';
   const controls = document.createElement('div'); controls.className = 'title-tools';
   const panel = document.createElement('div'); panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'Title observations');
   const selections = [];
   function show(view) {
-    for (const item of selections) item.setAttribute('aria-pressed', String(item.textContent === view));
+    for (const item of selections) item.setAttribute('aria-pressed', String(item.dataset.view === view));
     panel.replaceChildren();
     const indices = view === 'Original' ? original < 0 ? [] : [original] : view === 'Latest' ? latest < 0 ? [] : [latest] : observations.map((_, index) => index);
     if (!indices.length) { const empty = document.createElement('p'); empty.textContent = 'No usable title captured.'; panel.append(empty); }
@@ -41,7 +41,7 @@ function inspectTitles(record, selectedIndex = null) {
       version.append(name, title, provenance); panel.append(version);
     }
   }
-  for (const name of ['Original', 'Latest', 'History']) { const item = button(name, () => show(name)); selections.push(item); controls.append(item); }
+  for (const name of ['Original', 'Latest', 'History']) { const item = button(name === 'History' ? 'Captured title history' : name, () => show(name)); item.dataset.view = name; selections.push(item); controls.append(item); }
   const close = button('Close titles', () => dialog.close());
   dialog.append(heading, explanation, controls, panel, close); document.body.append(dialog);
   show(selectedIndex === null ? 'Original' : 'History');
@@ -63,7 +63,7 @@ export function appendTitleTools(content, record, { onChanged, onReviewRequired 
     const link = button(`Matched title from ${observedTime(match.observedAt)}: ${match.excerpt}`, () => inspectTitles(record, match.index));
     link.classList.add('historical-match'); content.append(link);
   }
-  tools.append(button('Titles', () => inspectTitles(record)));
+  tools.append(button('Captured titles', () => inspectTitles(record)));
   if (record.user.status !== 'active' || record.user.destination !== 'Inbox') { content.append(tools); return; }
   const edit = button('Edit Personal title', () => {
     if (record.user.pendingReview) { onReviewRequired(record); return; }
