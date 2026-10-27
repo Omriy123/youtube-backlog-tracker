@@ -1,0 +1,198 @@
+import { test, expect } from '@playwright/test';
+import { launch, capture, browserTabs, expectNewFocusedTab } from './helpers.js';
+
+test('Open creates a focused new tab and persistent Undo restores Inbox without closing tabs', async () => {
+  // Catches fake openings, transient Undo, replaced source tabs and incoherent watched history.
+  let app = await launch();
+  try {
+    const { source, popup } = await capture(app, 'https://example.org/opening#chapter', 'Opening lecture');
+    await expect(popup.getByRole('status')).toContainText('Saved to Inbox');
+    const before = await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    const library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    await library.setViewportSize({ width: 390, height: 780 });
+    const beforeOpening = await browserTabs(app);
+    await library.getByRole('button', { name: 'Open video', exact: true }).focus();
+    await library.getByRole('button', { name: 'Open video', exact: true }).press('Enter');
+    expect(source.isClosed()).toBe(false);
+    await expect(library.getByRole('article')).toHaveCount(0);
+    await expectNewFocusedTab(app, beforeOpening, 'https://example.org/opening#chapter');
+    const current = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    expect(current.latestOpening.record.user.status).toBe('watched');
+    expect(current.latestOpening.record.user.watchEvents).toHaveLength(1);
+    const profile = app.profile; const extensionPath = app.extensionPath;
+    await app.context.close(); app = await launch(profile, { extensionPath });
+    const reopened = await app.context.newPage(); await reopened.goto(`${app.base}/library.html`);
+    await reopened.getByRole('button', { name: 'Undo opening', exact: true }).click();
+    await expect(reopened.getByRole('article')).toContainText('Opening lecture');
+    const restored = await reopened.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    expect(restored.records[0].user).toEqual({ ...before.records[0].user, revision: 3 });
+    await expect(reopened.getByRole('status')).toContainText('Opening undone');
+  } finally { await app.context.close(); }
+});
+
+test('close opening notice survives refresh and restart while a later opening has a fresh notice', async () => {
+  let app = await launch();
+  try {
+    const { source } = await capture(app, 'https://example.org/notice-one', 'First notice');
+    const library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    await library.getByRole('button', { name: 'Open video', exact: true }).click();
+    await expect(library.getByRole('button', { name: 'Close opening notice', exact: true })).toBeVisible();
+    const before = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    const beforeStorage = await library.evaluate(() => chrome.storage.local.get('library'));
+    const tabs = await browserTabs(app);
+    await library.getByRole('button', { name: 'Close opening notice', exact: true }).focus();
+    await library.getByRole('button', { name: 'Close opening notice', exact: true }).press('Enter');
+    await expect(library.getByRole('button', { name: 'Undo opening', exact: true })).toHaveCount(0);
+    await library.reload();
+    await expect(library.getByRole('button', { name: 'Close opening notice', exact: true })).toHaveCount(0);
+    const after = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    expect(after.latestOpening).toBeNull();
+    const stored = await library.evaluate(() => chrome.storage.local.get('library'));
+    expect(stored.library.records).toEqual(beforeStorage.library.records);
+    expect(stored.library.history).toEqual(beforeStorage.library.history);
+    expect(await browserTabs(app)).toHaveLength(tabs.length);
+    expect(source.isClosed()).toBe(false);
+    const profile = app.profile; const extensionPath = app.extensionPath;
+    await app.context.close(); app = await launch(profile, { extensionPath });
+    const reopened = await app.context.newPage(); await reopened.goto(`${app.base}/library.html`);
+    await expect(reopened.getByRole('button', { name: 'Close opening notice', exact: true })).toHaveCount(0);
+    const second = await capture(app, 'https://example.org/notice-two', 'Second notice');
+    await expect(second.popup.getByRole('status')).toContainText('Saved to Inbox');
+    await reopened.reload();
+    await reopened.getByRole('button', { name: 'Open video', exact: true }).click();
+    await expect(reopened.getByRole('button', { name: 'Undo opening', exact: true })).toBeEnabled();
+    expect((await reopened.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }))).latestOpening.attemptId).not.toBe(before.latestOpening.attemptId);
+  } finally { await app.context.close(); }
+});
+
+test('review Dismiss removes obsolete Undo notice but preserves watched history and its tab', async () => {
+  const app = await launch();
+  try {
+    const { source } = await capture(app, 'https://example.org/notice-review', 'Review notice');
+    const library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    await library.getByRole('button', { name: 'Open video', exact: true }).click();
+    const tabs = await browserTabs(app);
+    const before = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    const repeat = await capture(app, 'https://example.org/notice-review', 'Review notice again');
+    await expect(repeat.popup.getByRole('status')).toContainText('review pending');
+    await library.reload();
+    await library.getByRole('button', { name: 'Review prior activity', exact: true }).click();
+    await library.getByRole('dialog', { name: 'Review prior activity' }).getByRole('button', { name: 'Dismiss', exact: true }).click();
+    await expect(library.getByRole('button', { name: 'Undo opening', exact: true })).toHaveCount(0);
+    const after = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    expect(after.latestOpening).toBeNull();
+    const retained = await library.evaluate(() => chrome.storage.local.get('library'));
+    expect(retained.library.records[0].user.watchEvents).toHaveLength(1);
+    expect(retained.library.history.some(item => item.type === 'opening')).toBe(true);
+    expect(retained.library.history.some(item => item.type === 'dismissRediscovery')).toBe(true);
+    expect(await browserTabs(app)).toHaveLength(tabs.length + 2);
+    expect(source.isClosed()).toBe(false);
+    const stale = await library.evaluate(id => chrome.runtime.sendMessage({ type: 'undoOpening', attemptId: id }), before.latestOpening.attemptId);
+    expect(stale.ok).toBe(false);
+  } finally { await app.context.close(); }
+});
+
+test('a known opened tab exposes durable Library repair without creating another tab', async () => {
+  // Catches hidden recovery UI when tracking writes fail after a real tab opens.
+  let app = await launch(undefined, { failWrite: 4 });
+  try {
+    const { popup } = await capture(app, 'https://example.org/repair', 'Repair lecture');
+    await expect(popup.getByRole('status')).toContainText('Saved to Inbox');
+    let library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    await library.getByRole('button', { name: 'Repair lecture', exact: true }).click();
+    await expect(library.getByRole('status')).toHaveText('Tab open — Library update not saved');
+    await expect(library.getByRole('article')).toHaveCount(1);
+    const profile = app.profile; const extensionPath = app.extensionPath;
+    await app.context.close(); app = await launch(profile, { extensionPath });
+    library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    const before = await app.worker.evaluate(() => chrome.tabs.query({}));
+    await library.getByRole('button', { name: 'Repair Library update', exact: true }).click();
+    await expect(library.getByRole('article')).toHaveCount(0);
+    const after = await app.worker.evaluate(() => chrome.tabs.query({}));
+    expect(after).toHaveLength(before.length);
+    const tracked = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    expect(tracked.latestOpening.record.user.watchEvents).toHaveLength(1);
+  } finally { await app.context.close(); }
+});
+
+test('uncertain restart offers tab inspection and an explicit warned new opening', async () => {
+  // Catches automatic replay and URL-based attribution after a receipt itself was lost.
+  let app = await launch(undefined, { failWrite: 3 });
+  try {
+    const { popup } = await capture(app, 'https://example.org/uncertain', 'Uncertain lecture');
+    await expect(popup.getByRole('status')).toContainText('Saved to Inbox');
+    let library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    await library.getByRole('button', { name: 'Open video', exact: true }).click();
+    await expect(library.getByRole('status')).toHaveText('Tab open — Library update not saved');
+    const profile = app.profile; const extensionPath = app.extensionPath;
+    await app.context.close(); app = await launch(profile, { extensionPath });
+    library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    const recovery = library.getByRole('region', { name: 'Opening recovery' });
+    await expect(recovery).toContainText('Opening outcome uncertain');
+    await expect(recovery).toContainText('may create a duplicate tab');
+    const before = await app.worker.evaluate(() => chrome.tabs.query({}));
+    // #43 supplies the review producer; seed that public persistence boundary
+    // here so uncertain-opening fallback must consume the same shared gate.
+    await library.evaluate(async () => {
+      const { library: state } = await chrome.storage.local.get('library');
+      state.records[0].user.pendingReview = { priorStatus: 'watched' }; state.records[0].user.revision++;
+      await chrome.storage.local.set({ library: state });
+    });
+    await library.reload();
+    await library.getByRole('button', { name: 'Open a new tab anyway', exact: true }).click();
+    await expect(library.locator('main > [role=status]')).toContainText('Review prior activity');
+    await library.getByRole('dialog', { name: 'Review prior activity', exact: true }).getByRole('button', { name: 'Cancel', exact: true }).click();
+    expect(await app.worker.evaluate(() => chrome.tabs.query({}))).toHaveLength(before.length);
+    await library.evaluate(async () => {
+      const { library: state } = await chrome.storage.local.get('library');
+      state.records[0].user.pendingReview = null; state.records[0].user.revision++;
+      await chrome.storage.local.set({ library: state });
+    });
+    await library.reload();
+    await library.getByRole('button', { name: 'Inspect existing tabs', exact: true }).click();
+    await expect(recovery.getByRole('list')).toBeVisible();
+    await recovery.getByRole('list').getByRole('button').first().click();
+    await expect(library.getByRole('status')).toContainText('Existing tab focused');
+    const inspected = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    expect(inspected.records[0].user.watchEvents).toHaveLength(0);
+    expect(await app.worker.evaluate(() => chrome.tabs.query({}))).toHaveLength(before.length);
+    await library.getByRole('button', { name: 'Open a new tab anyway', exact: true }).click();
+    await expect(library.getByRole('button', { name: 'Repair Library update', exact: true })).toBeVisible();
+    await library.getByRole('button', { name: 'Repair Library update', exact: true }).click();
+    await expect(library.getByRole('article')).toHaveCount(0);
+    expect(await app.worker.evaluate(() => chrome.tabs.query({}))).toHaveLength(before.length + 1);
+    const after = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    expect(after.latestOpening.record.user.watchEvents).toHaveLength(1);
+  } finally { await app.context.close(); }
+});
+
+test('a Personal title edit on another video keeps safe Undo available outside search results', async () => {
+  // Verifies the combined title/opening integration cannot globally invalidate recovery.
+  const app = await launch();
+  try {
+    const first = await capture(app, 'https://example.org/first-opening', 'First lecture');
+    await expect(first.popup.getByRole('status')).toContainText('Saved to Inbox');
+    const second = await capture(app, 'https://example.org/second-opening', 'Second lecture');
+    await expect(second.popup.getByRole('status')).toContainText('Saved to Inbox');
+    const library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    await library.getByRole('button', { name: 'First lecture', exact: true }).click();
+    await expect(library.getByRole('article')).toHaveCount(1);
+    await library.getByRole('button', { name: 'Edit Personal title', exact: true }).click();
+    const editor = library.getByRole('dialog', { name: 'Edit Personal title', exact: true });
+    await editor.getByRole('textbox', { name: 'Personal title', exact: true }).fill('Keep this newer title');
+    await editor.getByRole('button', { name: 'Save title', exact: true }).click();
+    await expect(editor).not.toBeVisible();
+    await library.getByRole('searchbox').fill('no matching result');
+    await expect(library.getByRole('article')).toHaveCount(0);
+    const tabs = await app.worker.evaluate(() => chrome.tabs.query({}));
+    await library.getByRole('button', { name: 'Undo opening', exact: true }).focus();
+    await library.getByRole('button', { name: 'Undo opening', exact: true }).press('Enter');
+    await expect(library.getByRole('status')).toContainText('Opening undone');
+    expect(await app.worker.evaluate(() => chrome.tabs.query({}))).toHaveLength(tabs.length);
+    await library.getByRole('searchbox').fill('');
+    await expect(library.getByRole('article')).toHaveCount(2);
+    await expect(library.getByRole('heading', { name: 'Keep this newer title', exact: true })).toBeVisible();
+    const restored = await library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+    expect(restored.records[0].user.watchEvents).toHaveLength(0);
+  } finally { await app.context.close(); }
+});

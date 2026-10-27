@@ -1,0 +1,100 @@
+import { expect } from '@playwright/test';
+import { browserTabs, expectNewFocusedTab } from '../browser/helpers.js';
+
+// Shared installed-extension walkthrough: bundled Chromium and machine Chrome
+// exercise the same public UI, real tabs and durable Library behavior.
+export async function completeWorkflow({ launch, save, screenshot = async () => {} }) {
+  let app = await launch();
+  const fixture = () => app.context.route('https://example.org/complete-workflow**', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>Controlled video fixture</title><p>Controlled page, not provider playback.</p>' }));
+  await fixture();
+  let library;
+  const list = () => library.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
+  const url = 'https://example.org/complete-workflow';
+  try {
+    const first = await save(app, url, 'Original alpha lecture');
+    await save(app, url, 'Intermediate beta lecture');
+    library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    await library.getByRole('button', { name: 'Edit Personal title', exact: true }).click();
+    const editor = library.getByRole('dialog', { name: 'Edit Personal title', exact: true });
+    await editor.getByLabel('Personal title', { exact: true }).fill('My deliberate lecture');
+    await editor.getByRole('button', { name: 'Save title', exact: true }).click();
+    await expect(editor).toHaveCount(0);
+    const original = (await list()).records[0];
+    await screenshot(library, '01-populated-library');
+    const tabsBeforeOpen = await browserTabs(app);
+    await library.getByRole('button', { name: 'Open video', exact: true }).click();
+    expect(first.source.isClosed()).toBe(false);
+    await expect(library.getByRole('article')).toHaveCount(0);
+    await expectNewFocusedTab(app, tabsBeforeOpen, url);
+    const firstWatch = (await list()).latestOpening.record.user.watchEvents[0];
+    await save(app, url, 'Latest gamma lecture');
+    await expect(library.getByRole('button', { name: 'Review prior activity', exact: true })).toBeVisible();
+    const pending = (await list()).records[0];
+    expect(pending.id).toBe(original.id);
+    expect(pending.user.firstSavedAt).toBe(original.user.firstSavedAt);
+    expect(pending.user.watchEvents).toEqual([firstWatch]);
+    expect(pending.metadata.observations.map(item => item.title)).toEqual(['Original alpha lecture', 'Intermediate beta lecture', 'Latest gamma lecture']);
+    await library.getByRole('button', { name: 'Review prior activity', exact: true }).click();
+    let review = library.getByRole('dialog', { name: 'Review prior activity', exact: true });
+    await expect(review).toContainText('Previous status: Watched');
+    await expect(review).toContainText('Previous destination: Inbox');
+    await expect(review).toContainText('Retained watch events: 1');
+    await screenshot(library, '02-pending-prior-activity');
+    await review.press('Escape');
+    await library.getByRole('searchbox').fill('Intermediate beta');
+    await expect(library.getByRole('article')).toHaveCount(1);
+    await library.getByRole('button', { name: /Matched title from/ }).click();
+    const titles = library.getByRole('dialog', { name: 'Captured titles', exact: true });
+    await expect(titles.getByRole('region', { name: 'Matched title version', exact: true })).toContainText('Intermediate beta lecture');
+    await expect(titles).toContainText('Captured from browser');
+    await screenshot(library, '03-retained-title-match');
+    await titles.press('Escape');
+    expect((await list()).records[0].user).toEqual(pending.user);
+    // Pending review itself must survive process restart with every title/watch.
+    const profile = app.profile; const extensionPath = app.extensionPath;
+    await app.context.close(); app = await launch(profile, { extensionPath });
+    await fixture();
+    library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    await expect(library.getByRole('searchbox')).toHaveValue('');
+    expect((await list()).records[0]).toMatchObject({ id: pending.id, user: pending.user, metadata: pending.metadata });
+    const tabsBeforeKeep = await app.worker.evaluate(() => chrome.tabs.query({}));
+    await library.getByRole('button', { name: 'Open video', exact: true }).click();
+    review = library.getByRole('dialog', { name: 'Review prior activity', exact: true });
+    const keep = review.getByRole('button', { name: 'Keep in Inbox', exact: true });
+    await keep.focus(); await keep.press('Enter');
+    await expect(review).toHaveCount(0);
+    expect(await app.worker.evaluate(() => chrome.tabs.query({}))).toHaveLength(tabsBeforeKeep.length);
+    const kept = (await list()).records[0];
+    expect(kept.user.pendingReview).toBeNull();
+    expect(kept.user.latestListEntryAt).toBe(pending.user.latestListEntryAt);
+    const open = library.getByRole('button', { name: 'Open video', exact: true });
+    await open.focus(); await open.press('Enter');
+    await expect(library.getByRole('article')).toHaveCount(0);
+    await expectNewFocusedTab(app, tabsBeforeKeep, url);
+    expect((await list()).latestOpening.record.user.watchEvents).toHaveLength(2);
+    await screenshot(library, '04-opening-recovery');
+    await app.context.close(); app = await launch(profile, { extensionPath });
+    await fixture();
+    library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
+    const tabsBeforeUndo = await app.worker.evaluate(() => chrome.tabs.query({}));
+    const undo = library.getByRole('button', { name: 'Undo opening', exact: true });
+    await undo.focus(); await undo.press('Enter');
+    await expect(library.getByRole('article')).toContainText('My deliberate lecture');
+    expect((await app.worker.evaluate(() => chrome.tabs.query({}))).map(tab => tab.id)).toEqual(tabsBeforeUndo.map(tab => tab.id));
+    const restored = (await list()).records[0];
+    expect(restored.user).toEqual({ ...kept.user, revision: kept.user.revision + 2 });
+    expect(restored.user.watchEvents).toEqual([firstWatch]);
+    expect(restored.metadata).toEqual(pending.metadata);
+    // A small viewport still exposes every action and supports keyboard editing.
+    await library.setViewportSize({ width: 390, height: 780 });
+    expect(await library.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const edit = library.getByRole('button', { name: 'Edit Personal title', exact: true });
+    await edit.focus(); await edit.press('Enter');
+    const compactEditor = library.getByRole('dialog', { name: 'Edit Personal title', exact: true });
+    await expect(compactEditor.getByLabel('Personal title', { exact: true })).toBeFocused();
+    await compactEditor.getByRole('button', { name: 'Clear Personal title', exact: true }).click();
+    await expect(library.getByRole('button', { name: 'Original alpha lecture', exact: true })).toBeVisible();
+    await screenshot(library, '05-compact-restored-library');
+    return { recordId: restored.id, retainedTitles: 3, retainedEarlierWatches: 1, openings: 2, restarts: 2, viewport: '390x780' };
+  } finally { await app.context.close(); }
+}
