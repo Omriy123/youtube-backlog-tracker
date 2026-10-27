@@ -36,7 +36,7 @@ export async function persistReviewChange(state, browser, changeId, recordId) {
 
 export async function review(state, browser, command) {
   const record = state.records.find(item => item.id === command.recordId);
-  if (!record || record.user.revision !== command.expectedRevision || record.user.status !== 'active' || record.user.destination !== 'Inbox' || !record.user.pendingReview) {
+  if (!record || record.user.revision !== command.expectedRevision || record.user.status !== 'active' || !record.user.pendingReview) {
     return { ok: false, outcome: 'conflict', error: 'This review changed. Close this dialog and refresh the Library before deciding.' };
   }
   if (!['keep', 'dismiss'].includes(command.decision)) return { ok: false, error: 'Choose a review decision.' };

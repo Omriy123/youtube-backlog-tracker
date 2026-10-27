@@ -70,7 +70,7 @@ export function appendTitleTools(content, record, { onChanged, onReviewRequired 
     link.classList.add('historical-match'); content.append(link);
   }
   tools.append(button('Captured titles', () => inspectTitles(record)));
-  if (record.user.status !== 'active' || record.user.destination !== 'Inbox') { content.append(tools); return; }
+  if (record.user.status !== 'active') { content.append(tools); return; }
   const edit = button('Edit Personal title', () => {
     if (record.user.pendingReview) { onReviewRequired(record); return; }
     const dialog = document.createElement('dialog'); dialog.setAttribute('aria-label', 'Edit Personal title');
