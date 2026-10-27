@@ -13,6 +13,11 @@ export function createBrowserAdapter(api = chrome) {
     async write(state) { await api.storage.local.set({ [STORAGE_KEY]: state }); },
     async readDateFormat() { return (await api.storage.local.get(DATE_FORMAT_KEY))[DATE_FORMAT_KEY] ?? 'browser'; },
     async writeDateFormat(value) { await api.storage.local.set({ [DATE_FORMAT_KEY]: value }); },
+    watchDateFormatChanges(listener) {
+      const changed = (changes, area) => { if (area === 'local' && changes[DATE_FORMAT_KEY]) listener(changes[DATE_FORMAT_KEY].newValue); };
+      api.storage.onChanged.addListener(changed);
+      return () => api.storage.onChanged.removeListener(changed);
+    },
     watchLibraryChanges(listener) {
       const changed = (changes, area) => { if (area === 'local' && changes[STORAGE_KEY]) listener(); };
       api.storage.onChanged.addListener(changed);

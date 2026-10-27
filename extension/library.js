@@ -48,6 +48,11 @@ function onReviewRequired(record) {
 }
 search.addEventListener('input', render);
 browser.watchLibraryChanges(render);
+browser.watchDateFormatChanges(value => {
+  dateFormat.value = value === 'israeli' ? 'israeli' : 'browser';
+  setDateFormat(dateFormat.value);
+  render();
+});
 dateFormat.addEventListener('change', async () => {
   const selected = dateFormat.value;
   dateFormat.disabled = true;

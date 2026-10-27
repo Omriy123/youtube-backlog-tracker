@@ -1,6 +1,6 @@
 import { command } from './shared.js';
 import { titleVersions } from './title-service.js';
-import { formatDateTime } from './date-display.js';
+import { formatDateTime, onDateFormatChanged } from './date-display.js';
 
 function button(label, action) {
   const element = document.createElement('button'); element.type = 'button'; element.className = 'secondary'; element.textContent = label;
@@ -28,7 +28,9 @@ function inspectTitles(record, selectedIndex = null) {
   const controls = document.createElement('div'); controls.className = 'title-tools';
   const panel = document.createElement('div'); panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'Title observations');
   const selections = [];
+  let currentView;
   function show(view) {
+    currentView = view;
     for (const item of selections) item.setAttribute('aria-pressed', String(item.dataset.view === view));
     panel.replaceChildren();
     const indices = view === 'Original' ? original < 0 ? [] : [original] : view === 'Latest' ? latest < 0 ? [] : [latest] : observations.map((_, index) => index);
@@ -48,7 +50,8 @@ function inspectTitles(record, selectedIndex = null) {
   const close = button('Close titles', () => dialog.close());
   dialog.append(heading, explanation, controls, panel, close); document.body.append(dialog);
   show(selectedIndex === null ? 'Original' : 'History');
-  dialog.addEventListener('close', () => dialog.remove(), { once: true });
+  const unsubscribe = onDateFormatChanged(() => show(currentView));
+  dialog.addEventListener('close', () => { unsubscribe(); dialog.remove(); }, { once: true });
   dialog.showModal();
   if (selectedIndex !== null) { const selected = panel.querySelector('.matched-version'); selected?.focus(); selected?.scrollIntoView({ block: 'nearest' }); }
 }

@@ -1,7 +1,14 @@
 let selectedFormat = 'browser';
+const listeners = new Set();
 
 export function setDateFormat(value) {
   selectedFormat = value === 'israeli' ? 'israeli' : 'browser';
+  for (const listener of listeners) listener();
+}
+
+export function onDateFormatChanged(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
 }
 
 export function formatDateTime(value, format = selectedFormat, locale = globalThis.navigator?.language, timeZone) {
