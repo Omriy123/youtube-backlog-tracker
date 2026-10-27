@@ -1,3 +1,5 @@
+import { renderOrganizationControls, showMove, organizationButton } from './organization-ui.js';
+import { fitArrivals } from './organization-service.js';
 import { command, displayTitle } from './shared.js';
 import { appendOpenActions, renderOpeningRecovery } from './opening-ui.js';
 import { appendTitleTools } from './title-ui.js';
@@ -10,6 +12,8 @@ const scopeInputs = [...document.querySelectorAll('.search-scopes input')];
 const dateFormat = document.querySelector('#date-format');
 const browser = createBrowserAdapter();
 let request = 0;
+let view = 'Inbox';
+function organizationChanged(message, target) { document.querySelector('main > [role=status]').textContent=message; if(typeof target==='string') view=target; render(); }
 async function render() {
   const current = ++request;
   const scopes = Object.fromEntries(scopeInputs.map(input => [input.name, input.checked]));
@@ -17,6 +21,16 @@ async function render() {
   const result = await command({ type: 'list', query: search.value, scopes });
   if (current !== request) return;
   if (!result.ok) { document.querySelector('[role=status]').textContent = result.error; return; }
+  if(view!=='Entire Library' && !result.lists.some(list=>list.id===view)) view='Entire Library';
+  renderOrganizationControls(result,{view,onNavigate(id){view=id;render();},onChanged:organizationChanged});
+  document.querySelector('h1').textContent=result.lists.find(list=>list.id===view)?.name ?? view;
+  result.records=result.records.filter(record=>view==='Entire Library' || record.user.destination===view);
+  const list=result.lists.find(list=>list.id===view);
+  if(list) {
+    const saved=(list.manualOrder ?? []).map(id=>result.records.find(record=>record.id===id)).filter(Boolean);
+    const remaining=result.records.filter(record=>!saved.includes(record));
+    result.records=fitArrivals(saved,remaining,list.publicationDirection);
+  }
   renderOpeningRecovery(result, { onChanged: render, onReviewRequired });
   document.querySelector('#count').textContent = `${result.records.length} saved ${result.records.length === 1 ? 'video' : 'videos'}`;
   container.replaceChildren();
@@ -35,6 +49,7 @@ async function render() {
       onChanged(message) { document.querySelector('main > [role=status]').textContent = message; render(); },
       onReviewRequired,
     });
+    content.append(organizationButton('Move video',()=>showMove([record],result.lists,{onChanged:organizationChanged})));
     row.append(thumbnail, content); container.append(row);
   }
 }

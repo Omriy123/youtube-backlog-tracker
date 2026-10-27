@@ -1,3 +1,4 @@
+import { executeOrganization, organizationSummary } from './organization-service.js';
 import { identify } from './identity.js';
 import { createOpeningCommands } from './opening-service.js';
 import { editTitle, matchRecordTitles } from './title-service.js';
@@ -7,6 +8,8 @@ export function createLibrary(browser) {
   let queue = Promise.resolve();
   async function execute(command, captured) {
     const state = await browser.read() ?? { version: 1, records: [], history: [] };
+    const organization = await executeOrganization(state, browser, command);
+    if (organization) return organization;
     if (command.type === 'editTitle') return editTitle(state, browser, command);
     if (command.type === 'review') return review(state, browser, command);
     if (command.type === 'list') {
@@ -14,7 +17,7 @@ export function createLibrary(browser) {
         const match = matchRecordTitles(record, command.query, command.scopes);
         return match.matched ? [{ ...record, historicalMatch: match.historicalMatch }] : [];
       });
-      return { ok: true, ...openings.summaries(state), records };
+      return { ok: true, ...openings.summaries(state), ...organizationSummary(state), records };
     }
     if (command.type === 'save') {
       const observationResult = await captured;

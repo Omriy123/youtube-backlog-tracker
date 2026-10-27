@@ -57,3 +57,11 @@ dialog::backdrop { background: #17291f66; }
 .recovery + .recovery { border-top: 1px solid #d7dfd7; margin-top: 18px; padding-top: 12px; }
 @media (max-width: 700px) { aside { width: 145px; padding: 20px 10px; } .brand { font-size: 15px; } main { padding: 28px 20px; } .thumbnail { display: none; } }
 @media (max-width: 440px) { .library { display: block; } aside { width: 100%; padding: 15px; } .brand { margin-bottom: 10px; } nav { display: flex; } nav button { margin: 0; } }
+#organization-recovery { margin: 20px 0; }
+#organization-recovery:empty { display: none; }
+#organization-recovery select { max-width: 100%; margin: 8px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #dfe5df; overflow-wrap: anywhere; }
+td select { width: 100%; min-width: 100px; }
+#list-management { flex-direction: column; }
+@media (max-width: 440px) { nav { flex-wrap: wrap; } nav button { width: auto; } #list-management { flex-direction: row; } }

@@ -29,8 +29,8 @@ export function matchRecordTitles(record, query, scopes) {
 
 export async function editTitle(state, browser, message) {
   const record = state.records.find(item => item.id === message.recordId);
-  if (!record || record.user.status !== 'active' || record.user.destination !== 'Inbox') {
-    return { ok: false, outcome: 'notEditable', error: 'Personal titles can be edited for active Inbox videos only.' };
+  if (!record || record.user.status !== 'active') {
+    return { ok: false, outcome: 'notEditable', error: 'Personal titles can be edited for active videos only.' };
   }
   if (record.user.pendingReview) return { ok: true, outcome: 'reviewRequired', recordId: record.id, record };
   if (message.expectedRevision !== record.user.revision) {

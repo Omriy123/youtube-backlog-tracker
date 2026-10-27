@@ -52,7 +52,7 @@ test('stale editors cannot overwrite later authorship, while observations do not
   assert.deepEqual(await browser.read(), beforeNoop);
 });
 
-test('pending review and inactive or non-Inbox records cannot silently commit a prepared title', async () => {
+test('pending review and inactive records cannot commit titles while Backlog supports edits', async () => {
   const browser = boundary(); const library = createLibrary(browser);
   const { record } = await library.command({ type: 'save' });
   const pending = await browser.read(); pending.records[0].user.pendingReview = { previousStatus: 'watched' }; await browser.write(pending);
@@ -60,7 +60,7 @@ test('pending review and inactive or non-Inbox records cannot silently commit a 
   assert.equal(gate.outcome, 'reviewRequired'); assert.equal(gate.recordId, record.id);
   assert.equal(gate.record.user.personalTitle, null); assert.deepEqual(await browser.read(), pending);
   const nonInbox = structuredClone(pending); nonInbox.records[0].user.pendingReview = null; nonInbox.records[0].user.destination = 'Backlog'; await browser.write(nonInbox);
-  assert.equal((await edit(library, record, 'Forbidden')).outcome, 'notEditable');
+  assert.equal((await edit(library, record, 'Backlog title')).outcome, 'titleSaved');
   const inactive = structuredClone(nonInbox); inactive.records[0].user.destination = null; inactive.records[0].user.status = 'watched'; await browser.write(inactive);
   assert.equal((await edit(library, record, 'Forbidden')).outcome, 'notEditable');
   assert.deepEqual(await browser.read(), inactive);
