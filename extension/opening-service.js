@@ -16,8 +16,9 @@ export function createOpeningCommands(browser) {
   }
   function summaries(state) {
     const candidate = latestCreated(state);
-    const latest = candidate?.phase === 'completed' ? candidate : null;
+    const latest = candidate?.phase === 'completed' && !candidate.noticeDismissed ? candidate : null;
     const latestRecord = latest && state.records.find(record => record.id === latest.recordId);
+    const safeUndo = latestRecord?.user.revision === latest?.completedRevision;
     return {
       recoveries: (state.openings ?? []).filter(item => ['prepared', 'created'].includes(item.phase)).map(item => {
         const known = item.phase === 'created' || liveEvidence.has(item.id);
@@ -26,7 +27,7 @@ export function createOpeningCommands(browser) {
         const safe = record?.user.revision === item.before.revision;
         return { attemptId: item.id, record, outcome: failed ? 'failed' : known ? 'known' : 'uncertain', canRepair: failed || known && safe, reason: safe || failed ? null : conflictReason, message: failed ? 'Opening failed — no tab created. The failed attempt outcome is not saved.' : known ? trackingFailure.error : 'Opening outcome uncertain. A tab may already have opened.' };
       }),
-      latestOpening: latest ? { attemptId: latest.id, record: latestRecord, canUndo: latestRecord?.user.revision === latest.completedRevision, reason: latestRecord?.user.revision === latest.completedRevision ? null : conflictReason } : null,
+      latestOpening: latest && safeUndo ? { attemptId: latest.id, record: latestRecord, canUndo: true } : null,
     };
   }
   async function complete(state, opening) {
@@ -129,6 +130,15 @@ export function createOpeningCommands(browser) {
       state.history.push({ id: browser.id(), type: 'undoOpening', recordId: record.id, openingId: opening.id, at: browser.now() });
       await browser.write(state);
       return { ok: true, outcome: 'undone', record };
+    }
+    if (command.type === 'dismissOpeningNotice') {
+      const opening = latestCreated(state);
+      if (!opening || opening.phase !== 'completed' || opening.id !== command.attemptId || opening.noticeDismissed) return { ok: false, error: 'This opening notice is no longer available.' };
+      const record = state.records.find(item => item.id === opening.recordId);
+      if (!record || record.user.revision !== opening.completedRevision) return { ok: false, outcome: 'conflict', error: conflictReason };
+      opening.noticeDismissed = true;
+      await browser.write(state);
+      return { ok: true, outcome: 'noticeDismissed' };
     }
     return null;
   }

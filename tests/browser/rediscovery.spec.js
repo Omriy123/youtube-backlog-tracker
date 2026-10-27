@@ -62,7 +62,7 @@ test('pending Library review survives restart and gates Open and Edit without bl
     await app.context.close(); app = await launch(profile, { extensionPath });
     library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
     await expect(library.getByRole('button', { name: 'Review prior activity', exact: true })).toBeVisible();
-    await expect(library.getByRole('button', { name: 'Undo opening', exact: true })).toBeDisabled();
+    await expect(library.getByRole('button', { name: 'Undo opening', exact: true })).toHaveCount(0);
     await library.getByRole('searchbox').fill('Pending lecture');
     await library.getByRole('button', { name: 'Captured titles', exact: true }).click();
     await expect(library.getByRole('dialog', { name: 'Captured titles', exact: true })).toBeVisible();

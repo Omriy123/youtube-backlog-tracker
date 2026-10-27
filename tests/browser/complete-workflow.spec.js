@@ -23,6 +23,7 @@ test('a prepared editor cannot bypass a later rediscovery or overwrite its revie
     await editor.getByLabel('Personal title', { exact: true }).fill('Prepared before rediscovery');
     await other.getByRole('button', { name: 'Open video', exact: true }).click();
     await expect(other.getByRole('article')).toHaveCount(0);
+    const openingId = (await other.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }))).latestOpening.attemptId;
     const repeated = await capture(app, 'https://example.org/interleaved-editor', 'Later automatic lecture');
     await expect(repeated.popup.getByRole('status')).toContainText('review pending');
     await editor.getByRole('button', { name: 'Save title', exact: true }).click();
@@ -34,12 +35,12 @@ test('a prepared editor cannot bypass a later rediscovery or overwrite its revie
     let state = await other.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
     expect(state.records[0].user.personalTitle).toBeNull();
     expect(state.records[0].user.watchEvents).toHaveLength(1);
-    await expect(first.getByRole('button', { name: 'Undo opening', exact: true })).toBeDisabled();
+    await expect(first.getByRole('button', { name: 'Undo opening', exact: true })).toHaveCount(0);
     await first.getByRole('button', { name: 'Edit Personal title', exact: true }).click();
     await first.getByLabel('Personal title', { exact: true }).fill('Later deliberate decision');
     await first.getByRole('button', { name: 'Save title', exact: true }).click();
     state = await other.evaluate(() => chrome.runtime.sendMessage({ type: 'list' }));
-    const unsafe = await other.evaluate(attemptId => chrome.runtime.sendMessage({ type: 'undoOpening', attemptId }), state.latestOpening.attemptId);
+    const unsafe = await other.evaluate(attemptId => chrome.runtime.sendMessage({ type: 'undoOpening', attemptId }), openingId);
     expect(unsafe.ok).toBe(false);
     expect(unsafe.error).toMatch(/later user decision/);
     await expect(other.getByRole('article')).toContainText('Later deliberate decision');

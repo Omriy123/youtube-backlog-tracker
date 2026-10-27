@@ -155,9 +155,40 @@ test('later relevant user decisions block unsafe Undo and tracking repair', asyn
     assert.equal(result.ok, false); assert.match(result.error, /later|changed/i);
     const visible = await library.command({ type: 'list' });
     if (incomplete) { assert.equal(visible.recoveries[0].canRepair, false); assert.equal(visible.records[0].user.personalTitle, 'Later decision'); }
-    else { assert.equal(visible.latestOpening.canUndo, false); assert.equal(visible.latestOpening.record.user.personalTitle, 'Later decision'); }
+    else { assert.equal(visible.latestOpening, null); assert.equal((await browser.read()).records[0].user.personalTitle, 'Later decision'); }
     assert.equal(browser.tabs.length, 1);
   }
+});
+
+test('closing a completed opening notice persists without changing opening facts and a later opening has its own notice', async () => {
+  const { browser, library, open } = await saved();
+  await library.command(open);
+  const before = await browser.read();
+  const closed = await library.command({ type: 'dismissOpeningNotice', attemptId: open.attemptId });
+  assert.equal(closed.ok, true);
+  assert.equal((await library.command({ type: 'list' })).latestOpening, null);
+  const durable = await browser.read();
+  assert.deepEqual(durable.records, before.records);
+  assert.deepEqual(durable.history, before.history);
+  assert.equal(browser.tabs.length, 1);
+  assert.equal((await createLibrary(browser).command({ type: 'list' })).latestOpening, null);
+  browser.setActive({ url: 'https://example.org/second', title: 'Second lecture' });
+  const second = await library.command({ type: 'save' });
+  await library.command({ type: 'open', recordId: second.record.id, expectedRevision: 1, attemptId: 'opening-two' });
+  const latest = await createLibrary(browser).command({ type: 'list' });
+  assert.equal(latest.latestOpening.attemptId, 'opening-two');
+  assert.equal(latest.latestOpening.canUndo, true);
+});
+
+test('closing cannot hide unresolved opening recovery', async () => {
+  const { browser, library, open } = await saved();
+  browser.failNextWrite(3);
+  await library.command(open);
+  assert.equal((await library.command({ type: 'dismissOpeningNotice', attemptId: open.attemptId })).ok, false);
+  const current = await library.command({ type: 'list' });
+  assert.equal(current.recoveries.length, 1);
+  assert.equal(current.latestOpening, null);
+  assert.equal(browser.tabs.length, 1);
 });
 
 test('Undo applies only to the most recent opening rather than exposing an older Undo stack', async () => {

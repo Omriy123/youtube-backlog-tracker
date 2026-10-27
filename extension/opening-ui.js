@@ -60,13 +60,17 @@ export function renderOpeningRecovery(result, { onChanged, onReviewRequired }) {
   if (result.latestOpening) {
     const label = document.createElement('p'); label.textContent = `Opened: ${displayTitle(result.latestOpening.record)} · Playback not verified`;
     const undo = document.createElement('button'); undo.textContent = 'Undo opening';
-    undo.disabled = !result.latestOpening.canUndo;
     undo.addEventListener('click', async () => {
       const response = await command({ type: 'undoOpening', attemptId: result.latestOpening.attemptId });
       document.querySelector('[role=status]').textContent = response.ok ? 'Opening undone · Browser tabs left open' : response.error;
       await onChanged();
     });
-    container.append(label, undo);
-    if (result.latestOpening.reason) { const reason = document.createElement('p'); reason.textContent = result.latestOpening.reason; container.append(reason); }
+    const close = document.createElement('button'); close.type = 'button'; close.className = 'close-opening-notice'; close.textContent = '×'; close.setAttribute('aria-label', 'Close opening notice');
+    close.addEventListener('click', async () => {
+      const response = await command({ type: 'dismissOpeningNotice', attemptId: result.latestOpening.attemptId });
+      document.querySelector('[role=status]').textContent = response.ok ? 'Opening notice closed' : response.error;
+      await onChanged();
+    });
+    container.append(label, undo, close);
   }
 }
