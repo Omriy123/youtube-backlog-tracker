@@ -8,6 +8,7 @@ button { font: inherit; cursor: pointer; border: 1px solid transparent; border-r
 button:hover { filter: brightness(.94); }
 button:disabled { opacity: .6; cursor: wait; }
 button:focus-visible, input:focus-visible { outline: 3px solid #b68b2b; outline-offset: 3px; }
+select:focus-visible { outline: 3px solid #b68b2b; outline-offset: 3px; }
 .popup { padding: 22px; width: 320px; }
 .popup h1 { font-size: 23px; }
 .popup button { display: block; width: 100%; margin: 10px 0; }
@@ -21,6 +22,8 @@ nav [aria-current] { background: #dce8de; color: #234b3c; font-weight: 650; }
 main { max-width: 1250px; width: 100%; padding: 45px 48px; }
 .eyebrow { font-size: 11px; color: #63766c; letter-spacing: 1.8px; margin: 0; }
 #count, .muted { color: #718078; font-size: 12px; }
+.date-preference { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; color: #586b60; font-size: 12px; }
+.date-preference select { max-width: 230px; padding: 6px 8px; border: 1px solid #d7dfd7; border-radius: 7px; background: white; color: #243336; font: inherit; }
 .search { display: block; margin-top: 30px; color: #586b60; font-size: 12px; }
 .search-scopes { display: flex; flex-wrap: wrap; gap: 10px 20px; border: 0; padding: 0; margin: 16px 0 0; }
 .search-scopes legend { color: #586b60; font-size: 12px; margin-bottom: 8px; }

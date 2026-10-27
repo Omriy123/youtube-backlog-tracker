@@ -3,9 +3,12 @@ import { appendOpenActions, renderOpeningRecovery } from './opening-ui.js';
 import { appendTitleTools } from './title-ui.js';
 import { appendReviewBadge, showReview } from './review-ui.js';
 import { createBrowserAdapter } from './browser.js';
+import { setDateFormat } from './date-display.js';
 const container = document.querySelector('#records');
 const search = document.querySelector('input[type=search]');
 const scopeInputs = [...document.querySelectorAll('.search-scopes input')];
+const dateFormat = document.querySelector('#date-format');
+const browser = createBrowserAdapter();
 let request = 0;
 async function render() {
   const current = ++request;
@@ -44,11 +47,27 @@ function onReviewRequired(record) {
   showReview(record, { onChanged: reviewChanged });
 }
 search.addEventListener('input', render);
-createBrowserAdapter().watchLibraryChanges(render);
+browser.watchLibraryChanges(render);
+dateFormat.addEventListener('change', async () => {
+  const selected = dateFormat.value;
+  dateFormat.disabled = true;
+  try {
+    await browser.writeDateFormat(selected);
+    setDateFormat(selected);
+    await render();
+  } catch {
+    dateFormat.value = await browser.readDateFormat().catch(() => 'browser');
+    document.querySelector('main > [role=status]').textContent = 'Date and time preference was not saved.';
+  } finally { dateFormat.disabled = false; }
+});
 for (const input of scopeInputs) input.addEventListener('change', render);
 for (const button of document.querySelectorAll('[data-view]')) button.addEventListener('click', () => {
   document.querySelector('h1').textContent = button.dataset.view;
   for (const item of document.querySelectorAll('[data-view]')) item.removeAttribute('aria-current');
   button.setAttribute('aria-current', 'page'); render();
 });
-render();
+browser.readDateFormat().then(value => {
+  dateFormat.value = value === 'israeli' ? 'israeli' : 'browser';
+  setDateFormat(dateFormat.value);
+  render();
+}).catch(() => render());

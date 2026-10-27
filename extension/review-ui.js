@@ -1,11 +1,12 @@
 import { command } from './shared.js';
+import { formatDateTime } from './date-display.js';
 
 function button(label, action) {
   const item = document.createElement('button'); item.type = 'button'; item.className = 'secondary'; item.textContent = label;
   item.addEventListener('click', action); return item;
 }
 function time(value) {
-  return value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleString() : 'Unknown';
+  return formatDateTime(value);
 }
 
 export function showReview(record, { onChanged }) {

@@ -1,5 +1,6 @@
 import { command } from './shared.js';
 import { titleVersions } from './title-service.js';
+import { formatDateTime } from './date-display.js';
 
 function button(label, action) {
   const element = document.createElement('button'); element.type = 'button'; element.className = 'secondary'; element.textContent = label;
@@ -7,13 +8,15 @@ function button(label, action) {
 }
 
 function observedTime(value) {
-  return value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleString() : 'Observation time unknown';
+  const formatted = formatDateTime(value);
+  return formatted === 'Unknown' ? 'Observation time unknown' : formatted;
 }
 function sourceLabel(value) {
   return value === 'browser-tab' ? 'Captured from browser' : value ? `Source: ${value}` : 'Source unknown';
 }
 function describeObservation(observation) {
-  return `${sourceLabel(observation?.source)} · ${observation?.observedAt && !Number.isNaN(Date.parse(observation.observedAt)) ? 'Observed ' : ''}${observedTime(observation?.observedAt)}`;
+  const observed = observedTime(observation?.observedAt);
+  return `${sourceLabel(observation?.source)} · ${observed === 'Observation time unknown' ? '' : 'Observed '}${observed}`;
 }
 
 function inspectTitles(record, selectedIndex = null) {
