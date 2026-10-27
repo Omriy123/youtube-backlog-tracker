@@ -12,7 +12,15 @@ Use the **unpacked trial folder** you received. It contains `extension/`, `INSTA
 2. Select **Open Library**. Find the saved video in Inbox, or search for its title or URL.
 3. Select its title or **Open video**. Chrome opens a new tab and the video is marked watched and removed from Inbox. Return to the Library and select **Undo opening** to restore its earlier Inbox placement. Undo leaves the opened tab in place.
 
-Data stays in this Chrome profile. For updates, replace the files in the **same unpacked installation folder** and select **Reload** on `chrome://extensions`. Removing the extension or clearing its storage loses this trial data; this build has no backup or export. Opening a tab does **not** verify playback.
+Data stays in this Chrome profile. Removing the extension or clearing its storage loses this trial data; this build has no backup or export. Opening a tab does **not** verify playback.
+
+## Update an existing installation
+
+1. Unpack the new trial build if it arrived as a ZIP. Open its `extension/` folder and copy everything inside it.
+2. Paste those files into the **same `extension/` folder you originally loaded in Chrome**, replacing files when prompted. Keep that folder in the same location.
+3. Open `chrome://extensions`, find **Video Backlog Tracker**, and click its **Reload** button.
+
+There is no need to select **Load unpacked** again. Keep the existing extension installed to retain its local trial data. If your extension already runs directly from a folder whose files have been updated, just click **Reload**.
 
 ## More detail
 
