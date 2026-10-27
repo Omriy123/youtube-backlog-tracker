@@ -23,10 +23,24 @@ export async function launch(profile, { failWrite = 0, missingTitle = false, ext
       }
     `);
   }
-  const context = await chromium.launchPersistentContext(profile, {
+  // The same public workflows can validate installed desktop Chrome. Recent
+  // Chrome versions register unpacked automation extensions through CDP.
+  const desktopChrome = process.env.CHROME_PATH;
+  const context = await chromium.launchPersistentContext(profile, desktopChrome ? {
+    executablePath: desktopChrome, headless: true,
+    ignoreDefaultArgs: ['--disable-extensions'],
+    args: ['--enable-unsafe-extension-debugging'],
+  } : {
     channel: 'chromium', headless: true,
     args: [`--disable-extensions-except=${installedExtension}`, `--load-extension=${installedExtension}`],
   });
+  if (desktopChrome) {
+    try {
+      const cdp = await context.browser().newBrowserCDPSession();
+      await cdp.send('Extensions.loadUnpacked', { path: installedExtension });
+      await cdp.detach();
+    } catch (error) { await context.close(); throw error; }
+  }
   const worker = context.serviceWorkers()[0] ?? await context.waitForEvent('serviceworker', { timeout: 5000 });
   const base = `chrome-extension://${new URL(worker.url()).host}`;
   return { context, base, profile, worker, extensionPath: installedExtension };
