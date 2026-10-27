@@ -8,5 +8,5 @@ await mkdir(resolve('.scratch/build'), { recursive: true });
 const output = await mkdtemp(resolve('.scratch/build/video-backlog-tracker-'));
 await cp(resolve('extension'), resolve(output, 'extension'), { recursive: true });
 await cp(resolve('docs/installation.md'), resolve(output, 'INSTALLATION.md'));
-await writeFile(resolve(output, 'README.txt'), 'Video Backlog Tracker first-slice test build\n\nIn desktop Chrome, open chrome://extensions, enable Developer mode, choose Load unpacked, and select the extension folder beside this file. See INSTALLATION.md for the complete walkthrough and scope.\n');
+await writeFile(resolve(output, 'README.txt'), 'Video Backlog Tracker first-slice test build\n\nIn desktop Chrome, open chrome://extensions, enable Developer mode, choose Load unpacked, and select the extension folder beside this file. See INSTALLATION.md for the short save/find/open/Undo trial.\n');
 console.log(output);
