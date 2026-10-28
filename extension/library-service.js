@@ -12,12 +12,18 @@ export function createLibrary(browser) {
     if (organization) return organization;
     if (command.type === 'editTitle') return editTitle(state, browser, command);
     if (command.type === 'review') return review(state, browser, command);
+    if (command.type === 'setOrganizationPreferences') {
+      const patch=command.patch ?? {};
+      if(Object.entries(patch).some(([key,value])=>!(['density','orientation'].includes(key)) || !(key==='density'?['thumbnails','compact']:['rows','columns']).includes(value))) return {ok:false,error:'Invalid presentation preference.'};
+      state.organizationPreferences={...state.organizationPreferences,...patch};
+      await browser.write(state);return {ok:true,organizationPreferences:state.organizationPreferences};
+    }
     if (command.type === 'list') {
       const records = state.records.filter(record => record.user.status === 'active').flatMap(record => {
         const match = matchRecordTitles(record, command.query, command.scopes);
         return match.matched ? [{ ...record, historicalMatch: match.historicalMatch }] : [];
       });
-      return { ok: true, ...openings.summaries(state), ...organizationSummary(state), records };
+      return { ok: true, ...openings.summaries(state), ...organizationSummary(state), organizationPreferences:state.organizationPreferences ?? {}, records };
     }
     if (command.type === 'save') {
       const observationResult = await captured;

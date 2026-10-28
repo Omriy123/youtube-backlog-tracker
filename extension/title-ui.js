@@ -42,6 +42,7 @@ function inspectTitles(record, selectedIndex = null) {
       if (matched) { version.setAttribute('role', 'region'); version.setAttribute('aria-label', 'Matched title version'); version.classList.add('matched-version'); version.tabIndex = -1; }
       const name = document.createElement('h3'); name.textContent = `Observation ${index + 1}${index === original ? ' · Original' : ''}${index === latest ? ' · Latest' : ''}${matched ? ' · Search match' : ''}`;
       const title = document.createElement('p'); title.textContent = observation.title || 'Title unavailable';
+      if(observation.description) { const description=document.createElement('p');description.textContent=observation.description; version.append(description); }
       const provenance = document.createElement('p'); provenance.className = 'muted'; provenance.textContent = describeObservation(observation);
       version.append(name, title, provenance); panel.append(version);
     }
@@ -60,13 +61,13 @@ export function appendTitleTools(content, record, { onChanged, onReviewRequired 
   const tools = document.createElement('div'); tools.className = 'title-tools';
   const { original, latest, observations } = titleVersions(record);
   if (record.user.personalTitle) { const authored = document.createElement('p'); authored.className = 'muted'; authored.textContent = 'Personal title'; content.append(authored); }
-  if (latest >= 0 && (latest !== original || !observations[latest].title)) {
+  if (latest >= 0 && (!observations[latest].title || observations[latest].title !== observations[original]?.title)) {
     const automatic = document.createElement('p'); automatic.className = 'muted';
     automatic.textContent = `Latest: ${observations[latest].title || 'Title unavailable'} · ${describeObservation(observations[latest])}`; content.append(automatic);
   }
   if (record.historicalMatch) {
     const match = record.historicalMatch;
-    const link = button(`Matched title from ${observedTime(match.observedAt)}: ${match.excerpt}`, () => inspectTitles(record, match.index));
+    const link = button(`Matched ${match.field ?? 'title'} from ${observedTime(match.observedAt)}: ${match.excerpt}`, () => inspectTitles(record, match.index));
     link.classList.add('historical-match'); content.append(link);
   }
   tools.append(button('Captured titles', () => inspectTitles(record)));
