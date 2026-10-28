@@ -46,7 +46,7 @@ export function renderOrganizationControls(result,{view,onNavigate,onChanged}) {
   if(actions.length) {
     const label=document.createElement('p'); label.textContent='Recover organization changes'; recovery.append(label);
     const select=document.createElement('select'); select.setAttribute('aria-label','Organization change to recover');
-    const labels={createList:'Created watch list',renameList:'Renamed watch list',setListImportance:'Changed list importance',organizationCommit:'Moved videos'};
+    const labels={createList:'Created watch list',renameList:'Renamed watch list',setListImportance:'Changed list importance',organizationCommit:'Moved videos',arrangeVideos:'Arranged videos'};
     for(const action of actions.slice().reverse()) {const option=document.createElement('option');option.value=action.id;option.textContent=`${labels[action.command] ?? 'Organization change'} · ${new Date(action.at).toLocaleString()}`;select.append(option);}
     recovery.append(select,organizationButton('Undo organization change',async()=>{
       const undone=await command({type:'organizationUndo',actionId:select.value}); onChanged(undone.ok ? undone.outcome : undone.error);

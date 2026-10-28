@@ -1,5 +1,6 @@
 import { renderOrganizationControls, showMove, organizationButton } from './organization-ui.js';
-import { fitArrivals } from './organization-service.js';
+import { createArrangementController, appendLibraryDates, renderOverviewControls } from './arrangement-ui.js';
+import { orderLists } from './arrangement-service.js';
 import { command, displayTitle } from './shared.js';
 import { appendOpenActions, renderOpeningRecovery } from './opening-ui.js';
 import { appendTitleTools } from './title-ui.js';
@@ -13,6 +14,8 @@ const dateFormat = document.querySelector('#date-format');
 const browser = createBrowserAdapter();
 let request = 0;
 let view = 'Inbox';
+const arrangements=createArrangementController({onChanged:message=>organizationChanged(message ?? ''),onError:message=>{document.querySelector('main > [role=status]').textContent=message;}});
+const sortControls=document.createElement('div');sortControls.id='arrangement-controls';container.before(sortControls);
 function organizationChanged(message, target) { document.querySelector('main > [role=status]').textContent=message; if(typeof target==='string') view=target; render(); }
 async function render() {
   const current = ++request;
@@ -22,15 +25,15 @@ async function render() {
   if (current !== request) return;
   if (!result.ok) { document.querySelector('[role=status]').textContent = result.error; return; }
   if(view!=='Entire Library' && !result.lists.some(list=>list.id===view)) view='Entire Library';
+  result.lists=orderLists(result.lists,result.listStatistics,result.organizationPreferences.overviewSort);
   renderOrganizationControls(result,{view,onNavigate(id){view=id;render();},onChanged:organizationChanged});
+  renderOverviewControls(result,{onChanged:render,onError:message=>organizationChanged(message)});
   document.querySelector('h1').textContent=result.lists.find(list=>list.id===view)?.name ?? view;
   result.records=result.records.filter(record=>view==='Entire Library' || record.user.destination===view);
-  const list=result.lists.find(list=>list.id===view);
-  if(list) {
-    const saved=(list.manualOrder ?? []).map(id=>result.records.find(record=>record.id===id)).filter(Boolean);
-    const remaining=result.records.filter(record=>!saved.includes(record));
-    result.records=fitArrivals(saved,remaining,list.publicationDirection);
-  }
+  const context={scopeId:view==='Entire Library'?null:view,originListId:view,query:search.value,titleScopes:scopes,channelId:null,selectedOnly:false,reviewSelected:false,sort:result.organizationPreferences.videoSort,preferences:result.organizationPreferences,lists:result.lists};
+  result.records=arrangements.order(result.records,context);
+  arrangements.renderSortControls(sortControls,context);
+  document.body.dataset.density=result.organizationPreferences.density ?? 'thumbnails';
   renderOpeningRecovery(result, { onChanged: render, onReviewRequired });
   document.querySelector('#count').textContent = `${result.records.length} saved ${result.records.length === 1 ? 'video' : 'videos'}`;
   container.replaceChildren();
@@ -43,6 +46,7 @@ async function render() {
     const url = document.createElement('p'); url.className = 'url'; url.textContent = record.url;
     const missing = document.createElement('p'); missing.className = 'muted'; missing.textContent = 'Channel unknown · Duration unknown · Publication date unknown';
     content.append(title, url, missing);
+    appendLibraryDates(content,record);
     appendReviewBadge(content, record, { onChanged: reviewChanged });
     appendOpenActions(title, content, record, { onChanged: render, onReviewRequired });
     appendTitleTools(content, record, {
@@ -50,7 +54,7 @@ async function render() {
       onReviewRequired,
     });
     content.append(organizationButton('Move video',()=>showMove([record],result.lists,{onChanged:organizationChanged})));
-    row.append(thumbnail, content); container.append(row);
+    row.append(thumbnail, content);arrangements.enhanceRow(row,record,{context,records:result.records});container.append(row);
   }
 }
 function reviewChanged(message) {
