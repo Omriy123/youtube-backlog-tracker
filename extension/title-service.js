@@ -1,3 +1,4 @@
+import { channel } from './metadata.js';
 export function titleVersions(record) {
   const observations = record.metadata.observations;
   const original = observations.findIndex(item => Boolean(item.title));
@@ -24,7 +25,21 @@ export function matchRecordTitles(record, query, scopes) {
     const end = Math.min(observation.title.length, start + 140);
     historicalMatch = { index, ...observation, excerpt: `${start ? '…' : ''}${observation.title.slice(start, end)}${end < observation.title.length ? '…' : ''}` };
   }
-  return { matched: url || personal || matches.length > 0, historicalMatch };
+  // Channel and retained descriptions extend search without inventing observations.
+  const metadataEnabled = ['personal','original','intermediate','latest'].some(enabled);
+  const channelMatch = metadataEnabled && includes(channel(record)?.name);
+  const originalDescription=observations.findIndex(item=>Boolean(item.description));
+  const descriptions = observations.flatMap((item,index) => {
+    const selected=(index===originalDescription && enabled('original')) || (index===latest && enabled('latest')) || (index!==originalDescription && index!==latest && enabled('intermediate'));
+    return selected && includes(item.description) ? [index] : [];
+  });
+  if(!url && !personal && !matches.length && !channelMatch && !descriptions.includes(latest) && descriptions.length) {
+    const index=descriptions[0];const observation=observations[index];
+    const start=Math.max(0,observation.description.toLocaleLowerCase().indexOf(text)-45);
+    const end=Math.min(observation.description.length,start+Math.max(140,text.length+45));
+    historicalMatch={index,...observation,field:'description',excerpt:`${start?'\u2026':''}${observation.description.slice(start,end)}${end<observation.description.length?'\u2026':''}`};
+  }
+  return { matched: url || personal || matches.length > 0 || channelMatch || descriptions.length>0, historicalMatch };
 }
 
 export async function editTitle(state, browser, message) {
