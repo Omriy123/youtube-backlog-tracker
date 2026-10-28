@@ -27,7 +27,7 @@ Actual measured CSS viewports were 2560x1440, 1440x900, 1280x500, 390x844, and 7
 
 Raw artifacts are temporary local evidence, deliberately outside the tracked product files:
 
-- `.scratch/worktrees/organization-54/.scratch/validation/organization-browse/evidence.json`
+- `.scratch/validation/organization-browse/evidence.json` (preserved at the integration root before ticket-worktree cleanup)
 - Same directory: `workload-1000.png`, `workload-3000.png`, `viewport-2560x1440.png`, `viewport-1440x900.png`, `viewport-1280x500.png`, `viewport-390x844.png`, `viewport-768x1200.png`, `zoom-1.25.png`, `zoom-1.5.png`.
 
 Running the scale test again replaces these local artifacts and records fresh measurements. The final integrated branch may produce additional evidence after combining arranging and selection.
