@@ -1,4 +1,4 @@
-# Install and try the first test build
+# Install and try the test build
 
 Use the **unpacked trial folder** you received. It contains `extension/`, `INSTALLATION.md`, and `README.txt`. Extract it first if it arrived as a ZIP. Keep that folder in place while Chrome uses the extension.
 
@@ -24,6 +24,7 @@ There is no need to select **Load unpacked** again. Keep the existing extension 
 
 ## More detail
 
+- [Organize your Library](library-organization-guide.md): watch lists, sorting, channels, selection, moving and recovery.
 - [First-slice behavior reference](first-slice-reference.md): identity, review, titles, and opening recovery.
 - [Development and validation commands](development.md): building the supplied folder and running checks. These are for the person preparing the build; they are not needed to install it.
 - [First-slice validation evidence](validation/first-slice.md): installed Chrome results, screenshots, and evidence limits.
