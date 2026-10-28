@@ -32,6 +32,8 @@ Choose **All selected** or **Matches current filters** to set the panel action's
 
 An ordinary drag carries one video. Ctrl+drag on a selected result carries selected current results in their displayed order; selections elsewhere stay untouched. Arranging keeps the selection. Successful moves and removals deselect processed videos; failures and deliberately excluded pending rows remain selected for retry.
 
+The selection panel also offers explicit Mark watched and Dismiss actions for its shown affected set. Mark watched records that decision without opening browser tabs. These actions retain activity for review and recovery; they do not verify playback.
+
 ## Delete a list or remove matches
 
 Whole-list deletion previews every active member, including videos hidden by filters. Explicitly choose to dismiss all or move all to a chosen destination. This full-list move may deliberately choose Inbox. An empty custom list still needs confirmation.

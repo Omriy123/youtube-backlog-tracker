@@ -1,6 +1,6 @@
 # First-slice behavior reference
 
-Detailed behavior for the current Chrome test build. The installation guide contains a short trial.
+Reference for the original save/find/open/recover workflow. The current build also provides the [Library organization workflows](library-organization-guide.md). The installation guide contains a short trial.
 
 ## Bounded identity and opening context
 
@@ -25,7 +25,7 @@ Save a watched or dismissed link again to return the **same record** to Inbox im
 
 **Cancel**, Escape or closing the popup leaves review pending. **Keep in Inbox** clears review without another list entry, watch event or browser tab. Choose Open or Edit again afterward. **Dismiss** removes active membership and retains prior history and watches. A failed decision stays visible in its dialog and preserves the last committed review; retry explicitly or cancel. A stale dialog must be closed and reopened before deciding. Re-saving an already pending Inbox row reports **Already saved — review pending**, preserving its original pending details and dates.
 
-First saved and the original First Inbox-exit stay fixed. Actual requeue advances Latest list-entry; Keep does not. Pending rows remain searchable and title inspection stays available, while Open and Personal title editing require review first. Earlier opening Undo cannot overwrite requeue/Keep/Dismiss; Undo after a new post-Keep opening restores the resolved Inbox state and earlier watches. Pending details and decisions survive Library reopening and browser restart. Broader destinations, capture sources, organization and explicit status controls remain outside this build.
+First saved and the original First Inbox-exit stay fixed. Actual requeue advances Latest list-entry; Keep does not. Pending rows remain searchable and title inspection stays available, while Open and Personal title editing require review first. Earlier opening Undo cannot overwrite requeue/Keep/Dismiss; Undo after a new post-Keep opening restores the resolved Inbox state and earlier watches. Pending details and decisions survive Library reopening and browser restart. The organization guide covers additional destinations and organization controls; additional capture sources remain outside this delivery.
 
 ## Complete trial walkthrough
 
@@ -48,7 +48,7 @@ The latest-opening Undo reverses only its own watched marking/event, preserves e
 
 ## Personal titles and captured-title search
 
-For an active Inbox video, choose **Edit Personal title** and deliberately enter your own title, then **Save title**. The editor starts empty unless you already authored a Personal title. **Clear Personal title** restores the automatic-title/URL fallback; it preserves captured observations. Confirmation follows persistence, failures remain in the editor, and accepted authored changes retain their prior title in History. Automatic repeat captures never replace a Personal title or count as a user edit. Stale editors must be closed and reopened before retrying. Pending rediscovery review gates editing; resolving it does not submit a prepared title automatically.
+For an active video in any destination, choose **Edit Personal title** and deliberately enter your own title, then **Save title**. The editor starts empty unless you already authored a Personal title. **Clear Personal title** restores the automatic-title/URL fallback; it preserves captured observations. Confirmation follows persistence, failures remain in the editor, and accepted authored changes retain their prior title in History. Automatic repeat captures never replace a Personal title or count as a user edit. Stale editors must be closed and reopened before retrying. Pending rediscovery review gates editing; resolving it does not submit a prepared title automatically.
 
 The independent **Personal / Original / Intermediate / Latest** checkboxes start on. Saved URL matching is always available; all four off visibly means URL-only search. A single observation can be both Original and Latest. Original is the first usable captured title, Latest is the final observation even when its title is missing, and Intermediate covers observations between those indices. Multiple matching categories return one video. Closing/reopening starts with an empty query and all four scopes on.
 
