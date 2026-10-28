@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Video Backlog Tracker",
   "version": "0.1.0",
-  "description": "Save video links to a durable personal Inbox.",
+  "description": "Organize saved video links in a durable personal Library.",
   "permissions": ["tabs", "storage"],
   "background": { "service_worker": "background.js", "type": "module" },
   "action": { "default_popup": "popup.html", "default_title": "Video Backlog Tracker" }
