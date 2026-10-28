@@ -1,4 +1,16 @@
 :root { font-family: system-ui, sans-serif; color: #243336; background: #f7f8f6; font-size: 15px; }
+#selection-controls { display:flex;flex-wrap:wrap;align-items:center;gap:12px;min-height:64px;margin:10px 0; }
+#selection-controls > span { flex-basis:100%;white-space:nowrap;font-size:12px;font-variant-numeric:tabular-nums; }
+#selection-controls label,#selection-panel label { display:inline-flex;align-items:center;gap:7px; }
+#selection-controls input,#selection-panel input,.record-selection input { width:auto;margin:0; }
+#selection-panel { border-top:1px solid #bdccc4;padding-top:18px;margin-top:20px; }
+#selection-panel fieldset { display:flex;flex-wrap:wrap;gap:12px;border:0;padding:0; }
+.record-selection { flex:none;align-self:flex-start;min-width:22px;padding-top:2px; }
+.move-exclusion { display:flex;align-items:center;gap:6px;margin-top:8px; }
+.move-exclusion input { width:auto;margin:0; }
+.destination-drop { outline:3px solid #326857;outline-offset:-3px; }
+th:nth-child(2),td:nth-child(2) { min-width:5rem; }
+th:nth-child(2) { white-space:nowrap; }
 * { box-sizing: border-box; }
 body { margin: 0; }
 h1 { font-size: 30px; margin: 6px 0; letter-spacing: -.7px; }

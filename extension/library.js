@@ -1,6 +1,9 @@
 import { renderOrganizationControls, showMove, organizationButton } from './organization-ui.js';
 import { createArrangementController, appendLibraryDates, renderOverviewControls } from './arrangement-ui.js';
 import { orderLists } from './arrangement-service.js';
+import { orderRecords } from './arrangement-service.js';
+import { createSelectionController } from './selection-ui.js';
+import { showStatus } from './status-ui.js';
 import { command, displayTitle } from './shared.js';
 import { appendOpenActions, renderOpeningRecovery } from './opening-ui.js';
 import { appendTitleTools } from './title-ui.js';
@@ -16,9 +19,34 @@ const scopeInputs=[...document.querySelectorAll('.search-scopes input')];
 const dateFormat=document.querySelector('#date-format');
 const browser=createBrowserAdapter();
 const browse=createBrowseState();
-const arrangements=createArrangementController({onChanged:message=>organizationChanged(message ?? ''),onError:message=>{document.querySelector('main > [role=status]').textContent=message;}});
+const selection=createSelectionController({onChanged:()=>render(),onMove:records=>moveRecords(records),onPlace:(records,current,context)=>placeRecords(records,current,context),onStatus:(records,effect)=>showStatus(orderedSelection(records),latest.lists,effect,{onChanged:organizationChanged,onProcessed:selection.processed})});
+const arrangements=createArrangementController({onChanged:message=>organizationChanged(message ?? ''),onError:message=>{document.querySelector('main > [role=status]').textContent=message;},getMovedIds:(event,record,records)=>event.ctrlKey && selection.selectedIds.has(record.id)?records.filter(item=>selection.selectedIds.has(item.id)).map(item=>item.id):[record.id],onMove:(ids,to)=>moveRecords(latest.records.filter(record=>ids.includes(record.id)),to)});
 const sortControls=document.createElement('div');sortControls.id='arrangement-controls';container.before(sortControls);
+container.before(selection.controls);container.after(selection.panel);
 let request=0;
+let latest=null;
+function orderedSelection(records) {
+  if(!latest)return [];
+  const ids=new Set(records.map(record=>record.id));
+  return latest.lists.flatMap(list=>{
+    const visible=selection.currentResults.filter(record=>record.user.destination===list.id);
+    const full=orderRecords(latest.records.filter(record=>record.user.destination===list.id),list,latest.organizationPreferences.videoSort,latest.lists);
+    const visibleIds=new Set(visible.map(record=>record.id));let next=0;
+    return full.map(record=>visibleIds.has(record.id)?visible[next++]:record).filter(record=>ids.has(record.id));
+  });
+}
+function moveRecords(records,initialDestination) {
+  if(!latest)return;
+  showMove(orderedSelection(records),latest.lists,{onChanged:organizationChanged,onProcessed:ids=>selection.processed(ids),initialDestination});
+}
+function placeRecords(records,current,context) {
+  if(records.some(record=>!current.some(item=>item.id===record.id)) || new Set(records.map(record=>record.user.destination)).size>1) {
+    const dialog=document.createElement('dialog');dialog.setAttribute('aria-label','Place selection scope');const heading=document.createElement('h2');heading.textContent='Choose a Place scope';const explanation=document.createElement('p');explanation.textContent='Some selected videos are outside current results or span destinations. Place arranges matching videos in one destination. Use Move for the full selection.';
+    const matches=current.filter(record=>records.some(item=>item.id===record.id));const place=organizationButton(`Place matching selected (${matches.length})`,()=>{dialog.close();placeRecords(matches,current,context);});place.disabled=!matches.length || new Set(matches.map(record=>record.user.destination)).size>1;
+    dialog.append(heading,explanation,place,organizationButton('Move this selection',()=>{dialog.close();moveRecords(records);}),organizationButton('Cancel',()=>dialog.close()));dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);dialog.showModal();return;
+  }
+  arrangements.showPlace(current,records.map(record=>record.id),context);
+}
 function navigate(id) {
   browse.scopeId=id==='Entire Library'?null:id;
   if(browse.scopeId!==null) browse.originListId=id;
@@ -30,24 +58,28 @@ function organizationChanged(message,target) {
 }
 async function render() {
   const current=++request;
+  container.inert=true;container.setAttribute('aria-busy','true');selection.controls.inert=true;selection.panel.inert=true;
   browse.query=search.value;browse.titleScopes=Object.fromEntries(scopeInputs.map(input=>[input.name,input.checked]));
   document.querySelector('#scope-status').textContent=scopeInputs.some(input=>input.checked)?'URL always included.':'URL-only search. All title scopes are off.';
   const result=await command({type:'list'});
   if(current!==request)return;
-  if(!result.ok){document.querySelector('main > [role=status]').textContent=result.error;return;}
+  if(!result.ok){document.querySelector('main > [role=status]').textContent=result.error;container.inert=false;container.setAttribute('aria-busy','false');selection.controls.inert=false;selection.panel.inert=false;return;}
   if(browse.scopeId!==null && !result.lists.some(list=>list.id===browse.scopeId))browse.scopeId=null;
   if(!result.lists.some(list=>list.id===browse.originListId))browse.originListId='Inbox';
   const preferences=result.organizationPreferences ?? {};
   result.lists=orderLists(result.lists,result.listStatistics,preferences.overviewSort);
+  latest=result;
   browse.density=preferences.density ?? 'thumbnails';browse.orientation=preferences.orientation ?? 'columns';
   if(!browse.anchor)browse.anchor=anchorChannels(result.records,browse.scopeId);
-  const derived=deriveBrowse({records:result.records,lists:result.lists,state:browse});
-  const context={scopeId:browse.scopeId,originListId:browse.originListId,query:browse.query,titleScopes:browse.titleScopes,channelId:browse.channelId,selectedOnly:false,reviewSelected:false,sort:preferences.videoSort,preferences,lists:result.lists};
+  const content=deriveBrowse({records:result.records,lists:result.lists,state:browse});
+  const derived=deriveBrowse({records:result.records,lists:result.lists,state:browse,selectedIds:selection.selectedIds,selectedOnly:selection.selectedOnly});
+  const context={scopeId:browse.scopeId,originListId:browse.originListId,query:browse.query,titleScopes:browse.titleScopes,channelId:browse.channelId,selectedOnly:selection.selectedOnly,reviewSelected:false,contentRecords:content.currentResults,sort:preferences.videoSort,preferences,lists:result.lists};
   const orderedRecords=arrangements.order(derived.currentResults,context);
   arrangements.renderSortControls(sortControls,context,{hideDensity:true});
   const view=browse.scopeId ?? 'Entire Library';
   renderOrganizationControls(result,{view,onNavigate:navigate,onChanged:organizationChanged});
   renderOverviewControls(result,{onChanged:render,onError:message=>organizationChanged(message)});
+  for(const button of document.querySelectorAll('nav [data-view]'))arrangements.enhanceDestination(button,button.dataset.view);
   renderBrowseControls(browse,derived,{
     onScope(){browse.scopeId=browse.scopeId===null?browse.originListId:null;render();},
     onChannel(id){browse.channelId=id;render();},
@@ -66,10 +98,12 @@ async function render() {
     if(browse.scopeId===null){const heading=document.createElement('h2');heading.append(organizationButton(`Open ${group.name}`,()=>navigate(group.id)));section.append(heading);}
     const rows=document.createElement('div');rows.className='destination-records';
     for(const record of orderedRecords.filter(record=>record.user.destination===group.id)) {
-      const row=renderRecord(record,result.lists);arrangements.enhanceRow(row,record,{context,records:orderedRecords});rows.append(row);
+      const row=renderRecord(record,result.lists);arrangements.enhanceRow(row,record,{context,records:orderedRecords});selection.enhanceRow(row,record);rows.append(row);
     }
     section.append(rows);container.append(section);
   }
+  selection.update(result,orderedRecords,context);
+  container.inert=false;container.setAttribute('aria-busy','false');selection.controls.inert=false;selection.panel.inert=false;
 }
 function renderRecord(record,lists) {
   const row=document.createElement('article');row.dataset.recordId=record.id;
@@ -88,7 +122,8 @@ function renderRecord(record,lists) {
   appendOpenActions(title,content,record,{onChanged:render,onReviewRequired});
   if(image){thumbnail.tabIndex=0;thumbnail.setAttribute('role','button');thumbnail.setAttribute('aria-label',`Open ${displayTitle(record)}`);thumbnail.addEventListener('click',()=>title.querySelector('button')?.click());thumbnail.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();title.querySelector('button')?.click();}});}
   appendTitleTools(content,record,{onChanged:organizationChanged,onReviewRequired});
-  content.append(organizationButton('Move video',()=>showMove([record],lists,{onChanged:organizationChanged})));
+  content.append(organizationButton('Move video',()=>moveRecords([record])));
+  for(const [effect,label] of [['watched','Mark watched'],['dismissed','Dismiss']])content.append(organizationButton(label,()=>showStatus([record],lists,effect,{onChanged:organizationChanged,onProcessed:selection.processed})));
   row.append(thumbnail,content);return row;
 }
 function reviewChanged(message){organizationChanged(message);}

@@ -1,3 +1,5 @@
+import {publicationDate} from './metadata.js';
+export {publicationDate} from './metadata.js';
 export function organizationLists(state) {
   return [
     { id: 'Inbox', name: 'Inbox', permanent: true, manualOrder: [], publicationDirection: 'asc' },
@@ -16,10 +18,6 @@ async function persist(state,browser,actionId) {
   }
 }
 const placement = user => Object.fromEntries(['status','destination','firstSavedAt','firstInboxExitAt','latestListEntryAt','pendingReview','lastDismissal','watchEvents'].map(key => [key, user[key] ?? null]));
-export function publicationDate(record) {
-  const value = record.metadata.publicationDate ?? record.metadata.publishedAt ?? record.metadata.observations.findLast(item => item.publicationDate || item.publishedAt)?.publicationDate ?? record.metadata.observations.findLast(item => item.publishedAt)?.publishedAt;
-  const date = Date.parse(value); return Number.isFinite(date) ? date : null;
-}
 export function fitArrivals(existing, incoming, direction = 'asc') {
   const sign = direction === 'desc' ? -1 : 1;
   const order = [...existing];
@@ -58,7 +56,14 @@ function preview(state,command) {
   }
   const targetIds=[...new Set(rows.map(row=>row.to))];
   const signature=JSON.stringify({rows:rows.map(row=>({id:row.recordId,to:row.to,user:placement(row.record.user)})),targets:targetIds.map(id=>({list:lists.find(list=>list.id===id),members:orderFor(state,id).map(record=>({id:record.id,user:placement(record.user)}))}))});
-  return {ok:true,preview:{rows,signature,allowInbox:Boolean(command.allowInbox)}};
+  return {ok:true,preview:{rows,signature,lists,allowInbox:Boolean(command.allowInbox)}};
+}
+function statusPreview(state,command) {
+  if(!['watched','dismissed'].includes(command.effect))return fail('Choose Mark watched or Dismiss.');
+  const ids=[...new Set(command.recordIds ?? [])];if(!ids.length)return fail('Choose at least one active video.');
+  const records=ids.map(id=>state.records.find(record=>record.id===id));
+  if(records.some(record=>!record || record.user.status!=='active'))return fail('An affected video is no longer active. Refresh and review this action.');
+  return {ok:true,preview:{effect:command.effect,recordIds:ids,records:structuredClone(records),signature:JSON.stringify(canonical(records.map(record=>({id:record.id,user:placement(record.user)}))))}};
 }
 function resources(state) {
   return { lists: structuredClone(state.lists ?? []), listSettings: structuredClone(state.listSettings ?? {}), records: state.records.map(record=>({id:record.id,user:placement(record.user)})) };
@@ -82,9 +87,19 @@ function deltas(before,after) {
   }
   return result;
 }
+function newerOwner(state,action,change) {
+  const recovered=new Set(state.history.filter(item=>item.type==='undoOrganization').map(item=>item.actionId));
+  return state.history.slice(state.history.indexOf(action)+1).some(item=>{
+    if(item.type==='organization' && !recovered.has(item.id))return item.changes.some(later=>later.kind===change.kind && later.id===change.id && (!later.field || !change.field || later.field===change.field));
+    if(change.kind!=='records' || item.recordId!==change.id)return false;
+    if(item.type==='opening')return state.openings?.find(opening=>opening.id===item.openingId)?.phase!=='undone';
+    return ['rediscovery','keepRediscovery','dismissRediscovery'].includes(item.type);
+  });
+}
 export async function executeOrganization(state,browser,command) {
   if (command.type==='organizationPreview') return preview(state,command);
-  if (!['createList','renameList','setListImportance','arrangeVideos','organizationCommit','organizationUndo'].includes(command.type)) return null;
+  if (command.type==='statusPreview') return statusPreview(state,command);
+  if (!['createList','renameList','setListImportance','arrangeVideos','organizationCommit','organizationUndo','statusCommit'].includes(command.type)) return null;
   const before=resources(state); state.lists ??= []; state.listSettings ??= {};
   let outcome='Organization saved'; let result={};
   if (command.type==='organizationUndo') {
@@ -93,6 +108,7 @@ export async function executeOrganization(state,browser,command) {
     if(action.destinationId && !same(state.records.filter(record=>record.user.status==='active' && record.user.destination===action.destinationId).map(record=>record.id).sort(),action.membership)) return fail('Videos in this destination changed. Recovery cannot overwrite their newer placement.');
     const current=resources(state);
     for(const change of action.changes) {
+      if(newerOwner(state,action,change))return fail('A newer relevant decision owns this change. Undo that decision first.');
       const resource=change.kind==='listSettings' ? current.listSettings[change.id] ?? null : current[change.kind].find(item=>item.id===change.id) ?? null;
       const value=change.field ? resource?.[change.field] ?? null : resource;
       if(!same(value,change.after)) return fail('A newer relevant decision conflicts with recovery. Keep that decision or undo it first.');
@@ -145,6 +161,7 @@ export async function executeOrganization(state,browser,command) {
     const displayed=command.displayedIds; const moved=command.movedIds;
     if(!Array.isArray(displayed) || displayed.length!==members.length || new Set(displayed).size!==members.length || displayed.some(id=>!members.includes(id)) || !same(command.expectedManualOrder,list.manualOrder ?? [])) return fail('Videos or saved order changed. Refresh before arranging.');
     if(!Array.isArray(moved) || !moved.length || new Set(moved).size!==moved.length || moved.some(id=>!members.includes(id)) || (command.beforeId!==null && !members.includes(command.beforeId))) return fail('Choose available videos and an insertion position.');
+    if(state.records.some(record=>moved.includes(record.id) && record.user.pendingReview))return fail('Review prior activity before arranging these videos.');
     if(moved.includes(command.beforeId)) return {ok:true,outcome:'Position unchanged'};
     const remaining=displayed.filter(id=>!moved.includes(id));
     const block=displayed.filter(id=>moved.includes(id));
@@ -177,6 +194,23 @@ export async function executeOrganization(state,browser,command) {
       else state.lists.find(item=>item.id===id).manualOrder=manualOrder;
     }
     outcome=moving.length ? 'Move saved' : 'Kept in the current list'; result.processedIds=fresh.preview.rows.map(row=>row.recordId);
+  }
+  if(command.type==='statusCommit') {
+    const fresh=statusPreview(state,command.preview ?? {});
+    if(!fresh.ok)return {...fresh,outcome:'stale'};
+    if(fresh.preview.signature!==command.preview.signature)return {ok:false,outcome:'stale',error:'Affected videos changed. Review the refreshed action and confirm again.',preview:fresh.preview};
+    const pending=fresh.preview.records.filter(record=>record.user.pendingReview);
+    if(fresh.preview.effect==='watched' && pending.length)return {ok:false,outcome:'reviewRequired',error:'Review prior activity or explicitly exclude unresolved videos before marking watched.',records:pending};
+    const time=browser.now();
+    for(const id of fresh.preview.recordIds) {
+      const record=state.records.find(record=>record.id===id);const destination=record.user.destination;
+      const destinationName=organizationLists(state).find(list=>list.id===destination)?.name ?? null;
+      if(fresh.preview.effect==='watched')record.user.watchEvents.push({id:browser.id(),at:time,source:'manual',destination,destinationName});
+      else record.user.lastDismissal={at:time,destination,destinationName};
+      record.user.status=fresh.preview.effect;record.user.destination=null;record.user.pendingReview=null;record.user.firstInboxExitAt ??= time;record.user.revision++;
+    }
+    outcome=fresh.preview.effect==='watched'?'Marked watched. Playback not verified.':'Dismissed. Prior history retained.';
+    result.processedIds=fresh.preview.recordIds;
   }
   const changes=deltas(before,resources(state));
   if(!changes.length) {

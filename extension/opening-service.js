@@ -34,7 +34,9 @@ export function createOpeningCommands(browser) {
     const record = state.records.find(item => item.id === opening.recordId);
     if (opening.phase === 'completed') return { ok: true, outcome: 'alreadyOpened', record };
     if (!record || record.user.revision !== opening.before.revision) return { ok: false, outcome: 'conflict', error: conflictReason };
-    const event = { id: opening.eventId, openingId: opening.id, at: opening.at };
+    const destination=opening.before.destination;
+    const destinationName=['Inbox','Backlog'].includes(destination)?destination:state.lists?.find(list=>list.id===destination)?.name ?? null;
+    const event = { id: opening.eventId, openingId: opening.id, at: opening.at,source:'opening',destination,destinationName };
     record.user = { ...record.user, status: 'watched', destination: null, firstInboxExitAt: record.user.firstInboxExitAt ?? opening.at, revision: record.user.revision + 1, watchEvents: [...record.user.watchEvents, event] };
     opening.phase = 'completed'; opening.completedRevision = record.user.revision;
     state.history.push({ id: browser.id(), type: 'opening', recordId: record.id, openingId: opening.id, at: opening.at });
@@ -112,7 +114,7 @@ export function createOpeningCommands(browser) {
       catch {
         opening.phase = 'failed';
         try { await browser.write(state); } catch { liveFailures.add(opening.id); }
-        return { ok: false, error: 'Could not create a browser tab. The video remains in Inbox.' };
+        return { ok: false, error: 'Could not create a browser tab. The video remains in its current destination.' };
       }
       opening.at = browser.now(); opening.tabId = tab.id; opening.phase = 'created';
       liveEvidence.set(opening.id, { at: opening.at, tabId: opening.tabId, phase: 'created' });
