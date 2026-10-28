@@ -71,9 +71,9 @@ test('all publication directions and independent preferences survive queued upda
 });
 
 test('date duration channel and displayed-title sorts keep missing and tied values honest',async()=>{
-  const f=fixture([record('a','2026-01-01',{durationSeconds:60,channelId:'a',channelName:'Channel A'}),record('b','2026-01-01',{durationSeconds:60,channelId:'b',channelName:'Channel B'}),record('c',null,{durationSeconds:null})]);
+  const f=fixture([record('a','2026-01-01',{durationSeconds:60,channelId:'a',channelName:'Zed A'}),record('b','2026-01-01',{durationSeconds:60,channelId:'b',channelName:'Zed B'}),record('c',null,{durationSeconds:null,channelId:'nameless'})]);
   const state=f.state();state.records[0].user.personalTitle='Zulu';state.records[1].user.personalTitle='Alpha';state.records[0].user.firstInboxExitAt='2026-02-01T12:00:00Z';state.records[1].user.firstInboxExitAt='2026-01-01T12:00:00Z';f.set(state);
-  for(const [key,direction,expected] of [['title','asc',['b','c','a']],['channel','desc',['b','a','c']],['duration','desc',['a','b','c']],['firstInboxExitAt','desc',['a','b','c']],['firstInboxExitAt','asc',['b','a','c']]]) {
+  for(const [key,direction,expected] of [['title','asc',['b','c','a']],['channel','asc',['a','b','c']],['channel','desc',['b','a','c']],['duration','desc',['a','b','c']],['firstInboxExitAt','desc',['a','b','c']],['firstInboxExitAt','asc',['b','a','c']]]) {
     await f.library.command({type:'setOrganizationPreferences',patch:{videoSort:{key,direction}}});
     assert.deepEqual((await f.library.command({type:'list'})).records.map(record=>record.id),expected);
   }

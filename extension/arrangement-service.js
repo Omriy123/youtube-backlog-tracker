@@ -25,7 +25,7 @@ export function orderRecords(records,list,sort={key:'manual',direction:'asc'},li
   const value=record=>{
     if(sort.key==='publication') return publicationDate(record);
     if(sort.key==='title') return displayTitle(record);
-    if(sort.key==='channel') return channel(record)?.name ?? null;
+    if(sort.key==='channel') {const name=channel(record)?.name;return name==='Channel name unknown' ? null : name ?? null;}
     if(sort.key==='duration') return durationSeconds(record);
     if(sort.key==='destination') return lists.find(item=>item.id===record.user.destination)?.name ?? null;
     const date=Date.parse(record.user[sort.key]); return Number.isFinite(date) ? date : null;

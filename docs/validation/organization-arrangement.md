@@ -6,7 +6,7 @@ Checked 2026-10-28 for issue #53 against the public Library command and installe
 
 - All 40 command-boundary tests passed, including six arrangement cases covering unknown/tied values, remembered directions, atomic persistence failure, stale/recovery conflicts, per-destination imported/Manual anchors, arrival fitting and independent preference patches.
 - All 51 installed Chrome browser tests passed in 2.3 minutes, including ten arrangement workflows/workloads and the previous capture/title/review/opening/organization suite. A subsequent focused native automated mouse test also passed: dragging from the opening title rearranges one video without opening a tab. Existing deterministic drag-event assertions verify exact insertion markers.
-- The package build completed successfully. The final composition with channel browsing receives focused validation after integration.
+- The package build completed successfully. After composing with channel browsing, all eleven arrangement browser cases, all eight browsing/scale cases, all 40 boundary tests and the package build passed. Native title dragging is included in these eleven.
 - Filtered `1,5` → `5,1` does not change saved `1,2,3,4,5`, placement dates or history. Clearing the query restores saved order; density/resizing and unrelated destination changes retain temporary relative order. Unfiltered Place adopts the displayed order and saves Manual/history together; browser restart preserves it. A stale second window cannot overwrite a newer arrangement. A rejected adapter write keeps the dialog, previous state/history and retry available.
 
 ## Representative measurements
