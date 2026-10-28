@@ -1,4 +1,5 @@
 import { executeOrganization, organizationSummary } from './organization-service.js';
+import { executeArrangementPreferences, organizationPreferences, arrangedRecords, listStatistics } from './arrangement-service.js';
 import { identify } from './identity.js';
 import { createOpeningCommands } from './opening-service.js';
 import { editTitle, matchRecordTitles } from './title-service.js';
@@ -8,22 +9,19 @@ export function createLibrary(browser) {
   let queue = Promise.resolve();
   async function execute(command, captured) {
     const state = await browser.read() ?? { version: 1, records: [], history: [] };
+    const preference = await executeArrangementPreferences(state, browser, command);
+    if (preference) return preference;
     const organization = await executeOrganization(state, browser, command);
     if (organization) return organization;
     if (command.type === 'editTitle') return editTitle(state, browser, command);
     if (command.type === 'review') return review(state, browser, command);
-    if (command.type === 'setOrganizationPreferences') {
-      const patch=command.patch ?? {};
-      if(Object.entries(patch).some(([key,value])=>!(['density','orientation'].includes(key)) || !(key==='density'?['thumbnails','compact']:['rows','columns']).includes(value))) return {ok:false,error:'Invalid presentation preference.'};
-      state.organizationPreferences={...state.organizationPreferences,...patch};
-      await browser.write(state);return {ok:true,organizationPreferences:state.organizationPreferences};
-    }
     if (command.type === 'list') {
       const records = state.records.filter(record => record.user.status === 'active').flatMap(record => {
         const match = matchRecordTitles(record, command.query, command.scopes);
         return match.matched ? [{ ...record, historicalMatch: match.historicalMatch }] : [];
       });
-      return { ok: true, ...openings.summaries(state), ...organizationSummary(state), organizationPreferences:state.organizationPreferences ?? {}, records };
+      const summary=organizationSummary(state);
+      return { ok: true, ...openings.summaries(state), ...summary, organizationPreferences:organizationPreferences(state), listStatistics:listStatistics(state.records,summary.lists), records:arrangedRecords(state,records) };
     }
     if (command.type === 'save') {
       const observationResult = await captured;

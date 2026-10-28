@@ -1,5 +1,6 @@
 import { renderOrganizationControls, showMove, organizationButton } from './organization-ui.js';
-import { fitArrivals } from './organization-service.js';
+import { createArrangementController, appendLibraryDates, renderOverviewControls } from './arrangement-ui.js';
+import { orderLists } from './arrangement-service.js';
 import { command, displayTitle } from './shared.js';
 import { appendOpenActions, renderOpeningRecovery } from './opening-ui.js';
 import { appendTitleTools } from './title-ui.js';
@@ -15,6 +16,8 @@ const scopeInputs=[...document.querySelectorAll('.search-scopes input')];
 const dateFormat=document.querySelector('#date-format');
 const browser=createBrowserAdapter();
 const browse=createBrowseState();
+const arrangements=createArrangementController({onChanged:message=>organizationChanged(message ?? ''),onError:message=>{document.querySelector('main > [role=status]').textContent=message;}});
+const sortControls=document.createElement('div');sortControls.id='arrangement-controls';container.before(sortControls);
 let request=0;
 function navigate(id) {
   browse.scopeId=id==='Entire Library'?null:id;
@@ -35,11 +38,16 @@ async function render() {
   if(browse.scopeId!==null && !result.lists.some(list=>list.id===browse.scopeId))browse.scopeId=null;
   if(!result.lists.some(list=>list.id===browse.originListId))browse.originListId='Inbox';
   const preferences=result.organizationPreferences ?? {};
+  result.lists=orderLists(result.lists,result.listStatistics,preferences.overviewSort);
   browse.density=preferences.density ?? 'thumbnails';browse.orientation=preferences.orientation ?? 'columns';
   if(!browse.anchor)browse.anchor=anchorChannels(result.records,browse.scopeId);
   const derived=deriveBrowse({records:result.records,lists:result.lists,state:browse});
+  const context={scopeId:browse.scopeId,originListId:browse.originListId,query:browse.query,titleScopes:browse.titleScopes,channelId:browse.channelId,selectedOnly:false,reviewSelected:false,sort:preferences.videoSort,preferences,lists:result.lists};
+  const orderedRecords=arrangements.order(derived.currentResults,context);
+  arrangements.renderSortControls(sortControls,context,{hideDensity:true});
   const view=browse.scopeId ?? 'Entire Library';
   renderOrganizationControls(result,{view,onNavigate:navigate,onChanged:organizationChanged});
+  renderOverviewControls(result,{onChanged:render,onError:message=>organizationChanged(message)});
   renderBrowseControls(browse,derived,{
     onScope(){browse.scopeId=browse.scopeId===null?browse.originListId:null;render();},
     onChannel(id){browse.channelId=id;render();},
@@ -57,9 +65,9 @@ async function render() {
     const section=document.createElement('section');section.className='destination-group';
     if(browse.scopeId===null){const heading=document.createElement('h2');heading.append(organizationButton(`Open ${group.name}`,()=>navigate(group.id)));section.append(heading);}
     const rows=document.createElement('div');rows.className='destination-records';
-    const saved=(group.manualOrder ?? []).map(id=>group.records.find(record=>record.id===id)).filter(Boolean);
-    const ordered=fitArrivals(saved,group.records.filter(record=>!saved.includes(record)),group.publicationDirection);
-    for(const record of ordered)rows.append(renderRecord(record,result.lists));
+    for(const record of orderedRecords.filter(record=>record.user.destination===group.id)) {
+      const row=renderRecord(record,result.lists);arrangements.enhanceRow(row,record,{context,records:orderedRecords});rows.append(row);
+    }
     section.append(rows);container.append(section);
   }
 }
@@ -75,6 +83,7 @@ function renderRecord(record,lists) {
   metadata.textContent=`${channel(record)?.name ?? 'Channel unknown'} · ${duration===null?'Duration unknown':`${Math.floor(duration/60)}:${String(Math.floor(duration%60)).padStart(2,'0')}`} · ${published===null?'Publication date unknown':formatDateTime(new Date(published).toISOString())}`;
   const origin=document.createElement('p');origin.className='record-origin';origin.textContent=`From: ${lists.find(list=>list.id===record.user.destination)?.name ?? 'Destination unavailable'}`;
   content.append(title,url,metadata,origin);
+  appendLibraryDates(content,record);
   appendReviewBadge(content,record,{onChanged:reviewChanged});
   appendOpenActions(title,content,record,{onChanged:render,onReviewRequired});
   if(image){thumbnail.tabIndex=0;thumbnail.setAttribute('role','button');thumbnail.setAttribute('aria-label',`Open ${displayTitle(record)}`);thumbnail.addEventListener('click',()=>title.querySelector('button')?.click());thumbnail.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();title.querySelector('button')?.click();}});}

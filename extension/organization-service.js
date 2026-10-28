@@ -84,12 +84,13 @@ function deltas(before,after) {
 }
 export async function executeOrganization(state,browser,command) {
   if (command.type==='organizationPreview') return preview(state,command);
-  if (!['createList','renameList','setListImportance','organizationCommit','organizationUndo'].includes(command.type)) return null;
+  if (!['createList','renameList','setListImportance','arrangeVideos','organizationCommit','organizationUndo'].includes(command.type)) return null;
   const before=resources(state); state.lists ??= []; state.listSettings ??= {};
   let outcome='Organization saved'; let result={};
   if (command.type==='organizationUndo') {
     const action=state.history.find(item=>item.id===command.actionId && item.type==='organization');
     if (!action || state.history.some(item=>item.type==='undoOrganization' && item.actionId===action.id)) return fail('This organization change is no longer available to undo.');
+    if(action.destinationId && !same(state.records.filter(record=>record.user.status==='active' && record.user.destination===action.destinationId).map(record=>record.id).sort(),action.membership)) return fail('Videos in this destination changed. Recovery cannot overwrite their newer placement.');
     const current=resources(state);
     for(const change of action.changes) {
       const resource=change.kind==='listSettings' ? current.listSettings[change.id] ?? null : current[change.kind].find(item=>item.id===change.id) ?? null;
@@ -135,6 +136,23 @@ export async function executeOrganization(state,browser,command) {
     const ids=command.listIds;
     if(!Array.isArray(ids) || new Set(ids).size!==state.lists.length || ids.length!==state.lists.length || ids.some(id=>!state.lists.some(list=>list.id===id))) return fail('Watch lists changed. Refresh their importance order.');
     state.lists.forEach(list=>list.importance=ids.indexOf(list.id));
+    state.organizationPreferences={...state.organizationPreferences,overviewSort:{key:'importance',direction:'asc'}};
+  }
+  if(command.type==='arrangeVideos') {
+    const list=organizationLists(state).find(item=>item.id===command.destinationId);
+    if(!list) return fail('The destination is no longer available.');
+    const members=state.records.filter(record=>record.user.status==='active' && record.user.destination===list.id).map(record=>record.id);
+    const displayed=command.displayedIds; const moved=command.movedIds;
+    if(!Array.isArray(displayed) || displayed.length!==members.length || new Set(displayed).size!==members.length || displayed.some(id=>!members.includes(id)) || !same(command.expectedManualOrder,list.manualOrder ?? [])) return fail('Videos or saved order changed. Refresh before arranging.');
+    if(!Array.isArray(moved) || !moved.length || new Set(moved).size!==moved.length || moved.some(id=>!members.includes(id)) || (command.beforeId!==null && !members.includes(command.beforeId))) return fail('Choose available videos and an insertion position.');
+    if(moved.includes(command.beforeId)) return {ok:true,outcome:'Position unchanged'};
+    const remaining=displayed.filter(id=>!moved.includes(id));
+    const block=displayed.filter(id=>moved.includes(id));
+    remaining.splice(command.beforeId===null ? remaining.length : remaining.indexOf(command.beforeId),0,...block);
+    if(list.permanent) state.listSettings[list.id]={...state.listSettings[list.id],manualOrder:remaining};
+    else state.lists.find(item=>item.id===list.id).manualOrder=remaining;
+    state.organizationPreferences={...state.organizationPreferences,videoSort:{key:'manual',direction:'asc'}};
+    outcome='Manual order saved';
   }
   if(command.type==='organizationCommit') {
     const expected=command.preview;
@@ -161,8 +179,11 @@ export async function executeOrganization(state,browser,command) {
     outcome=moving.length ? 'Move saved' : 'Kept in the current list'; result.processedIds=fresh.preview.rows.map(row=>row.recordId);
   }
   const changes=deltas(before,resources(state));
-  if(!changes.length) return {ok:true,outcome,...result};
-  const actionId=browser.id(); state.history.push({id:actionId,type:'organization',command:command.type,at:browser.now(),changes});
+  if(!changes.length) {
+    if(command.type==='arrangeVideos' || command.type==='setListImportance') await browser.write(state);
+    return {ok:true,outcome,...result};
+  }
+  const actionId=browser.id(); state.history.push({id:actionId,type:'organization',command:command.type,at:browser.now(),changes,...(command.type==='arrangeVideos' ? {destinationId:command.destinationId,membership:state.records.filter(record=>record.user.status==='active' && record.user.destination===command.destinationId).map(record=>record.id).sort()} : {})});
   await persist(state,browser,actionId);
   return {ok:true,outcome,actionId,...result};
 }

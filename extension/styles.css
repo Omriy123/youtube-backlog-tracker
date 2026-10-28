@@ -63,6 +63,22 @@ dialog::backdrop { background: #17291f66; }
 table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #dfe5df; overflow-wrap: anywhere; }
 td select { width: 100%; min-width: 100px; }
+.sort-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 15px 0; }
+.sort-controls button { padding: 8px 12px; }
+.sort-controls [aria-pressed=true], #overview-controls [aria-pressed=true] { background: #dce8de; }
+.sort-controls details { padding: 8px; }
+.sort-controls summary { cursor: pointer; }
+summary:focus-visible { outline: 3px solid #b68b2b; outline-offset: 3px; }
+[data-density=compact] .thumbnail { display: none; }
+[data-density=compact] article { padding: 12px 0; }
+.insert-before { box-shadow: 0 -4px #326857; }
+.insert-after { box-shadow: 0 4px #326857; }
+.dragging { opacity: .6; }
+nav small { display: block; font-size: 10px; font-weight: normal; margin-top: 5px; }
+#overview-controls { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+#overview-controls button { padding: 5px; font-size: 11px; }
+#overview-controls label, #overview-controls select { max-width: 100%; font-size: 12px; }
+#overview-controls select { display: block; }
 #list-management { flex-direction: column; }
 @media (max-width: 440px) { nav { flex-wrap: wrap; } nav button { width: auto; } #list-management { flex-direction: row; } }
 html { scrollbar-width:none; }
