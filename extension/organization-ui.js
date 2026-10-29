@@ -21,7 +21,7 @@ export function editList(list,{onChanged}) {
     dialog.close(); onChanged(result.outcome,result.list?.id);
   }); actions.append(save,organizationButton('Cancel',()=>dialog.close())); dialog.showModal(); input.focus();
 }
-export function renderOrganizationControls(result,{view,onNavigate,onChanged}) {
+export function renderOrganizationControls(result,{view,onNavigate,onChanged,onDelete}) {
   const nav=document.querySelector('nav'); nav.replaceChildren();
   const views=[{id:'Entire Library',name:'Entire Library'},...result.lists];
   for(const list of views) {
@@ -41,12 +41,17 @@ export function renderOrganizationControls(result,{view,onNavigate,onChanged}) {
       }); button.disabled=index+offset<0 || index+offset>=custom.length; management.append(button);
     }
   }
+  if(onDelete) {
+    const managementMenu=document.createElement('details');const summary=document.createElement('summary');summary.textContent='Delete a watch list';managementMenu.append(summary);
+    for(const custom of result.lists.filter(list=>!list.permanent))managementMenu.append(organizationButton(`Delete ${custom.name} list`,()=>onDelete(custom.id)));
+    management.append(managementMenu);
+  }
   const recovery=document.querySelector('#organization-recovery'); recovery.replaceChildren();
   const actions=result.organizationActions ?? [];
   if(actions.length) {
     const label=document.createElement('p'); label.textContent='Recover organization changes'; recovery.append(label);
     const select=document.createElement('select'); select.setAttribute('aria-label','Organization change to recover');
-    const labels={createList:'Created watch list',renameList:'Renamed watch list',setListImportance:'Changed list importance',organizationCommit:'Moved videos',arrangeVideos:'Arranged videos',statusCommit:'Changed watched or dismissed status'};
+    const labels={createList:'Created watch list',renameList:'Renamed watch list',setListImportance:'Changed list importance',organizationCommit:'Moved videos',arrangeVideos:'Arranged videos',statusCommit:'Changed watched or dismissed status',removalCommit:'Removed videos or deleted list'};
     for(const action of actions.slice().reverse()) {const option=document.createElement('option');option.value=action.id;option.textContent=`${labels[action.command] ?? 'Organization change'} · ${new Date(action.at).toLocaleString()}`;select.append(option);}
     recovery.append(select,organizationButton('Undo organization change',async()=>{
       const undone=await command({type:'organizationUndo',actionId:select.value}); onChanged(undone.ok ? undone.outcome : undone.error);
