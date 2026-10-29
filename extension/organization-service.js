@@ -1,3 +1,4 @@
+import {removalPreview,applyRemoval} from './removal-service.js';
 import {publicationDate} from './metadata.js';
 export {publicationDate} from './metadata.js';
 export function organizationLists(state) {
@@ -17,7 +18,7 @@ async function persist(state,browser,actionId) {
     if(!durable?.history.some(item=>item.id===actionId)) throw error;
   }
 }
-const placement = user => Object.fromEntries(['status','destination','firstSavedAt','firstInboxExitAt','latestListEntryAt','pendingReview','lastDismissal','watchEvents'].map(key => [key, user[key] ?? null]));
+const placement = user => structuredClone(Object.fromEntries(['status','destination','firstSavedAt','firstInboxExitAt','latestListEntryAt','pendingReview','lastDismissal','watchEvents'].map(key => [key, user[key] ?? null])));
 export function fitArrivals(existing, incoming, direction = 'asc') {
   const sign = direction === 'desc' ? -1 : 1;
   const order = [...existing];
@@ -99,13 +100,18 @@ function newerOwner(state,action,change) {
 export async function executeOrganization(state,browser,command) {
   if (command.type==='organizationPreview') return preview(state,command);
   if (command.type==='statusPreview') return statusPreview(state,command);
-  if (!['createList','renameList','setListImportance','arrangeVideos','organizationCommit','organizationUndo','statusCommit'].includes(command.type)) return null;
+  if (command.type==='removalPreview') return removalPreview(state,command,{lists:organizationLists(state),orderFor:id=>orderFor(state,id),placement});
+  if (!['createList','renameList','setListImportance','arrangeVideos','organizationCommit','organizationUndo','statusCommit','removalCommit'].includes(command.type)) return null;
   const before=resources(state); state.lists ??= []; state.listSettings ??= {};
   let outcome='Organization saved'; let result={};
   if (command.type==='organizationUndo') {
     const action=state.history.find(item=>item.id===command.actionId && item.type==='organization');
     if (!action || state.history.some(item=>item.type==='undoOrganization' && item.actionId===action.id)) return fail('This organization change is no longer available to undo.');
     if(action.destinationId && !same(state.records.filter(record=>record.user.status==='active' && record.user.destination===action.destinationId).map(record=>record.id).sort(),action.membership)) return fail('Videos in this destination changed. Recovery cannot overwrite their newer placement.');
+    if(action.deletedListId) {
+      const undone=new Set(state.history.filter(item=>item.type==='undoOrganization').map(item=>item.actionId));
+      if(state.history.slice(state.history.indexOf(action)+1).some(item=>item.type==='organization' && item.command==='setListImportance' && !undone.has(item.id)))return fail('A newer list importance decision conflicts with recovery. Undo that importance change first.');
+    }
     const current=resources(state);
     for(const change of action.changes) {
       if(newerOwner(state,action,change))return fail('A newer relevant decision owns this change. Undo that decision first.');
@@ -195,6 +201,16 @@ export async function executeOrganization(state,browser,command) {
     }
     outcome=moving.length ? 'Move saved' : 'Kept in the current list'; result.processedIds=fresh.preview.rows.map(row=>row.recordId);
   }
+  if(command.type==='removalCommit') {
+    const expected=command.preview;
+    const fresh=removalPreview(state,expected ?? {},{lists:organizationLists(state),orderFor:id=>orderFor(state,id),placement});
+    if(!fresh.ok)return {...fresh,outcome:'stale'};
+    if(fresh.preview.signature!==expected.signature)return {ok:false,outcome:'stale',error:'Affected contents or destination changed. Review the refreshed titles and confirm again.',preview:fresh.preview};
+    if(!fresh.preview.ready)return fail('Choose an explicit effect and destination before confirming.');
+    const pending=fresh.preview.effect==='move'?fresh.preview.rows.filter(row=>row.blocked&&!row.excluded):[];
+    if(pending.length)return {ok:false,outcome:'reviewRequired',error:'Resolve pending reviews before moving. Review alone does not delete or move the list.',records:pending.map(row=>row.record),preview:fresh.preview};
+    result=applyRemoval(state,fresh.preview,{lists:organizationLists(state),orderFor:id=>orderFor(state,id),fitArrivals,now:browser.now()});outcome=result.outcome;
+  }
   if(command.type==='statusCommit') {
     const fresh=statusPreview(state,command.preview ?? {});
     if(!fresh.ok)return {...fresh,outcome:'stale'};
@@ -217,7 +233,7 @@ export async function executeOrganization(state,browser,command) {
     if(command.type==='arrangeVideos' || command.type==='setListImportance') await browser.write(state);
     return {ok:true,outcome,...result};
   }
-  const actionId=browser.id(); state.history.push({id:actionId,type:'organization',command:command.type,at:browser.now(),changes,...(command.type==='arrangeVideos' ? {destinationId:command.destinationId,membership:state.records.filter(record=>record.user.status==='active' && record.user.destination===command.destinationId).map(record=>record.id).sort()} : {})});
+  const actionId=browser.id(); state.history.push({id:actionId,type:'organization',command:command.type,at:browser.now(),changes,...(result.deletedListId?{deletedListId:result.deletedListId}:{}),...(command.type==='arrangeVideos' ? {destinationId:command.destinationId,membership:state.records.filter(record=>record.user.status==='active' && record.user.destination===command.destinationId).map(record=>record.id).sort()} : {})});
   await persist(state,browser,actionId);
   return {ok:true,outcome,actionId,...result};
 }

@@ -120,3 +120,12 @@ button:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus
 @media(max-width:440px){.library nav{display:block;}.library aside{position:static;}.library header{min-height:155px;}.orientation-rows .destination-records article{flex-basis:290px;}}
 .channel-count {display:inline-block;min-width:4ch;text-align:right;font-variant-numeric:tabular-nums;}
 .channel-identity {display:block;font-size:11px;overflow-wrap:anywhere;max-width:180px;text-align:left;}
+.removal-preview td:first-child {min-width:130px;}
+.removal-preview td:nth-child(2) {min-width:75px;}
+.removal-preview td button {display:block;margin-top:8px;}
+.removal-preview label {display:flex;gap:8px;align-items:center;margin-top:8px;}
+.removal-preview input {width:auto;margin:0;}
+.removal-dialog > label {display:block;margin:12px 0;}
+.removal-dialog > label select {display:block;max-width:100%;margin-top:6px;}
+.removal-dialog [hidden] {display:none!important;}
+#list-management details button {margin:6px 0;max-width:100%;overflow-wrap:anywhere;}

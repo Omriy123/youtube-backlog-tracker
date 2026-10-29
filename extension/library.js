@@ -1,3 +1,4 @@
+import {showRemoval} from './removal-ui.js';
 import { renderOrganizationControls, showMove, organizationButton } from './organization-ui.js';
 import { createArrangementController, appendLibraryDates, renderOverviewControls } from './arrangement-ui.js';
 import { orderLists } from './arrangement-service.js';
@@ -23,6 +24,7 @@ const selection=createSelectionController({onChanged:()=>render(),onMove:records
 const arrangements=createArrangementController({onChanged:message=>organizationChanged(message ?? ''),onError:message=>{document.querySelector('main > [role=status]').textContent=message;},getMovedIds:(event,record,records)=>event.ctrlKey && selection.selectedIds.has(record.id)?records.filter(item=>selection.selectedIds.has(item.id)).map(item=>item.id):[record.id],onMove:(ids,to)=>moveRecords(latest.records.filter(record=>ids.includes(record.id)),to)});
 const sortControls=document.createElement('div');sortControls.id='arrangement-controls';container.before(sortControls);
 container.before(selection.controls);container.after(selection.panel);
+const removalControls=document.createElement('section');removalControls.className='title-tools';removalControls.setAttribute('aria-label','List cleanup');container.before(removalControls);
 let request=0;
 let latest=null;
 function orderedSelection(records) {
@@ -47,6 +49,18 @@ function placeRecords(records,current,context) {
   }
   arrangements.showPlace(current,records.map(record=>record.id),context);
 }
+function removeList(listId,scope) {
+  if(!latest)return;
+  const impacted=browse.scopeId===listId || browse.originListId===listId;
+  const context=selection.context;
+  showRemoval({listId,scope,recordIds:selection.currentResults.filter(record=>record.user.destination===listId).map(record=>record.id),filterContext:{query:context.query,titleScopes:context.titleScopes,channelId:context.channelId,selectedOnly:selection.selectedOnly,selectedIds:[...selection.selectedIds]}},{onChanged:organizationChanged,onCompleted(result){
+    selection.processed(result.processedIds);
+    if(result.deletedListId && (impacted || browse.scopeId===result.deletedListId || browse.originListId===result.deletedListId)) {
+      browse.scopeId=result.effect==='move'?result.to:null;browse.originListId=result.effect==='move'?result.to:'Inbox';browse.anchor=null;
+    }
+    organizationChanged(result.outcome);
+  }});
+}
 function navigate(id) {
   browse.scopeId=id==='Entire Library'?null:id;
   if(browse.scopeId!==null) browse.originListId=id;
@@ -58,7 +72,7 @@ function organizationChanged(message,target) {
 }
 async function render() {
   const current=++request;
-  container.inert=true;container.setAttribute('aria-busy','true');selection.controls.inert=true;selection.panel.inert=true;
+  removalControls.inert=true;container.inert=true;container.setAttribute('aria-busy','true');selection.controls.inert=true;selection.panel.inert=true;
   browse.query=search.value;browse.titleScopes=Object.fromEntries(scopeInputs.map(input=>[input.name,input.checked]));
   document.querySelector('#scope-status').textContent=scopeInputs.some(input=>input.checked)?'URL always included.':'URL-only search. All title scopes are off.';
   const result=await command({type:'list'});
@@ -77,7 +91,7 @@ async function render() {
   const orderedRecords=arrangements.order(derived.currentResults,context);
   arrangements.renderSortControls(sortControls,context,{hideDensity:true});
   const view=browse.scopeId ?? 'Entire Library';
-  renderOrganizationControls(result,{view,onNavigate:navigate,onChanged:organizationChanged});
+  renderOrganizationControls(result,{view,onNavigate:navigate,onChanged:organizationChanged,onDelete:id=>removeList(id,'whole')});
   renderOverviewControls(result,{onChanged:render,onError:message=>organizationChanged(message)});
   for(const button of document.querySelectorAll('nav [data-view]'))arrangements.enhanceDestination(button,button.dataset.view);
   renderBrowseControls(browse,derived,{
@@ -96,6 +110,7 @@ async function render() {
   for(const group of derived.groups) {
     const section=document.createElement('section');section.className='destination-group';
     if(browse.scopeId===null){const heading=document.createElement('h2');heading.append(organizationButton(`Open ${group.name}`,()=>navigate(group.id)));section.append(heading);}
+    if(browse.scopeId===null && !group.permanent){const actions=document.createElement('div');actions.className='title-tools';actions.append(organizationButton(`Delete entire ${group.name} list`,()=>removeList(group.id,'whole')),organizationButton(`Remove matching from ${group.name}`,()=>removeList(group.id,'matches')));section.append(actions);}
     const rows=document.createElement('div');rows.className='destination-records';
     for(const record of orderedRecords.filter(record=>record.user.destination===group.id)) {
       const row=renderRecord(record,result.lists);arrangements.enhanceRow(row,record,{context,records:orderedRecords});selection.enhanceRow(row,record);rows.append(row);
@@ -103,6 +118,9 @@ async function render() {
     section.append(rows);container.append(section);
   }
   selection.update(result,orderedRecords,context);
+  removalControls.replaceChildren();const cleanupList=result.lists.find(list=>list.id===browse.scopeId && !list.permanent);
+  if(cleanupList){const matching=organizationButton('Remove matching videos',()=>removeList(cleanupList.id,'matches'));matching.disabled=!selection.currentResults.length;removalControls.append(organizationButton('Delete entire list',()=>removeList(cleanupList.id,'whole')),matching);}
+  removalControls.inert=false;
   container.inert=false;container.setAttribute('aria-busy','false');selection.controls.inert=false;selection.panel.inert=false;
 }
 function renderRecord(record,lists) {
