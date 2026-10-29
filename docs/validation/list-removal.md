@@ -39,7 +39,7 @@ Actual `chrome.tabs.setZoom` at **125%** and **150%** measured **614x960** and *
 
 Raw evidence is preserved at the project root, outside implementer worktrees and Playwright's cleared output directory:
 
-- [Baseline metrics](../../.scratch/validation/organization-removal/baseline.json) and [growth metrics](../../.scratch/validation/organization-removal/growth.json).
+- Local-only metrics: `.scratch/validation/organization-removal/baseline.json` and `.scratch/validation/organization-removal/growth.json` (ignored artifacts, not published links).
 - Same directory: `baseline-1440x900.png`, `baseline-final.png`, `growth-2560x1440.png`, `growth-1440x900.png`, `growth-1280x500.png`, `growth-390x844.png`, `growth-768x1200.png`, `growth-zoom-1.25.png`, `growth-zoom-1.5.png`, and `growth-final.png`.
 
 Set `ORGANIZATION_EVIDENCE_ROOT` to that root directory when rerunning from a worktree. Rerunning replaces these samples with fresh measurements; ordinary runs from the repository root use the same location by default.

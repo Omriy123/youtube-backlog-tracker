@@ -1,4 +1,4 @@
-# First-slice development and validation
+# Development and validation
 
 Build a portable unpacked folder with Node 24 or newer:
 
@@ -9,7 +9,7 @@ npm run build
 
 `npm run build` prints a new `.scratch/build/video-backlog-tracker-…/` folder containing `extension/`, `INSTALLATION.md`, and `README.txt`. Copy the whole folder before sharing it. The receiver installs the `extension/` folder and needs no Node installation.
 
-For user-facing steps, see the installation guide. For feature behavior, see the [first-slice reference](first-slice-reference.md).
+For user-facing steps, see the installation guide. For feature behavior, see the [organization guide](library-organization-guide.md) and [capture/opening reference](first-slice-reference.md). The [integrated validation report](validation/library-organization.md) records checks and evidence limits.
 
 ## Run the automated checks
 
