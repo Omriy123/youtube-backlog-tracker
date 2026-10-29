@@ -1,4 +1,7 @@
 :root { font-family: system-ui, sans-serif; color: #243336; background: #f7f8f6; font-size: 15px; }
+#records.global-results { display:block; }
+#records.global-results .destination-records { display:block;overflow:visible; }
+#records.global-results .destination-records article { flex:initial;max-width:none; }
 #selection-controls { display:flex;flex-wrap:wrap;align-items:center;gap:12px;min-height:64px;margin:10px 0; }
 #selection-controls > span { flex-basis:100%;white-space:nowrap;font-size:12px;font-variant-numeric:tabular-nums; }
 #selection-controls label,#selection-panel label { display:inline-flex;align-items:center;gap:7px; }

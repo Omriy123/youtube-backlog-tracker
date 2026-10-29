@@ -1,3 +1,4 @@
+import {completeInitialPlacement} from './placement-state.js';
 // Rediscovery changes user placement separately from automatic observations.
 export function requeueForReview(state, record, browser) {
   if (!['watched', 'dismissed'].includes(record.user.status)) return false;
@@ -21,6 +22,7 @@ export function requeueForReview(state, record, browser) {
     // without recursively copying earlier reviews' full history snapshots.
     activity: activity.map(({ id, type, at }) => ({ id, type, at })),
   };
+  completeInitialPlacement(state,record,time);
   record.user = { ...record.user, status: 'active', destination: 'Inbox', latestListEntryAt: time, revision: record.user.revision + 1, pendingReview: { queuedAt: time, previous } };
   const changeId = browser.id();
   state.history.push({ id: changeId, type: 'rediscovery', recordId: record.id, at: time, before });
@@ -46,6 +48,7 @@ export async function review(state, browser, command) {
   if (!['keep', 'dismiss'].includes(command.decision)) return { ok: false, error: 'Choose a review decision.' };
   const before = structuredClone(record.user);
   const time = browser.now();
+  completeInitialPlacement(state,record,time);
   if (command.decision === 'dismiss') {
     record.user.lastDismissal = { at: time, destination: record.user.destination };
     record.user.status = 'dismissed';

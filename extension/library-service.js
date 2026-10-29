@@ -43,7 +43,7 @@ export function createLibrary(browser) {
       const time = browser.now();
       const record = {
         id: browser.id(), identity, url: capture.url,
-        user: { status: 'active', destination: 'Inbox', firstSavedAt: time, firstInboxExitAt: null, latestListEntryAt: time, revision: 1, personalTitle: null, watchEvents: [], pendingReview: null },
+        user: { status: 'active', destination: 'Inbox', firstSavedAt: time, firstInboxExitAt: null, initialPlacementComplete: false, latestListEntryAt: time, revision: 1, personalTitle: null, watchEvents: [], pendingReview: null },
         metadata: { observations: [observation] },
       };
       state.records.push(record);

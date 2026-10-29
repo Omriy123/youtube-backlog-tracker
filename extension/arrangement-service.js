@@ -4,6 +4,9 @@ import { displayTitle } from './shared.js';
 
 export const videoSortKeys = ['manual','publication','title','channel','destination','duration','firstSavedAt','firstInboxExitAt','latestListEntryAt'];
 export const overviewSortKeys = ['importance','name','count','duration','latestAddition'];
+export function isGlobalValueView(context) {
+  return context.scopeId===null && context.channelId===null && !['manual','publication'].includes(context.sort.key);
+}
 const collator=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});
 export function organizationPreferences(state) {
   return {videoSort:{key:'manual',direction:'asc'},overviewSort:{key:'importance',direction:'asc'},...state.organizationPreferences};

@@ -1,5 +1,7 @@
 import {removalPreview,applyRemoval} from './removal-service.js';
 import {publicationDate} from './metadata.js';
+import {completeInitialPlacement} from './placement-state.js';
+import {saveManualOrder} from './list-order.js';
 export {publicationDate} from './metadata.js';
 export function organizationLists(state) {
   return [
@@ -18,7 +20,7 @@ async function persist(state,browser,actionId) {
     if(!durable?.history.some(item=>item.id===actionId)) throw error;
   }
 }
-const placement = user => structuredClone(Object.fromEntries(['status','destination','firstSavedAt','firstInboxExitAt','latestListEntryAt','pendingReview','lastDismissal','watchEvents'].map(key => [key, user[key] ?? null])));
+const placement = user => structuredClone(Object.fromEntries(['status','destination','firstSavedAt','firstInboxExitAt','initialPlacementComplete','latestListEntryAt','pendingReview','lastDismissal','watchEvents'].map(key => [key, user[key] ?? null])));
 export function fitArrivals(existing, incoming, direction = 'asc') {
   const sign = direction === 'desc' ? -1 : 1;
   const order = [...existing];
@@ -172,8 +174,7 @@ export async function executeOrganization(state,browser,command) {
     const remaining=displayed.filter(id=>!moved.includes(id));
     const block=displayed.filter(id=>moved.includes(id));
     remaining.splice(command.beforeId===null ? remaining.length : remaining.indexOf(command.beforeId),0,...block);
-    if(list.permanent) state.listSettings[list.id]={...state.listSettings[list.id],manualOrder:remaining};
-    else state.lists.find(item=>item.id===list.id).manualOrder=remaining;
+    saveManualOrder(state,list.id,remaining);
     state.organizationPreferences={...state.organizationPreferences,videoSort:{key:'manual',direction:'asc'}};
     outcome='Manual order saved';
   }
@@ -190,14 +191,14 @@ export async function executeOrganization(state,browser,command) {
     const time=browser.now();
     for(const row of moving) {
       const record=state.records.find(item=>item.id===row.recordId);
-      record.user.destination=row.to; record.user.latestListEntryAt=time; record.user.firstInboxExitAt ??= time; record.user.revision++;
+      completeInitialPlacement(state,record,time);
+      record.user.destination=row.to; record.user.latestListEntryAt=time; record.user.revision++;
     }
     for(const id of affected) {
       const list=organizationLists(state).find(item=>item.id===id);
       const arrivals=moving.filter(row=>row.to===id).map(row=>state.records.find(item=>item.id===row.recordId));
       const manualOrder=fitArrivals(baselines.get(id),arrivals,list.publicationDirection).map(record=>record.id);
-      if(list.permanent) state.listSettings[id]={...(state.listSettings[id] ?? {}),manualOrder};
-      else state.lists.find(item=>item.id===id).manualOrder=manualOrder;
+      saveManualOrder(state,id,manualOrder);
     }
     outcome=moving.length ? 'Move saved' : 'Kept in the current list'; result.processedIds=fresh.preview.rows.map(row=>row.recordId);
   }
@@ -220,10 +221,11 @@ export async function executeOrganization(state,browser,command) {
     const time=browser.now();
     for(const id of fresh.preview.recordIds) {
       const record=state.records.find(record=>record.id===id);const destination=record.user.destination;
+      completeInitialPlacement(state,record,time);
       const destinationName=organizationLists(state).find(list=>list.id===destination)?.name ?? null;
       if(fresh.preview.effect==='watched')record.user.watchEvents.push({id:browser.id(),at:time,source:'manual',destination,destinationName});
       else record.user.lastDismissal={at:time,destination,destinationName};
-      record.user.status=fresh.preview.effect;record.user.destination=null;record.user.pendingReview=null;record.user.firstInboxExitAt ??= time;record.user.revision++;
+      record.user.status=fresh.preview.effect;record.user.destination=null;record.user.pendingReview=null;record.user.revision++;
     }
     outcome=fresh.preview.effect==='watched'?'Marked watched. Playback not verified.':'Dismissed. Prior history retained.';
     result.processedIds=fresh.preview.recordIds;

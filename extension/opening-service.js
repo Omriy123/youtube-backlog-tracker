@@ -1,3 +1,4 @@
+import {completeInitialPlacement} from './placement-state.js';
 // Opening commands share the Library queue and coherent persistence boundary.
 export function createOpeningCommands(browser) {
   // Keeps positively observed creation when its receipt write fails. A restart
@@ -37,7 +38,8 @@ export function createOpeningCommands(browser) {
     const destination=opening.before.destination;
     const destinationName=['Inbox','Backlog'].includes(destination)?destination:state.lists?.find(list=>list.id===destination)?.name ?? null;
     const event = { id: opening.eventId, openingId: opening.id, at: opening.at,source:'opening',destination,destinationName };
-    record.user = { ...record.user, status: 'watched', destination: null, firstInboxExitAt: record.user.firstInboxExitAt ?? opening.at, revision: record.user.revision + 1, watchEvents: [...record.user.watchEvents, event] };
+    completeInitialPlacement(state,record,opening.at);
+    record.user = { ...record.user, status: 'watched', destination: null, revision: record.user.revision + 1, watchEvents: [...record.user.watchEvents, event] };
     opening.phase = 'completed'; opening.completedRevision = record.user.revision;
     state.history.push({ id: browser.id(), type: 'opening', recordId: record.id, openingId: opening.id, at: opening.at });
     try { await browser.write(state); }
