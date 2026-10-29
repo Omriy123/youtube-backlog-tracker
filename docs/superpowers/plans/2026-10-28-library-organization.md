@@ -33,11 +33,11 @@
 
 **Interfaces:** Library list responses expose permanent and custom destinations with stable IDs, importance, saved Manual order and publication direction. Commands include `createList`, `renameList`, `setListImportance`, `organizationPreview`, `organizationCommit`, and `organizationUndo`. Preparation returns explicit Video/From/To rows and relevant-state tokens; commit checks those tokens before writing.
 
-- [ ] Write an installed-browser failing workflow for create/rename/name conflict, rank, previewed single move and persistent recovery.
-- [ ] Run it and confirm failure because the controls are absent.
-- [ ] Implement destinations, validation, coherent change history, explicit preview/reconfirmation, pending review gates and selective recovery. Preserve legacy records without fabricating dates.
-- [ ] Extend public-command boundary fixtures for Jan 1/10/5/20 + Jan 7 arrival, descending/equal/unknown dates, no-op dates/history, relevant/unrelated changes, write rejection and recovery conflict.
-- [ ] Run focused browser/boundary checks and existing workflows; commit the ticket.
+- [x] Write an installed-browser failing workflow for create/rename/name conflict, rank, previewed single move and persistent recovery.
+- [x] Run it and confirm failure because the controls are absent.
+- [x] Implement destinations, validation, coherent change history, explicit preview/reconfirmation, pending review gates and selective recovery. Preserve legacy records without fabricating dates.
+- [x] Extend public-command boundary fixtures for Jan 1/10/5/20 + Jan 7 arrival, descending/equal/unknown dates, no-op dates/history, relevant/unrelated changes, write rejection and recovery conflict.
+- [x] Run focused browser/boundary checks and existing workflows; commit the ticket.
 
 ## Task 2: Sort and arrange videos (#53, depends on #52)
 
@@ -45,11 +45,11 @@
 
 **Interfaces:** A shared view pipeline supplies displayed per-destination order and current result IDs. Saved arrangement commands use explicit displayed order and relevant destination baseline; temporary order is UI state keyed to current view meaning. Preferences store sort/direction/overview separately from saved Manual and importance.
 
-- [ ] Write/run a failing installed-browser test for clickable title/publication/Library-date headers and non-drag Place adopting the current unfiltered sort.
-- [ ] Implement missing-last comparisons, per-list publication directions, overview order/statistics, Manual restoration and persisted preferences.
-- [ ] Write/run a failing filtered 1,5 → 5,1 workflow; clearing restores 1,2,3,4,5 without changing dates/history.
-- [ ] Implement exact drag insertion and equivalent keyboard Place with temporary lifetime rules, durable unfiltered arrangements and selective recovery.
-- [ ] Verify source-order fixtures, stale saves, failed writes and restart; record physical-drag evidence limits; commit.
+- [x] Write/run a failing installed-browser test for clickable title/publication/Library-date headers and non-drag Place adopting the current unfiltered sort.
+- [x] Implement missing-last comparisons, per-list publication directions, overview order/statistics, Manual restoration and persisted preferences.
+- [x] Write/run a failing filtered 1,5 → 5,1 workflow; clearing restores 1,2,3,4,5 without changing dates/history.
+- [x] Implement exact drag insertion and equivalent keyboard Place with temporary lifetime rules, durable unfiltered arrangements and selective recovery.
+- [x] Verify source-order fixtures, stale saves, failed writes and restart; record physical-drag evidence limits; commit.
 
 ## Task 3: Browse lists/channels (#54, depends on #52; parallel with #53)
 
@@ -57,10 +57,10 @@
 
 **Interfaces:** One result pipeline combines `{listId, returnListId, query, titleScopes, channelId}` with later selected-only IDs. Channel counts substitute each button's identity while preserving other filters; explicit navigation anchors the shortlist. Sorting supplies per-destination displayed order, and grouping consumes sidebar order.
 
-- [ ] Write/run a failing installed-browser scope/query/channel workflow using same-name distinct creators and unknown identity.
-- [ ] Implement independent retained search scopes, reversible Library scope controls, stable five-channel shortcuts/counts and clearable zero-result states.
-- [ ] Implement grouped destination headings, remembered Rows/Columns and Thumbnails/Compact with keyboard and responsive access.
-- [ ] Verify restart preferences and baseline/growth fixtures, recording CSS viewport, zoom and measured latency without inventing a numerical requirement; commit.
+- [x] Write/run a failing installed-browser scope/query/channel workflow using same-name distinct creators and unknown identity.
+- [x] Implement independent retained search scopes, reversible Library scope controls, stable five-channel shortcuts/counts and clearable zero-result states.
+- [x] Implement grouped destination headings, remembered Rows/Columns and Thumbnails/Compact with keyboard and responsive access.
+- [x] Verify restart preferences and baseline/growth fixtures, recording CSS viewport, zoom and measured latency without inventing a numerical requirement; commit.
 
 ## Task 4: Collect selections and organize batches (#55, depends on #53 and #54)
 
@@ -68,11 +68,11 @@
 
 **Interfaces:** Selection is a transient ordered identity set. All/Matches panel actions freeze explicit IDs; Ctrl+drag always intersects selected IDs with all current main results. Move returns processed/excluded/no-op IDs for truthful selection cleanup.
 
-- [ ] Write/run a failing cross-search/list selection test, including partial Select all, offscreen results and zero matches.
-- [ ] Implement compact main-area In here/Elsewhere rows after results, per-row deselection, All/Matches, Clear and selected-only without pointer movement.
-- [ ] Write/run split-swap, per-row Keep, pending exclusion and same-target no-op workflows; implement atomic batch arrival fitting and safe recovery.
-- [ ] Add Ctrl+drag/group Place using displayed relative order and temporary-vs-saved rules. Explain outside-result Place sets rather than silently pruning them.
-- [ ] Verify failure/retry and newer-decision conflicts; preserve selection after arrange and opened-but-unsaved repair; commit.
+- [x] Write/run a failing cross-search/list selection test, including partial Select all, offscreen results and zero matches.
+- [x] Implement compact main-area In here/Elsewhere rows after results, per-row deselection, All/Matches, Clear and selected-only without pointer movement.
+- [x] Write/run split-swap, per-row Keep, pending exclusion and same-target no-op workflows; implement atomic batch arrival fitting and safe recovery.
+- [x] Add Ctrl+drag/group Place using displayed relative order and temporary-vs-saved rules. Explain outside-result Place sets rather than silently pruning them.
+- [x] Verify failure/retry and newer-decision conflicts; preserve selection after arrange and opened-but-unsaved repair; commit.
 
 ## Task 5: Delete lists and remove matches (#56, depends on #55)
 
@@ -80,14 +80,16 @@
 
 **Interfaces:** Delete preparation freezes full custom-list contents independently of filters. Matching removal freezes current result IDs. Explicit effect/destination are required; permanent destinations reject deletion. Results provide processed IDs and deleted destination ID for selection/navigation updates.
 
-- [ ] Write/run a failing full-delete preview test with hidden members, no default destructive choice and an explicit Inbox target.
-- [ ] Implement empty/full deletion and matching-only move/dismiss, review gates, affected-state reconfirmation, coherent history and conflict-safe list recreation.
-- [ ] Verify filters/return-list navigation, selected-only/zero results, permanent destinations, failure retention, restart and unrelated-list behavior.
-- [ ] Run combined installed-Chrome save/find/organize/open/recover at approved baseline/growth distributions and responsive dimensions, recording actual evidence and limits; commit.
+- [x] Write/run a failing full-delete preview test with hidden members, no default destructive choice and an explicit Inbox target.
+- [x] Implement empty/full deletion and matching-only move/dismiss, review gates, affected-state reconfirmation, coherent history and conflict-safe list recreation.
+- [x] Verify filters/return-list navigation, selected-only/zero results, permanent destinations, failure retention, restart and unrelated-list behavior.
+- [x] Run combined installed-Chrome save/find/organize/open/recover at approved baseline/growth distributions and responsive dimensions, recording actual evidence and limits; commit.
 
 ## Integration and completion
 
-- [ ] Merge completed ticket branches through merger agents, refresh dependent branches from integration and open/update a draft PR with closing references #52–#56 after the first implementation merge.
-- [ ] Run `npm test`, `npm run build` and appropriate installed Chrome validation with local Node and browser cache configured.
-- [ ] Run independent Standards and Spec reviews against `main...HEAD`; fix reported issues in an implementer branch and rerun affected checks.
-- [ ] Mark the PR ready only when implementation and automated checks are complete; keep any unmet physical-device evidence explicit. Clean up implementer worktrees after integration.
+- [x] Merge completed ticket branches through merger agents, refresh dependent branches from integration and open/update a draft PR with closing references #52–#56 after the first implementation merge.
+- [x] Run `npm test`, `npm run build` and appropriate installed Chrome validation with local Node and browser cache configured.
+- [x] Run independent Standards and Spec reviews against `main...HEAD`; fix reported issues in an implementer branch and rerun affected checks.
+- [x] Mark the PR ready only when implementation and automated checks are complete; keep any unmet physical-device evidence explicit. Clean up implementer worktrees after integration.
+
+Completed 2026-10-29: PR #57 is ready for review; all six implementation/review-fix worktrees were removed after preserving evidence. See [integrated validation](../../validation/library-organization.md). Physical-device evidence limits remain explicit.
