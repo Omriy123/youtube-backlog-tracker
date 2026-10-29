@@ -1,7 +1,7 @@
 import {showRemoval} from './removal-ui.js';
 import { renderOrganizationControls, showMove, organizationButton } from './organization-ui.js';
 import { createArrangementController, appendLibraryDates, renderOverviewControls } from './arrangement-ui.js';
-import { orderLists } from './arrangement-service.js';
+import { orderLists, isGlobalValueView } from './arrangement-service.js';
 import { orderRecords } from './arrangement-service.js';
 import { createSelectionController } from './selection-ui.js';
 import { showStatus } from './status-ui.js';
@@ -104,18 +104,29 @@ async function render() {
   document.querySelector('h1').textContent=result.lists.find(list=>list.id===view)?.name ?? 'Entire Library';
   renderOpeningRecovery(result,{onChanged:render,onReviewRequired});
   document.querySelector('#count').textContent=`${derived.currentResults.length} saved ${derived.currentResults.length===1?'video':'videos'}`;
-  container.className=`density-${browse.density} orientation-${browse.orientation}`;
+  const globalValues=isGlobalValueView(context);
+  container.className=`density-${browse.density} orientation-${browse.orientation}${globalValues?' global-results':''}`;
   container.replaceChildren();
   if(!derived.currentResults.length){const empty=document.createElement('p');empty.textContent='No matching saved videos. Clear filters or change scope to continue.';container.append(empty);}
-  for(const group of derived.groups) {
+  function appendRows(records,parent) {
+    const rows=document.createElement('div');rows.className='destination-records';
+    for(const record of records) {
+      const row=renderRecord(record,result.lists);arrangements.enhanceRow(row,record,{context,records:orderedRecords});selection.enhanceRow(row,record);rows.append(row);
+    }
+    parent.append(rows);
+  }
+  if(globalValues && orderedRecords.length) {
+    const destinations=document.createElement('section');destinations.setAttribute('aria-label','Matching destinations');destinations.className='title-tools';
+    for(const group of derived.groups) {
+      destinations.append(organizationButton(`Open ${group.name}`,()=>navigate(group.id)));
+      if(!group.permanent)destinations.append(organizationButton(`Delete entire ${group.name} list`,()=>removeList(group.id,'whole')),organizationButton(`Remove matching from ${group.name}`,()=>removeList(group.id,'matches')));
+    }
+    container.append(destinations);appendRows(orderedRecords,container);
+  } else for(const group of derived.groups) {
     const section=document.createElement('section');section.className='destination-group';
     if(browse.scopeId===null){const heading=document.createElement('h2');heading.append(organizationButton(`Open ${group.name}`,()=>navigate(group.id)));section.append(heading);}
     if(browse.scopeId===null && !group.permanent){const actions=document.createElement('div');actions.className='title-tools';actions.append(organizationButton(`Delete entire ${group.name} list`,()=>removeList(group.id,'whole')),organizationButton(`Remove matching from ${group.name}`,()=>removeList(group.id,'matches')));section.append(actions);}
-    const rows=document.createElement('div');rows.className='destination-records';
-    for(const record of orderedRecords.filter(record=>record.user.destination===group.id)) {
-      const row=renderRecord(record,result.lists);arrangements.enhanceRow(row,record,{context,records:orderedRecords});selection.enhanceRow(row,record);rows.append(row);
-    }
-    section.append(rows);container.append(section);
+    appendRows(orderedRecords.filter(record=>record.user.destination===group.id),section);container.append(section);
   }
   selection.update(result,orderedRecords,context);
   removalControls.replaceChildren();const cleanupList=result.lists.find(list=>list.id===browse.scopeId && !list.permanent);

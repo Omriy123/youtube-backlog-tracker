@@ -1,5 +1,7 @@
 import {deriveBrowse} from './browse-model.js';
 import {displayTitle} from './shared.js';
+import {completeInitialPlacement} from './placement-state.js';
+import {saveManualOrder} from './list-order.js';
 
 // Removal stays inside the organization's single history/write transaction.
 export function removalPreview(state,command,{lists,orderFor,placement}) {
@@ -42,17 +44,14 @@ export function applyRemoval(state,preview,{lists,orderFor,fitArrivals,now}) {
   const targetBaseline=moving.length?orderFor(preview.to).filter(record=>!changedIds.has(record.id)):[];
   for(const row of changed) {
     const record=state.records.find(record=>record.id===row.recordId);
+    completeInitialPlacement(state,record,now);
     if(preview.effect==='dismiss') {
       record.user.lastDismissal={at:now,destination:preview.listId,destinationName:preview.listName};record.user.status='dismissed';record.user.destination=null;record.user.pendingReview=null;
     } else {record.user.destination=preview.to;record.user.latestListEntryAt=now;}
     record.user.revision++;
   }
-  function saveOrder(id,records) {
-    const list=lists.find(list=>list.id===id);const manualOrder=records.map(record=>record.id);
-    if(list.permanent)state.listSettings[id]={...state.listSettings[id],manualOrder};else state.lists.find(list=>list.id===id).manualOrder=manualOrder;
-  }
-  if(changed.length && preview.scope==='matches')saveOrder(preview.listId,sourceBaseline);
-  if(moving.length)saveOrder(preview.to,fitArrivals(targetBaseline,moving.map(row=>state.records.find(record=>record.id===row.recordId)),lists.find(list=>list.id===preview.to).publicationDirection));
+  if(changed.length && preview.scope==='matches')saveManualOrder(state,preview.listId,sourceBaseline.map(record=>record.id));
+  if(moving.length)saveManualOrder(state,preview.to,fitArrivals(targetBaseline,moving.map(row=>state.records.find(record=>record.id===row.recordId)),lists.find(list=>list.id===preview.to).publicationDirection).map(record=>record.id));
   if(preview.scope==='whole') {state.lists=state.lists.filter(list=>list.id!==preview.listId);delete state.listSettings[preview.listId];}
   return {processedIds:[...ids],deletedListId:preview.scope==='whole'?preview.listId:null,effect:preview.empty?'empty':preview.effect,to:preview.effect==='move'?preview.to:null,outcome:preview.scope==='whole'?'List deleted. Videos and prior history retained.':changed.length?'Matching removal saved. List retained.':'Kept in the current list.'};
 }

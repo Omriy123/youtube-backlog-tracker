@@ -1,5 +1,5 @@
 import { command, displayTitle } from './shared.js';
-import { orderRecords, orderLists } from './arrangement-service.js';
+import { orderRecords, orderLists, isGlobalValueView } from './arrangement-service.js';
 import { organizationButton } from './organization-ui.js';
 import { channel, durationSeconds, publicationDate } from './metadata.js';
 import { formatDateTime, onDateFormatChanged } from './date-display.js';
@@ -14,8 +14,8 @@ function dateText(value) {
   return displayedDates.get(value);
 }
 export function createArrangementController({onChanged,onError,getMovedIds,onMove}) {
-  let temporary=new Map(); let identity=null; let contents=null; let datesExpanded=false; let drag=null; let suppressUntil=0;
-  function reset() {temporary.clear();}
+  let temporary=new Map(); let flatTemporary=null; let identity=null; let contents=null; let datesExpanded=false; let drag=null; let suppressUntil=0;
+  function reset() {temporary.clear();flatTemporary=null;}
   function report(error) {onError(error);const status=document.querySelector('dialog[data-place] [role=status]');if(status)status.textContent=error;}
   function signature(context) {return JSON.stringify([context.scopeId,context.originListId,context.query,['personal','original','intermediate','latest'].map(key=>context.titleScopes?.[key]),context.channelId,context.selectedOnly,context.reviewSelected,context.sort.key,context.sort.direction]);}
   function order(records,context) {
@@ -28,6 +28,12 @@ export function createArrangementController({onChanged,onError,getMovedIds,onMov
     if(identity!==next || contents!==facts+orders) reset();
     identity=next;contents=facts+orders;
     const lists=context.lists;
+    if(isGlobalValueView(context)) {
+      const sorted=orderRecords(records,null,context.sort,lists);
+      if(!flatTemporary)return sorted;
+      const byId=new Map(sorted.map(record=>[record.id,record]));
+      return [...flatTemporary.map(id=>byId.get(id)).filter(Boolean),...sorted.filter(record=>!flatTemporary.includes(record.id))];
+    }
     const groups=lists.flatMap(list=>{
       const members=records.filter(record=>record.user.destination===list.id);
       const sorted=orderRecords(members,list,context.sort,lists);
@@ -64,7 +70,7 @@ export function createArrangementController({onChanged,onError,getMovedIds,onMov
       button.setAttribute('aria-pressed',String((context.preferences?.density ?? 'thumbnails')===density));container.append(button);
     }
   }
-  async function arrange(records,movedIds,beforeId,context) {
+  async function arrange(records,movedIds,beforeId,context,{afterId=null}={}) {
     const moved=records.filter(record=>movedIds.includes(record.id));
     if(!moved.length || moved.length!==movedIds.length) {report('Some videos are outside these results. Choose matching videos or Move instead.');return false;}
     const snapshot=await command({type:'list'});
@@ -77,11 +83,21 @@ export function createArrangementController({onChanged,onError,getMovedIds,onMov
     if(moved.some(record=>record.user.destination!==destinationId)) {report('Place arranges videos within one destination. Use Move to change destinations.');return false;}
     const group=records.filter(record=>record.user.destination===destinationId);
     if(beforeId!==null && !group.some(record=>record.id===beforeId)) {report('Choose an insertion position in the same destination.');return false;}
-    if(movedIds.includes(beforeId)) return true;
+    if(afterId!==null && !group.some(record=>record.id===afterId)) {report('Choose an insertion position in the same destination.');return false;}
+    if(movedIds.includes(beforeId) || movedIds.includes(afterId)) return true;
     const remaining=group.map(record=>record.id).filter(id=>!movedIds.includes(id));
     remaining.splice(beforeId===null?remaining.length:remaining.indexOf(beforeId),0,...group.filter(record=>movedIds.includes(record.id)).map(record=>record.id));
     const filtered=Boolean(context.query?.trim() || context.channelId || context.selectedOnly || context.reviewSelected);
-    if(filtered) {temporary.set(destinationId,remaining);onChanged();return true;}
+    if(filtered) {
+      if(isGlobalValueView(context)) {
+        const visible=records.filter(record=>!movedIds.includes(record.id));
+        const last=visible.findLastIndex(record=>record.user.destination===destinationId);
+        const position=afterId!==null ? visible.findIndex(record=>record.id===afterId)+1 : beforeId!==null ? visible.findIndex(record=>record.id===beforeId) : last<0 ? visible.length : last+1;
+        visible.splice(position,0,...moved);flatTemporary=visible.map(record=>record.id);
+        temporary.set(destinationId,visible.filter(record=>record.user.destination===destinationId).map(record=>record.id));
+      } else temporary.set(destinationId,remaining);
+      onChanged();return true;
+    }
     const list=context.lists.find(item=>item.id===destinationId);
     const result=await command({type:'arrangeVideos',destinationId,displayedIds:group.map(record=>record.id),movedIds,beforeId,expectedManualOrder:list.manualOrder ?? []});
     if(!result.ok) {report(result.error);return false;}
@@ -121,8 +137,8 @@ export function createArrangementController({onChanged,onError,getMovedIds,onMov
       if(!drag)return;if((drag.destinationId!==record.user.destination || drag.mixed) && record.user.destination==='Inbox')return;event.preventDefault();event.stopPropagation();suppressUntil=Date.now()+350;
       if(drag.destinationId!==record.user.destination || drag.mixed){const ids=drag.ids;drag=null;clearMarkers();onMove?.(ids,record.user.destination);return;}
       if(drag.ids.includes(record.id)){drag=null;clearMarkers();return;}
-      const group=records.filter(item=>item.user.destination===record.user.destination);const after=row.classList.contains('insert-after');const beforeId=after?group[group.findIndex(item=>item.id===record.id)+1]?.id ?? null:record.id;
-      const ids=drag.ids;drag=null;clearMarkers();arrange(records,ids,beforeId,context);
+      const group=records.filter(item=>item.user.destination===record.user.destination);const after=row.classList.contains('insert-after');const flatFiltered=isGlobalValueView(context) && Boolean(context.query?.trim() || context.selectedOnly || context.reviewSelected);const beforeId=after?(flatFiltered?null:group[group.findIndex(item=>item.id===record.id)+1]?.id ?? null):record.id;
+      const ids=drag.ids;drag=null;clearMarkers();arrange(records,ids,beforeId,context,{afterId:flatFiltered && after?record.id:null});
     });
     row.addEventListener('dragend',()=>{drag=null;suppressUntil=Date.now()+350;clearMarkers();row.classList.remove('dragging');});
     row.querySelector('.row-content')?.append(organizationButton('Place video',()=>showPlace(records,[record.id],context)));
