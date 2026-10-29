@@ -4,13 +4,17 @@ export function requeueForReview(state, record, browser) {
   const before = structuredClone(record.user);
   const event = before.watchEvents.at(-1);
   const opening = state.openings?.find(item => item.id === event?.openingId && item.recordId === record.id);
-  const activity = state.history.filter(item => item.recordId === record.id);
+  const activity = state.history.filter(item => item.recordId === record.id || item.changes?.some(change=>change.kind==='records' && change.id===record.id));
   const time = browser.now();
+  const previousDestination=before.destination ?? (before.status === 'watched' ? opening?.before.destination ?? event?.destination : before.lastDismissal?.destination) ?? null;
+  const destinationName=['Inbox','Backlog'].includes(previousDestination)?previousDestination:state.lists?.find(list=>list.id===previousDestination)?.name ?? event?.destinationName ?? before.lastDismissal?.destinationName ?? null;
   const previous = {
     status: before.status,
-    destination: before.destination ?? (before.status === 'watched' ? opening?.before.destination : before.lastDismissal?.destination) ?? null,
+    destination: previousDestination,
+    destinationName,
     lastActivityAt: activity.at(-1)?.at ?? event?.at ?? null,
-    lastOpenedAt: event?.at ?? null,
+    lastOpenedAt: [...before.watchEvents].reverse().find(item=>item.source!=='manual')?.at ?? null,
+    lastWatchedAt: event?.at ?? null,
     dismissedAt: before.lastDismissal?.at ?? null,
     user: before,
     // History itself remains durable. Retain its dated activity summaries here

@@ -3,6 +3,7 @@ import { orderRecords, orderLists } from './arrangement-service.js';
 import { organizationButton } from './organization-ui.js';
 import { channel, durationSeconds, publicationDate } from './metadata.js';
 import { formatDateTime, onDateFormatChanged } from './date-display.js';
+import { showReview } from './review-ui.js';
 
 const headers=[['title','Title'],['channel','Channel'],['destination','Destination'],['publication','Published'],['duration','Duration']];
 const dates=[['firstSavedAt','First saved'],['firstInboxExitAt','First Inbox-exit'],['latestListEntryAt','Latest list-entry']];
@@ -12,7 +13,7 @@ function dateText(value) {
   if(!displayedDates.has(value)) {if(displayedDates.size>5000)displayedDates.clear();displayedDates.set(value,formatDateTime(value));}
   return displayedDates.get(value);
 }
-export function createArrangementController({onChanged,onError,getMovedIds}) {
+export function createArrangementController({onChanged,onError,getMovedIds,onMove}) {
   let temporary=new Map(); let identity=null; let contents=null; let datesExpanded=false; let drag=null; let suppressUntil=0;
   function reset() {temporary.clear();}
   function report(error) {onError(error);const status=document.querySelector('dialog[data-place] [role=status]');if(status)status.textContent=error;}
@@ -21,7 +22,7 @@ export function createArrangementController({onChanged,onError,getMovedIds}) {
     const next=signature(context);
     // contentRecords describes membership before checkbox-only visibility changes.
     const content=context.contentRecords ?? records;
-    const facts=JSON.stringify(content.map(record=>[record.id,record.user.destination,displayTitle(record),channel(record),durationSeconds(record),publicationDate(record),record.user.firstSavedAt,record.user.firstInboxExitAt,record.user.latestListEntryAt]).sort((a,b)=>a[0].localeCompare(b[0])));
+    const facts=JSON.stringify(content.map(record=>[record.id,record.user.destination,displayTitle(record),channel(record),durationSeconds(record),publicationDate(record),record.user.firstSavedAt,record.user.firstInboxExitAt,record.user.latestListEntryAt,record.user.pendingReview]).sort((a,b)=>a[0].localeCompare(b[0])));
     const relevant=new Set(content.map(record=>record.user.destination));if(context.scopeId)relevant.add(context.scopeId);
     const orders=JSON.stringify(context.lists.filter(list=>relevant.has(list.id)).map(list=>[list.id,list.manualOrder,list.publicationDirection]).sort((a,b)=>a[0].localeCompare(b[0])));
     if(identity!==next || contents!==facts+orders) reset();
@@ -66,6 +67,12 @@ export function createArrangementController({onChanged,onError,getMovedIds}) {
   async function arrange(records,movedIds,beforeId,context) {
     const moved=records.filter(record=>movedIds.includes(record.id));
     if(!moved.length || moved.length!==movedIds.length) {report('Some videos are outside these results. Choose matching videos or Move instead.');return false;}
+    const snapshot=await command({type:'list'});
+    if(!snapshot.ok){report(snapshot.error);return false;}
+    const latest=moved.map(record=>snapshot.records.find(item=>item.id===record.id));
+    if(latest.some((record,index)=>!record || record.user.destination!==moved[index].user.destination)){report('An affected video changed placement. Refresh and choose Place again.');return false;}
+    if(latest.some(record=>record.user.pendingReview)) {report('Review prior activity before arranging. Choose Place again after the review.');showReview(latest.find(record=>record.user.pendingReview),{onChanged:()=>{reset();onChanged('Review resolved. Choose Place again to arrange.');}});return false;}
+    if(latest.some((record,index)=>record.user.revision!==moved[index].user.revision)){report('An affected video changed. Refresh and choose Place again.');return false;}
     const destinationId=moved[0].user.destination;
     if(moved.some(record=>record.user.destination!==destinationId)) {report('Place arranges videos within one destination. Use Move to change destinations.');return false;}
     const group=records.filter(record=>record.user.destination===destinationId);
@@ -91,28 +98,36 @@ export function createArrangementController({onChanged,onError,getMovedIds}) {
     const status=document.createElement('p');status.setAttribute('role','status');
     dialog.append(heading,label,status,confirm,organizationButton('Cancel',()=>dialog.close()));dialog.addEventListener('close',()=>dialog.remove());document.body.append(dialog);dialog.showModal();select.focus();
   }
-  function clearMarkers() {document.querySelectorAll('.insert-before,.insert-after').forEach(row=>row.classList.remove('insert-before','insert-after'));}
+  function clearMarkers() {document.querySelectorAll('.insert-before,.insert-after,.destination-drop').forEach(row=>row.classList.remove('insert-before','insert-after','destination-drop'));}
+  function enhanceDestination(target,destinationId) {
+    if(destinationId==='Inbox' || destinationId==='Entire Library')return;
+    target.addEventListener('dragover',event=>{if(!drag)return;event.preventDefault();clearMarkers();target.classList.add('destination-drop');});
+    target.addEventListener('drop',event=>{if(!drag)return;event.preventDefault();event.stopPropagation();const ids=drag.ids;drag=null;clearMarkers();suppressUntil=Date.now()+350;onMove?.(ids,destinationId);});
+  }
   function enhanceRow(row,record,{context,records}) {
     row.dataset.recordId=record.id;row.draggable=true;
     row.addEventListener('click',event=>{if(Date.now()<suppressUntil){event.preventDefault();event.stopImmediatePropagation();}},true);
     row.addEventListener('dragstart',event=>{
       if(event.target.closest('button,input,select,a,summary') && !event.target.closest('.title-target')) {event.preventDefault();return;}
-      const ids=getMovedIds?.(event,record,records) ?? [record.id];drag={ids,destinationId:record.user.destination};
+      const ids=getMovedIds?.(event,record,records) ?? [record.id];drag={ids,destinationId:record.user.destination,mixed:new Set(records.filter(item=>ids.includes(item.id)).map(item=>item.user.destination)).size>1};
       event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',record.id);row.classList.add('dragging');
     });
     row.addEventListener('dragover',event=>{
-      if(!drag || drag.destinationId!==record.user.destination)return;
-      event.preventDefault();clearMarkers();const rect=row.getBoundingClientRect();row.classList.add(event.clientY<rect.top+rect.height/2?'insert-before':'insert-after');
+      if(!drag)return;
+      if((drag.destinationId!==record.user.destination || drag.mixed) && record.user.destination==='Inbox')return;
+      event.preventDefault();clearMarkers();if(drag.destinationId!==record.user.destination || drag.mixed){row.classList.add('destination-drop');return;}const rect=row.getBoundingClientRect();row.classList.add(event.clientY<rect.top+rect.height/2?'insert-before':'insert-after');
     });
     row.addEventListener('drop',event=>{
-      if(!drag || drag.destinationId!==record.user.destination)return;event.preventDefault();event.stopPropagation();suppressUntil=Date.now()+350;
+      if(!drag)return;if((drag.destinationId!==record.user.destination || drag.mixed) && record.user.destination==='Inbox')return;event.preventDefault();event.stopPropagation();suppressUntil=Date.now()+350;
+      if(drag.destinationId!==record.user.destination || drag.mixed){const ids=drag.ids;drag=null;clearMarkers();onMove?.(ids,record.user.destination);return;}
+      if(drag.ids.includes(record.id)){drag=null;clearMarkers();return;}
       const group=records.filter(item=>item.user.destination===record.user.destination);const after=row.classList.contains('insert-after');const beforeId=after?group[group.findIndex(item=>item.id===record.id)+1]?.id ?? null:record.id;
       const ids=drag.ids;drag=null;clearMarkers();arrange(records,ids,beforeId,context);
     });
     row.addEventListener('dragend',()=>{drag=null;suppressUntil=Date.now()+350;clearMarkers();row.classList.remove('dragging');});
     row.querySelector('.row-content')?.append(organizationButton('Place video',()=>showPlace(records,[record.id],context)));
   }
-  return {order,arrange,reset,renderSortControls,enhanceRow,showPlace};
+  return {order,arrange,reset,renderSortControls,enhanceRow,enhanceDestination,showPlace};
 }
 export function appendLibraryDates(content,record) {
   const line=document.createElement('p');line.className='library-dates muted';line.textContent=dates.map(([key,label])=>`${label}: ${dateText(record.user[key])}`).join(' · ');content.append(line);

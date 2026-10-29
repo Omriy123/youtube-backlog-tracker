@@ -24,16 +24,17 @@ export function showReview(record, { onChanged }) {
   function dateLine(label, value) { const p = document.createElement('p'); const update = () => { p.textContent = `${label}: ${time(value)}`; }; dateUpdates.push(update); update(); dialog.append(p); }
   const priorStatus = previous.status ?? pending.priorStatus;
   line('Previous status', priorStatus === 'watched' ? 'Watched' : priorStatus === 'dismissed' ? 'Dismissed' : 'Unknown');
-  line('Previous destination', previous.destination ?? 'Unknown');
+  line('Previous destination', previous.destinationName ?? (['Inbox','Backlog'].includes(previous.destination)?previous.destination:previous.destination?'Destination unavailable':'Unknown'));
   dateLine('Last activity', previous.lastActivityAt);
   dateLine('Last opened', previous.lastOpenedAt);
+  dateLine('Last watch event', previous.lastWatchedAt);
   dateLine('Last dismissed', previous.dismissedAt);
   dateLine('First saved', before.firstSavedAt);
   dateLine('First Inbox-exit', before.firstInboxExitAt);
   dateLine('Previous list-entry', before.latestListEntryAt);
   const events = before.watchEvents ?? [];
   line('Retained watch events', events.length);
-  for (const event of events) dateLine('Opened', event.at);
+  for (const event of events) dateLine(event.source==='manual'?'Marked watched':'Opened', event.at);
   if (previous.activity?.length) {
     const activity = document.createElement('details');
     const summary = document.createElement('summary'); summary.textContent = 'Prior Library activity';

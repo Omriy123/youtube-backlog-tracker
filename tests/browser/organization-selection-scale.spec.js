@@ -1,0 +1,28 @@
+import {test,expect} from '@playwright/test';
+import {launch} from './helpers.js';
+
+for(const fixture of [{name:'baseline',active:1000,total:1000,channels:100,lists:8},{name:'growth',active:1900,total:3000,channels:550,lists:24}])test(`collect and filter selection at ${fixture.name} workload`,async({},testInfo)=>{
+  test.setTimeout(120000);const app=await launch();try{
+    const page=await app.context.newPage();await page.setViewportSize({width:1440,height:900});await page.goto(`${app.base}/library.html`);
+    await page.evaluate(async fixture=>{
+      const lists=Array.from({length:fixture.lists},(_,index)=>({id:`list-${index}`,name:`List ${index+1}`,importance:index,manualOrder:[],publicationDirection:'asc'}));
+      const records=Array.from({length:fixture.total},(_,index)=>({id:`v${index}`,identity:`fixture:${index}`,url:`https://example.org/${index}`,user:{status:index<fixture.active?'active':'watched',destination:index>=fixture.active?null:index<Math.floor(fixture.active*.7)?'Inbox':`list-${index%fixture.lists}`,firstSavedAt:'2026-01-01T12:00:00Z',firstInboxExitAt:null,latestListEntryAt:'2026-01-01T12:00:00Z',revision:1,personalTitle:null,watchEvents:index>=fixture.active?[{id:`watch-${index}`,source:'manual',at:'2026-02-01T12:00:00Z',destination:'Inbox'}]:[],pendingReview:null},metadata:{publicationDate:index%9?new Date(Date.UTC(2026,0,index%180+1)).toISOString():null,durationSeconds:index%7?60+index%3600:null,channelId:index%11?`channel-${index%fixture.channels}`:null,channelName:index%11?`Channel ${String(index%fixture.channels).padStart(3,'0')}`:null,observations:[{title:`Video ${String(index).padStart(5,'0')}`,source:'test-fixture',observedAt:'2026-01-01T12:00:00Z'}]}}));
+      await chrome.storage.local.set({library:{version:1,lists,records,history:[]}});
+    },fixture);
+    const initial=performance.now();await page.reload();const expected=Math.floor(fixture.active*.7);await expect(page.locator('#records article')).toHaveCount(expected);const loadMs=performance.now()-initial;
+    await page.locator('[aria-label="Select all current results"]').evaluate(control=>{window.started=performance.now();control.click();});await expect(page.locator('#selection-panel > h2')).toHaveText(`${expected} selected`);const selectAllMs=await page.evaluate(()=>performance.now()-window.started);
+    await page.locator('[aria-label="Show only selected"]').evaluate(control=>{window.started=performance.now();control.click();});await page.waitForFunction(()=>document.querySelector('#records').getAttribute('aria-busy')==='false');const selectedOnlyMs=await page.evaluate(()=>performance.now()-window.started);
+    await page.getByRole('searchbox').evaluate(input=>{window.started=performance.now();input.value='Video 0000';input.dispatchEvent(new Event('input',{bubbles:true}));});await expect(page.locator('#records article')).toHaveCount(10);const queryMs=await page.evaluate(()=>performance.now()-window.started);
+    await page.locator('[aria-label="Select all current results"]').evaluate(control=>control.click());await expect(page.locator('#records article')).toHaveCount(0);await expect(page.locator('#selection-panel > h2')).toHaveText(`${expected-10} selected`);
+    const metrics={...fixture,viewport:await page.evaluate(()=>({width:innerWidth,height:innerHeight,devicePixelRatio})),zoom:1,activation:'in-page UI activation; excludes locator traversal',loadMs,selectAllMs,selectedOnlyMs,queryMs};console.log('selection workload',JSON.stringify(metrics));await testInfo.attach('selection-workload.json',{body:JSON.stringify(metrics,null,2),contentType:'application/json'});
+  }finally{await app.context.close();}
+});
+
+for(const viewport of [{width:2560,height:1440},{width:1440,height:900},{width:1280,height:500},{width:390,height:844},{width:768,height:1200}])test(`selection controls and explicit preview remain reachable at ${viewport.width}x${viewport.height}`,async({},testInfo)=>{
+  const app=await launch();try{
+    const page=await app.context.newPage();await page.setViewportSize(viewport);await page.goto(`${app.base}/library.html`);
+    await page.evaluate(async()=>{await chrome.storage.local.set({library:{version:1,history:[],records:[{id:'one',identity:'fixture:one',url:'https://example.org/one',user:{status:'active',destination:'Inbox',firstSavedAt:'2026-01-01T00:00:00Z',firstInboxExitAt:null,latestListEntryAt:'2026-01-01T00:00:00Z',revision:1,personalTitle:null,watchEvents:[],pendingReview:null},metadata:{observations:[{title:'Responsive selection fixture',source:'test-fixture',observedAt:'2026-01-01T00:00:00Z'}]}}]}});});await page.reload();
+    await page.getByRole('article').getByRole('checkbox').focus();await page.keyboard.press('Space');const panel=page.getByRole('region',{name:'Selected videos',exact:true});await panel.getByRole('button',{name:'Move selected (1)',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Move videos',exact:true});await dialog.getByRole('combobox').selectOption('Backlog');const confirm=dialog.getByRole('button',{name:'Confirm move',exact:true});await confirm.focus();await expect(confirm).toBeFocused();const box=await confirm.boundingBox();expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(viewport.width);
+    await page.screenshot({path:testInfo.outputPath('selection-responsive.png')});await confirm.press('Enter');await expect(dialog).not.toBeVisible();await expect(panel).toContainText('0 selected');await testInfo.attach('viewport.json',{body:JSON.stringify(await page.evaluate(()=>({width:innerWidth,height:innerHeight,devicePixelRatio}))),contentType:'application/json'});
+  }finally{await app.context.close();}
+});

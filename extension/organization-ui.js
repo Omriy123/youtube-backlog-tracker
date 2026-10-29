@@ -46,50 +46,70 @@ export function renderOrganizationControls(result,{view,onNavigate,onChanged}) {
   if(actions.length) {
     const label=document.createElement('p'); label.textContent='Recover organization changes'; recovery.append(label);
     const select=document.createElement('select'); select.setAttribute('aria-label','Organization change to recover');
-    const labels={createList:'Created watch list',renameList:'Renamed watch list',setListImportance:'Changed list importance',organizationCommit:'Moved videos',arrangeVideos:'Arranged videos'};
+    const labels={createList:'Created watch list',renameList:'Renamed watch list',setListImportance:'Changed list importance',organizationCommit:'Moved videos',arrangeVideos:'Arranged videos',statusCommit:'Changed watched or dismissed status'};
     for(const action of actions.slice().reverse()) {const option=document.createElement('option');option.value=action.id;option.textContent=`${labels[action.command] ?? 'Organization change'} · ${new Date(action.at).toLocaleString()}`;select.append(option);}
     recovery.append(select,organizationButton('Undo organization change',async()=>{
       const undone=await command({type:'organizationUndo',actionId:select.value}); onChanged(undone.ok ? undone.outcome : undone.error);
     }));
   }
 }
-export async function showMove(records,lists,{onChanged}) {
+export async function showMove(records,lists,{onChanged,onProcessed,initialDestination}={}) {
   const {dialog,status,actions}=dialogFor('Move videos');
-  let frozen=null;
-  const table=document.createElement('table'); const head=document.createElement('thead'); const heading=document.createElement('tr');
-  for(const text of ['Video','From','To']) {const th=document.createElement('th');th.textContent=text;heading.append(th);}head.append(heading);table.append(head);
-  const body=document.createElement('tbody');table.append(body);const choices=new Map();
-  const name=id=>lists.find(item=>item.id===id)?.name ?? id;
-  for(const record of records) {
-    const row=document.createElement('tr'); const title=document.createElement('td');title.textContent=displayTitle(record);const from=document.createElement('td');from.textContent=name(record.user.destination);
-    const cell=document.createElement('td');const select=document.createElement('select');select.setAttribute('aria-label',`Destination for ${displayTitle(record)}`);
-    for(const list of [{id:'keep',name:'Keep in the current list'},...lists.filter(list=>list.id!=='Inbox')]) {const option=document.createElement('option');option.value=list.id;option.textContent=list.name;select.append(option);}
-    choices.set(record.id,select); select.addEventListener('change',refresh);cell.append(select);row.append(title,from,cell);body.append(row);
+  let frozen=null;let generation=0;let saving=false;
+  const excluded=new Set();const choices=new Map(records.map(record=>[record.id,initialDestination ?? 'keep']));
+  const live=new Map(records.map(record=>[record.id,record]));
+  const count=document.createElement('p');const table=document.createElement('table');const head=document.createElement('thead');const heading=document.createElement('tr');
+  for(const text of ['Video','From','To']) {const th=document.createElement('th');th.textContent=text;heading.append(th);}head.append(heading);table.append(head);const body=document.createElement('tbody');table.append(body);
+  const name=id=>lists.find(list=>list.id===id)?.name ?? 'Destination unavailable';
+  function destinations(select,value) {
+    for(const list of [{id:'keep',name:'Keep in the current list'},...lists.filter(list=>list.id!=='Inbox')]){const option=document.createElement('option');option.value=list.id;option.textContent=list.name;select.append(option);}
+    if(value!=='keep' && !lists.some(list=>list.id===value && list.id!=='Inbox')){const invalid=document.createElement('option');invalid.value=value;invalid.textContent='Unavailable destination - choose again';select.append(invalid);}
+    select.value=value;
+  }
+  if(records.length>1) {
+    const label=document.createElement('label');label.textContent='Shared destination';const shared=document.createElement('select');shared.setAttribute('aria-label','Shared destination');destinations(shared,'keep');label.append(shared);
+    dialog.append(label,organizationButton('Set the same destination for all',()=>{for(const record of records)choices.set(record.id,shared.value);refresh();}));
+  }
+  async function reviewRecord(record) {
+    showReview(record,{onChanged:async(message,updated)=>{
+      if(updated?.user.status!=='active')excluded.add(record.id);
+      await refresh();status.textContent='Review resolved. Review the refreshed move and confirm separately.';
+      onChanged?.('Review resolved. Move still awaits confirmation.');
+    }});
+  }
+  function paint() {
+    body.replaceChildren();count.textContent=`${records.length-excluded.size} included / ${records.length} requested`;
+    for(const initial of records) {
+      const record=live.get(initial.id);const row=document.createElement('tr');const title=document.createElement('td');title.textContent=displayTitle(record ?? initial);const from=document.createElement('td');from.textContent=record?name(record.user.destination):'No longer active';
+      const cell=document.createElement('td');const select=document.createElement('select');select.setAttribute('aria-label',`Destination for ${displayTitle(initial)}`);destinations(select,choices.get(initial.id));select.disabled=excluded.has(initial.id) || saving;select.addEventListener('change',()=>{choices.set(initial.id,select.value);refresh();});cell.append(select);
+      if(record?.user.pendingReview)cell.append(organizationButton(`Review ${displayTitle(record)}`,()=>reviewRecord(record)));
+      if(records.length>1 || record?.user.pendingReview || !record) {
+        const label=document.createElement('label');label.className='move-exclusion';const exclude=document.createElement('input');exclude.type='checkbox';exclude.checked=excluded.has(initial.id);exclude.setAttribute('aria-label',`Exclude ${displayTitle(initial)} from this move`);exclude.addEventListener('change',()=>{exclude.checked?excluded.add(initial.id):excluded.delete(initial.id);refresh();});label.append(exclude,document.createTextNode('Exclude from this move'));cell.append(label);
+      }
+      row.append(title,from,cell);body.append(row);
+    }
   }
   const confirm=organizationButton('Confirm move',async()=>{
-    if(!frozen) return; confirm.disabled=true;
-    const result=await command({type:'organizationCommit',preview:frozen});confirm.disabled=false;
-    if(result.ok) {dialog.close();onChanged(result.outcome,result);return;}
+    if(!frozen || saving)return;saving=true;confirm.disabled=true;dialog.inert=true;
+    const result=await command({type:'organizationCommit',preview:frozen});saving=false;dialog.inert=false;
+    if(result.ok){onProcessed?.(result.processedIds);dialog.close();onChanged?.(result.outcome,result);return;}
     status.textContent=result.error;
-    if(result.preview) {frozen=result.preview;updateOrigins();}
-    if(result.outcome==='reviewRequired') {
-      const review=result.records[0];
-      showReview(review,{onChanged:async()=>{await refresh();status.textContent='Review resolved. Review the refreshed move and confirm separately.';onChanged('Review resolved. Move still awaits confirmation.');}});
-    }
+    if(result.preview){frozen=result.preview;if(frozen.lists)lists=frozen.lists;for(const row of frozen.rows)live.set(row.recordId,row.record);paint();}
+    else if(result.outcome==='stale'){await refresh();status.textContent=result.error;}
+    if(result.outcome==='reviewRequired')reviewRecord(result.records[0]);
+    confirm.disabled=!frozen;
   });
-  function updateOrigins() {
-    if(frozen?.lists) lists=frozen.lists;
-    for(const [index,row] of [...body.children].entries()) {
-      const item=frozen?.rows.find(item=>item.recordId===records[index].id);
-      if(item) row.children[1].textContent=name(item.from);
-      for(const option of choices.get(records[index].id).options) if(option.value!=='keep') option.textContent=name(option.value);
-    }
-  }
+  dialog.addEventListener('cancel',event=>{if(saving)event.preventDefault();});
   async function refresh() {
-    frozen=null;confirm.disabled=true;
-    const result=await command({type:'organizationPreview',rows:records.map(record=>({recordId:record.id,to:choices.get(record.id).value}))});
-    if(result.ok) {frozen=result.preview;updateOrigins();status.textContent=frozen.rows.some(row=>row.blocked) ? 'Review prior activity is required before movement.' : 'Review every destination before confirming.';} else status.textContent=result.error;
+    const current=++generation;frozen=null;confirm.disabled=true;
+    const snapshot=await command({type:'list'});if(current!==generation)return;
+    if(!snapshot.ok){status.textContent=snapshot.error;return;}
+    lists=snapshot.lists;live.clear();for(const record of snapshot.records)live.set(record.id,record);paint();
+    const rows=records.filter(record=>!excluded.has(record.id)).map(record=>({recordId:record.id,to:choices.get(record.id)}));
+    if(!rows.length){status.textContent='No included videos. Excluded videos stay selected.';return;}
+    const result=await command({type:'organizationPreview',rows});if(current!==generation)return;
+    if(result.ok){frozen=result.preview;status.textContent=frozen.rows.some(row=>row.blocked)?'Review prior activity or explicitly exclude unresolved rows before moving.':'Review every destination before confirming.';}else status.textContent=result.error;
     confirm.disabled=!frozen;
   }
-  actions.append(confirm,organizationButton('Refresh move preview',refresh),organizationButton('Cancel',()=>dialog.close()));dialog.append(table,status,actions);dialog.showModal();await refresh();
+  actions.append(confirm,organizationButton('Refresh move preview',refresh),organizationButton('Cancel',()=>dialog.close()));dialog.append(count,table,status,actions);dialog.showModal();await refresh();
 }
