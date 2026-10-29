@@ -17,18 +17,18 @@
 
 ## Task 1: Render global value sorts
 
-- [ ] Add a failing installed-Chrome workflow that interleaves destinations under Destination, Title, duration and Library-date sorts in both directions.
-- [ ] Render ordinary Entire Library/All channels value sorts in their actual global order, preserving channel-group/sidebar and destination-local Manual/publication behavior.
-- [ ] Verify selection, row actions, matched cleanup and arranging remain available in both render paths.
+- [x] Add a failing installed-Chrome workflow that interleaves destinations under Destination, Title, duration and Library-date sorts in both directions.
+- [x] Render ordinary Entire Library/All channels value sorts in their actual global order, preserving channel-group/sidebar and destination-local Manual/publication behavior.
+- [x] Verify selection, row actions, matched cleanup and arranging remain available in both render paths.
 
 ## Task 2: Distinguish unknown historical dates from initial decisions
 
-- [ ] Add failing public/browser cases for unknown custom-list records moved, manually marked, opened, returned to Inbox by deletion and rediscovered.
-- [ ] Add `initialPlacementComplete` plus a pure recovery-aware inference and mutation helper. Apply before movement/status/opening/deletion/rediscovery and preserve it in organization recovery snapshots.
-- [ ] Verify initial Inbox transitions record dates, known dates remain unchanged, and Undo of initial move/status/open restores eligibility without blanket history inference.
+- [x] Add failing public/browser cases for unknown custom-list records moved, manually marked, opened, returned to Inbox by deletion and rediscovered.
+- [x] Add `initialPlacementComplete` plus a pure recovery-aware inference and mutation helper. Apply before movement/status/opening/deletion/rediscovery and preserve it in organization recovery snapshots.
+- [x] Verify initial Inbox transitions record dates, known dates remain unchanged, and Undo of initial move/status/open restores eligibility without blanket history inference.
 
 ## Task 3: Share Manual-order persistence and verify
 
-- [ ] Replace permanent/custom Manual writes in arranging, moves and removal with one mutation helper inside the existing transaction.
-- [ ] Run targeted installed-Chrome/public regressions, full boundary/browser suites and build. Record results and limits.
-- [ ] Merge current integration, check the diff, commit and hand off for reviewer recheck.
+- [x] Replace permanent/custom Manual writes in arranging, moves and removal with one mutation helper inside the existing transaction.
+- [x] Run targeted installed-Chrome/public regressions, full boundary/browser suites and build. Record results and limits.
+- [x] Merge current integration, check the diff, commit and hand off for reviewer recheck.
