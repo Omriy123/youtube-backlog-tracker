@@ -16,7 +16,7 @@ export function createSelectionController({onChanged,onMove,onPlace,onStatus}) {
   function paint() {
     const matching=currentResults.filter(record=>selectedIds.has(record.id));
     all.checked=currentResults.length>0 && matching.length===currentResults.length;all.indeterminate=matching.length>0 && matching.length<currentResults.length;all.disabled=!currentResults.length;
-    only.checked=selectedOnly;counts.textContent=`${selectedIds.size} selected · ${matching.length} in current ${currentResults.length} results`;
+    only.checked=selectedOnly;counts.textContent=`${selectedIds.size} selected · ${matching.length} matching of ${currentResults.length} ${currentResults.length===1?'result':'results'}`;
     for(const checkbox of document.querySelectorAll('input[data-select-record]'))checkbox.checked=selectedIds.has(checkbox.dataset.selectRecord);
     panel.replaceChildren();const heading=document.createElement('h2');heading.textContent=`${selectedIds.size} selected`;panel.append(heading);
     const scopes=document.createElement('fieldset');const legend=document.createElement('legend');legend.textContent='Selection action scope';scopes.append(legend);
