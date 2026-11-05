@@ -3,11 +3,11 @@ import { resolve } from 'node:path';
 import { mkdtemp, mkdir, cp, rename, writeFile } from 'node:fs/promises';
 
 const extension = resolve('extension');
-export async function launch(profile, { failWrite = 0, failCreate = false, missingTitle = false, extensionPath } = {}) {
+export async function launch(profile, { failWrite = 0, writeDelay = 0, failCreate = false, missingTitle = false, extensionPath } = {}) {
   await mkdir(resolve('.scratch/profiles'), { recursive: true });
   profile ??= await mkdtemp(resolve('.scratch/profiles/browser-'));
   let installedExtension = extensionPath ?? extension;
-  if (failWrite || failCreate || missingTitle) {
+  if (failWrite || writeDelay || failCreate || missingTitle) {
     await mkdir(resolve('.scratch/extensions'), { recursive: true });
     installedExtension = await mkdtemp(resolve('.scratch/extensions/failure-'));
     await cp(extension, installedExtension, { recursive: true });
@@ -17,7 +17,7 @@ export async function launch(profile, { failWrite = 0, failCreate = false, missi
       import { createBrowserAdapter as actual } from './actual-browser.js';
       export function createBrowserAdapter() {
         const browser = actual(); let writes = 0; const write = browser.write; const capture = browser.capture;
-        browser.write = state => { if (++writes === ${failWrite}) throw new Error('Fixture persistence failure'); return write(state); };
+        browser.write = async state => { if (${writeDelay}) await new Promise(resolve => setTimeout(resolve, ${writeDelay})); if (++writes === ${failWrite}) throw new Error('Fixture persistence failure'); return write(state); };
         if (${failCreate}) browser.createTab = async () => { throw new Error('Fixture tab creation failure'); };
         if (${missingTitle}) browser.capture = async () => ({ ...await capture(), title: null });
         return browser;

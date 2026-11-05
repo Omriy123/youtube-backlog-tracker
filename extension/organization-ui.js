@@ -13,13 +13,20 @@ function dialogFor(name) {
 }
 export function editList(list,{onChanged}) {
   const {dialog,status,actions}=dialogFor(list ? 'Rename list' : 'Create watch list');
-  const label=document.createElement('label'); label.textContent='List name'; const input=document.createElement('input'); input.value=list?.name ?? ''; label.append(input); dialog.append(label,status,actions);
-  const save=organizationButton('Save list',async()=>{
-    save.disabled=true;
-    const result=await command({type:list ? 'renameList' : 'createList',listId:list?.id,name:input.value}); save.disabled=false;
-    if(!result.ok) {status.textContent=result.error;return;}
+  const form=document.createElement('form');let saving=false;
+  const label=document.createElement('label'); label.textContent='List name'; const input=document.createElement('input'); input.value=list?.name ?? ''; label.append(input); form.append(label,status,actions);dialog.append(form);
+  const save=document.createElement('button');save.type='submit';save.className='secondary';save.textContent='Save list';
+  const cancel=organizationButton('Cancel',()=>{if(!saving)dialog.close();});
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();if(saving)return;saving=true;
+    save.disabled=true;cancel.disabled=true;input.disabled=true;
+    const result=await command({type:list ? 'renameList' : 'createList',listId:list?.id,name:input.value});
+    saving=false;save.disabled=false;cancel.disabled=false;input.disabled=false;
+    if(!result.ok) {status.textContent=result.error;input.focus();return;}
     dialog.close(); onChanged(result.outcome,result.list?.id);
-  }); actions.append(save,organizationButton('Cancel',()=>dialog.close())); dialog.showModal(); input.focus();
+  });
+  dialog.addEventListener('cancel',event=>{if(saving)event.preventDefault();});
+  actions.append(save,cancel); dialog.showModal(); input.focus();
 }
 export function renderOrganizationControls(result,{view,onNavigate,onChanged,onDelete}) {
   const nav=document.querySelector('nav'); nav.replaceChildren();
@@ -68,12 +75,15 @@ export async function showMove(records,lists,{onChanged,onProcessed,initialDesti
   const name=id=>lists.find(list=>list.id===id)?.name ?? 'Destination unavailable';
   function destinations(select,value) {
     for(const list of [{id:'keep',name:'Keep in the current list'},...lists.filter(list=>list.id!=='Inbox')]){const option=document.createElement('option');option.value=list.id;option.textContent=list.name;select.append(option);}
-    if(value!=='keep' && !lists.some(list=>list.id===value && list.id!=='Inbox')){const invalid=document.createElement('option');invalid.value=value;invalid.textContent='Unavailable destination - choose again';select.append(invalid);}
+    if(value && value!=='keep' && !lists.some(list=>list.id===value && list.id!=='Inbox')){const invalid=document.createElement('option');invalid.value=value;invalid.textContent='Unavailable destination - choose again';select.append(invalid);}
     select.value=value;
   }
+  let shared=null;let applyShared=null;
   if(records.length>1) {
-    const label=document.createElement('label');label.textContent='Shared destination';const shared=document.createElement('select');shared.setAttribute('aria-label','Shared destination');destinations(shared,'keep');label.append(shared);
-    dialog.append(label,organizationButton('Set the same destination for all',()=>{for(const record of records)choices.set(record.id,shared.value);refresh();}));
+    const label=document.createElement('label');label.textContent='Shared destination';shared=document.createElement('select');shared.setAttribute('aria-label','Shared destination');label.append(shared);
+    applyShared=organizationButton('Set the same destination for all',()=>{if(!shared.value || saving)return;for(const record of records)if(!excluded.has(record.id))choices.set(record.id,shared.value);refresh();});
+    shared.addEventListener('change',()=>{applyShared.disabled=!shared.value || saving;});
+    dialog.append(label,applyShared);
   }
   async function reviewRecord(record) {
     showReview(record,{onChanged:async(message,updated)=>{
@@ -83,6 +93,12 @@ export async function showMove(records,lists,{onChanged,onProcessed,initialDesti
     }});
   }
   function paint() {
+    if(shared) {
+      const values=new Set(records.filter(record=>!excluded.has(record.id)).map(record=>choices.get(record.id)));
+      const value=values.size===1?[...values][0]:'';shared.replaceChildren();destinations(shared,value);
+      if(!value){const mixed=document.createElement('option');mixed.value='';mixed.textContent=values.size?'Mixed destinations':'No included videos';mixed.disabled=true;shared.prepend(mixed);shared.value='';}
+      shared.disabled=saving || !values.size;applyShared.disabled=saving || !value;
+    }
     body.replaceChildren();count.textContent=`${records.length-excluded.size} included / ${records.length} requested`;
     for(const initial of records) {
       const record=live.get(initial.id);const row=document.createElement('tr');const title=document.createElement('td');title.textContent=displayTitle(record ?? initial);const from=document.createElement('td');from.textContent=record?name(record.user.destination):'No longer active';

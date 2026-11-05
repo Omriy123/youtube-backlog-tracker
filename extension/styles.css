@@ -8,6 +8,11 @@
 #selection-controls input,#selection-panel input,.record-selection input { width:auto;margin:0; }
 #selection-panel { border-top:1px solid #bdccc4;padding-top:18px;margin-top:20px; }
 #selection-panel fieldset { display:flex;flex-wrap:wrap;gap:12px;border:0;padding:0; }
+.selection-table { table-layout:fixed; }
+.selection-table th:first-child { width:65%; }
+.selection-title { display:flex;align-items:flex-start;gap:8px; }
+.selection-title span { min-width:0;overflow-wrap:anywhere; }
+.selection-deselect { flex:none;width:28px;height:28px;padding:0;line-height:1;font-size:20px; }
 .record-selection { flex:none;align-self:flex-start;min-width:22px;padding-top:2px; }
 .move-exclusion { display:flex;align-items:center;gap:6px;margin-top:8px; }
 .move-exclusion input { width:auto;margin:0; }
@@ -92,6 +97,7 @@ summary:focus-visible { outline: 3px solid #b68b2b; outline-offset: 3px; }
 nav small { display: block; font-size: 10px; font-weight: normal; margin-top: 5px; }
 #overview-controls { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
 #overview-controls button { padding: 5px; font-size: 11px; }
+.overview-note { flex-basis:100%;margin:4px 0; }
 #overview-controls label, #overview-controls select { max-width: 100%; font-size: 12px; }
 #overview-controls select { display: block; }
 #list-management { flex-direction: column; }

@@ -151,9 +151,12 @@ export function appendLibraryDates(content,record) {
 export function renderOverviewControls(result,{onChanged,onError}) {
   let controls=document.querySelector('#overview-controls');if(!controls){controls=document.createElement('div');controls.id='overview-controls';document.querySelector('nav').before(controls);}controls.replaceChildren();
   const sort=result.organizationPreferences.overviewSort;
+  const directions={importance:['Most important first','Least important first'],name:['A to Z','Z to A'],count:['Fewest first','Most first'],duration:['Shortest first','Longest first'],latestAddition:['Oldest first','Newest first']};
   for(const [key,label] of [['importance','Importance'],['name','Name'],['count','Count'],['duration','Known duration'],['latestAddition','Most recent addition']]) {
     const button=organizationButton(label,async()=>{const direction=sort.key===key && sort.direction==='asc'?'desc':'asc';const saved=await command({type:'setOrganizationPreferences',patch:{overviewSort:{key,direction}}});if(saved.ok)onChanged();else onError(saved.error);});button.setAttribute('aria-label',`Sort lists by ${label}`);button.setAttribute('aria-pressed',String(sort.key===key));controls.append(button);
+    if(sort.key===key){const direction=directions[key][sort.direction==='desc'?1:0];button.textContent=`${label} · ${direction}`;button.setAttribute('aria-description',`${direction}. Activate to reverse the overview direction.`);}
   }
+  const note=document.createElement('p');note.className='muted overview-note';note.textContent='Overview sorting does not change saved importance.';controls.append(note);
   const ordered=orderLists(result.lists,result.listStatistics,sort);const custom=ordered.filter(list=>!list.permanent);
   async function place(id,beforeId) {
     const ids=custom.map(list=>list.id).filter(key=>key!==id);ids.splice(beforeId===null?ids.length:ids.indexOf(beforeId),0,id);
