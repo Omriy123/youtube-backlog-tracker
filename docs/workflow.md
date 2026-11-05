@@ -30,6 +30,16 @@ GitHub's open/closed state records whether an issue remains actionable. Triage l
 
 ## Live delivery status
 
-Read the [remaining-scope roadmap](https://github.com/Omriy123/youtube-backlog-tracker/issues/9), [wayfinder map](https://github.com/Omriy123/youtube-backlog-tracker/issues/10), native relationships and current PR for the active milestone, ownership and next task. This workflow describes the process rather than caching an issue sequence that can be superseded. Closed superseded tickets do not establish implementation completion.
+Use the live GitHub tracker as the authority for current work. Read the [remaining-scope roadmap](https://github.com/Omriy123/youtube-backlog-tracker/issues/9), [wayfinder map](https://github.com/Omriy123/youtube-backlog-tracker/issues/10), native relationships and current PR for the active milestone, ownership and next task. This workflow describes the process rather than caching an issue sequence that can be superseded. Closed superseded tickets do not establish implementation completion.
 
 Use [human-test feedback reconciliation](agents/issue-tracker.md#human-test-feedback) after a trial and [rendered review and readiness](agents/design.md#rendered-review-and-readiness) for UI delivery. The [feature map](design/feature-map.md) and versioned specifications preserve design provenance; GitHub holds current actionable work.
+
+## Historical background
+
+This section preserves the original delivery context, not the current task sequence. Use [Live delivery status](#live-delivery-status) above to find current work.
+
+The initial layout prototype is recorded in [issue #1](https://github.com/Omriy123/youtube-backlog-tracker/issues/1), and the overarching design was approved on 2026-10-14 in [issue #2](https://github.com/Omriy123/youtube-backlog-tracker/issues/2). The [feature-design map](design/feature-map.md) organized the early shared contracts, metadata rules and capture/import interviews around a usable save/find/open/recover slice. Prototype approval did not authorize shipping throwaway code or inferring domain logic from it.
+
+The [first-slice spec](specs/first-end-to-end-slice.md) was approved through [issue #3](https://github.com/Omriy123/youtube-backlog-tracker/issues/3). Its draft used grill-with-docs and builder review; to-spec formalized the approved content, and to-tickets published the original child issues #4–#8. That sequence began with save/find and extended to open/recover, with UI and validation included in the relevant workflow tickets. These original tickets are historical references; their closure or supersession alone does not establish delivery.
+
+The remaining-scope roadmap was introduced to review the real build and human feedback, choose subsequent bounded slices, resolve focused questions and agree their specs and implementation tickets. The [later-area handoffs](design/feature-map.md#basis-for-subsequent-feature-specs) preserve context without requiring every feature area to be finalized before the first working slice. The initial repository setup was a baseline commit; subsequent implementation followed the issue/branch/PR cycle described above.
