@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Tasks live in GitHub Issues; durable specs live in `docs/specs/`. Read `docs/agents/issue-tracker.md` before creating, updating, or retiring tasks or specs. Use `.scratch/` for temporary local work only.
+Tasks live in GitHub Issues; durable specs live in `docs/specs/`. Read `docs/agents/issue-tracker.md` when receiving human-test feedback or creating, updating, or retiring tasks or specs. Use `.scratch/` for temporary local work only.
 
 ### Triage labels
 
@@ -14,7 +14,7 @@ Use a single-context layout. Read `docs/agents/domain.md` before exploring the c
 
 ### Design and UI
 
-Read `docs/agents/design.md` before design interviews or UI changes.
+Read `docs/agents/design.md` before design interviews, UI implementation/review, or declaring a UI PR ready.
 
 ### Human testing
 

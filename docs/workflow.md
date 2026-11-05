@@ -28,14 +28,8 @@ The [Wayfinder map](https://github.com/Omriy123/youtube-backlog-tracker/issues/1
 
 GitHub's open/closed state records whether an issue remains actionable. Triage labels describe readiness or ownership needs; they are not substitutes for completion. Start with Issues and PRs; a project board can be introduced when it helps.
 
-## Current stage
+## Live delivery status
 
-The overarching design was approved on 2026-10-14. The [feature-design map](design/feature-map.md) now prioritizes small shared contracts, concrete early metadata rules, capture/import interviews, and an early save/find/open/recover slice. Approve the relevant slice specs before implementation planning. Prototype completion does not authorize shipping its throwaway code or inferring domain logic from it.
+Read the [remaining-scope roadmap](https://github.com/Omriy123/youtube-backlog-tracker/issues/9), [wayfinder map](https://github.com/Omriy123/youtube-backlog-tracker/issues/10), native relationships and current PR for the active milestone, ownership and next task. This workflow describes the process rather than caching an issue sequence that can be superseded. Closed superseded tickets do not establish implementation completion.
 
-The completed prototype is recorded in [issue #1](https://github.com/Omriy123/youtube-backlog-tracker/issues/1). The approved overarching design is recorded in [issue #2](https://github.com/Omriy123/youtube-backlog-tracker/issues/2); future feature work uses focused issues linked to its specs.
-
-The [first-slice spec](specs/first-end-to-end-slice.md) is approved and published through [issue #3](https://github.com/Omriy123/youtube-backlog-tracker/issues/3). Its original draft used grill-with-docs and builder review; to-spec formalized the approved content. To-tickets was then used to agree and publish five child issues, #4-#8. The [approved sequence](specs/first-end-to-end-slice.md#approved-delivery-slicing) starts with save/find and completes the first usable path with open/recover. UI and validation are included in each relevant workflow ticket. Prepare the implementation plan for the ticket being taken up; GitHub holds its current status and blockers.
-
-[Roadmap issue #9](https://github.com/Omriy123/youtube-backlog-tracker/issues/9) tracks remaining approved product scope across subsequent slices. Its next checkpoint follows #8 and its dependencies: review the real build and user feedback, choose the next bounded slice, resolve focused questions/evidence needs, approve its spec, and agree its implementation tickets. Keep the roadmap open until its remaining scope is delivered or explicitly deferred/removed by the user; choosing one next slice does not close it. The [later-area handoffs](design/feature-map.md#basis-for-subsequent-feature-specs) preserve the context for that work without requiring every area to be finalized before the first working slice.
-
-The initial repository setup is a baseline commit. Subsequent implementation follows the issue/branch/PR cycle above.
+Use [human-test feedback reconciliation](agents/issue-tracker.md#human-test-feedback) after a trial and [rendered review and readiness](agents/design.md#rendered-review-and-readiness) for UI delivery. The [feature map](design/feature-map.md) and versioned specifications preserve design provenance; GitHub holds current actionable work.
