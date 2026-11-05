@@ -12,6 +12,20 @@ Use the five triage labels defined in `triage-labels.md` for delivery tasks. Kee
 
 Before starting, read the issue, linked spec, and dependencies. Identify ongoing ownership through its assignee, linked branch/PR, and latest comments so parallel sessions do not duplicate work. Record material findings and handoffs in issue comments. Link the implementation PR to its issue, and close the issue only when its criteria are met or an explicit decision makes it non-actionable.
 
+## References and retirement
+
+Treat approved specs as snapshots of agreed scope, rather than running implementation logs. Later approved decisions can live in linked issue resolutions or a successor spec. Keep the active issue's references explicit about which source governs the work; routine implementation does not require rewriting every earlier spec.
+
+When replacing agreed scope:
+
+- Link the successor from the old issue's closing comment and identify what it replaces in the new issue. Close the old issue as superseded rather than completed implementation, and carry forward any still-actionable scope.
+- Mark a superseded spec near its top with its replacement or decision link and the affected scope. Preserve the historical content; distinguish a partial replacement from retirement of the whole spec.
+- Update active entry points and affected issue references, parents, and blockers so the next session reaches the current work. Preserve historical links as provenance, clearly identified as such.
+
+## Follow-ups
+
+When the user agrees to defer work or revisit a decision, create or reuse a GitHub issue and report its link. Record the outcome to revisit and the prerequisite or real-use trigger; connect it to the relevant roadmap or feature. For a timed review, record when the clock starts and add actual start/due dates when that trigger occurs. Keep the follow-up actionable until the work or review happens, or the user explicitly drops it.
+
 ## Wayfinding operations
 
 For wayfinder sessions, start at [the video Library planning map](https://github.com/Omriy123/youtube-backlog-tracker/issues/10), or find maps with `gh issue list --state all --label 'wayfinder:map'`. Its body holds Destination, Notes, a named index of closed decisions, Not yet specified, and Out of scope. Open questions live as native child issues, queried rather than copied into the map body.
