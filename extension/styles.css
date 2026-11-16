@@ -138,3 +138,5 @@ button:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus
 .removal-dialog > label select {display:block;max-width:100%;margin-top:6px;}
 .removal-dialog [hidden] {display:none!important;}
 #list-management details button {margin:6px 0;max-width:100%;overflow-wrap:anywhere;}
+dialog .metadata-image { display:block; max-width:100%; max-height:240px; object-fit:contain; }
+.metadata-tools { flex-wrap:wrap; }
