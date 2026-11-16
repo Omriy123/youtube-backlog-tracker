@@ -109,8 +109,8 @@ test('retained metadata browsing scales and both densities keep selected/history
         await expect(page.locator('#records')).toHaveAttribute('aria-busy','false');
         await details.focus();await expect(details).toBeFocused();await details.press('Enter');
         const dialog=page.getByRole('dialog',{name:'Metadata details'});await dialog.getByRole('button',{name:'History',exact:true}).click();
-        await dialog.getByRole('button',{name:'Close metadata'}).focus();await expect(dialog.getByRole('button',{name:'Close metadata'})).toBeFocused();
-        await page.screenshot({path:resolve(output,`${density}-${width}-history.png`),fullPage:true});await page.keyboard.press('Escape');
+        await page.screenshot({path:resolve(output,`${density}-${width}-history.png`),fullPage:true});
+        await dialog.getByRole('button',{name:'Close metadata'}).focus();await expect(dialog.getByRole('button',{name:'Close metadata'})).toBeFocused();await page.keyboard.press('Escape');
       }
     }
     console.log('metadata browse workload',JSON.stringify(evidence.measurements));
