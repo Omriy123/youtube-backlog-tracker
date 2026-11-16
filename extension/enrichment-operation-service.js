@@ -2,6 +2,11 @@ const supported=identity=>/^youtube:[A-Za-z0-9_-]{11}$/.test(identity);
 const unfinished=target=>!['retrieved','skipped'].includes(target.outcome) || target.imageOutcome==='failed';
 const latest=state=>state.enrichmentOperations?.at(-1) ?? null;
 
+function snapshotTargets(state,message) {
+  const seen=new Set();
+  return state.records.filter(record=>message.scope==='library' || (record.user.status==='active' && record.user.destination===message.listId)).filter(record=>{if(seen.has(record.identity))return false;seen.add(record.identity);return true;}).map(record=>({recordId:record.id,identity:record.identity,title:record.user.personalTitle || record.metadata.observations.find(item=>item.title)?.title || record.url,url:record.url,outcome:supported(record.identity)?'notAttempted':'skipped',imageOutcome:'notAttempted',error:supported(record.identity)?null:'This link has no supported YouTube identity.',inFlight:false}));
+}
+
 export function recordEnrichmentCompletion(state,message,result) {
   const operation=state.enrichmentOperations?.find(item=>item.id===message.operationId);
   const target=operation?.targets.find(item=>item.recordId===message.recordId);
@@ -85,8 +90,13 @@ export function createEnrichmentOperationCommands(browser,transact,enrichment) {
     } finally {if(live===session)live=null;}
   }
   function activate(message,retry) {
+    // Enter the mutation queue at invocation, before credential IO or later
+    // user commands can change which videos belonged to the selected list.
+    const frozen=retry?null:transact(state=>snapshotTargets(state,message));
+    frozen?.catch(()=>{});
     const task=activation.then(async()=>{
       if(live)return result();
+      const targets=retry?null:await frozen;
       lastError=null;
       const credential=await browser.readYoutubeCredential?.();
       if(!credential?.key)return {ok:false,outcome:'setupRequired',error:'Configure your personal YouTube API key first.'};
@@ -101,9 +111,6 @@ export function createEnrichmentOperationCommands(browser,transact,enrichment) {
           for(const target of value.targets)target.inFlight=false;
         }else{
           if(!['library','list'].includes(message.scope))throw Error('Choose list or Library retrieval.');
-          const records=state.records.filter(record=>message.scope==='library' || (record.user.status==='active' && record.user.destination===message.listId));
-          const seen=new Set();
-          const targets=records.filter(record=>{if(seen.has(record.identity))return false;seen.add(record.identity);return true;}).map(record=>({recordId:record.id,identity:record.identity,title:record.user.personalTitle || record.metadata.observations.find(item=>item.title)?.title || record.url,url:record.url,outcome:supported(record.identity)?'notAttempted':'skipped',imageOutcome:'notAttempted',error:supported(record.identity)?null:'This link has no supported YouTube identity.',inFlight:false}));
           value={id:browser.id(),scope:message.scope,listId:message.listId ?? null,startedAt:browser.now(),status:'running',attempt:1,targets};
           state.enrichmentOperations ??=[];state.enrichmentOperations.push(value);
         }

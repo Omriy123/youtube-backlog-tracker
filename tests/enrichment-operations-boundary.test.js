@@ -128,3 +128,15 @@ test('an unrelated later manual retrieval cannot invent completion for an interr
   const operation=(await restarted.command({type:'enrichmentOperation'})).operation;
   assert.equal(operation.status,'interrupted');assert.equal(operation.counts.retrieved,0);assert.equal(operation.counts.notAttempted,1);
 });
+
+test('list targets freeze at invocation before a concurrent opening changes membership',async()=>{
+  const browser=fixture(),library=createLibrary(browser);const record=await save(library,browser,'https://youtu.be/abcdefghijk');await library.command({type:'setYoutubeKey',key:'fixture'});
+  const read=browser.readYoutubeCredential;let release;const gate=new Promise(resolve=>{release=resolve;});
+  browser.readYoutubeCredential=async()=>{await gate;return read();};
+  const starting=library.command({type:'startEnrichment',scope:'list',listId:'Inbox'});
+  await library.command({type:'open',recordId:record.id,expectedRevision:record.user.revision,attemptId:'concurrent-opening'});
+  release();const job=await starting;
+  assert.equal(job.operation.counts.requested,1);
+  const done=await completed(library);assert.equal(done.counts.retrieved,1);
+  assert.equal((await library.command({type:'metadataDetails',recordId:record.id})).record.user.status,'watched');
+});
