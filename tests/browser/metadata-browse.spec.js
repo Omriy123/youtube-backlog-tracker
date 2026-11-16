@@ -21,6 +21,15 @@ test('retrieved channels appear immediately and metadata details expose per-fiel
     await page.getByRole('button',{name:/Metadata details: Metadata returned/}).click();
     const dialog=page.getByRole('dialog',{name:'Metadata details'});
     await expect(dialog.getByRole('button',{name:'Original',exact:true})).toHaveAttribute('aria-pressed','true');
+    const versionTabs=dialog.locator('[aria-label="Metadata versions"] button');
+    for(const name of ['Original','Latest','History']) {
+      await dialog.getByRole('button',{name,exact:true}).click();
+      const borders=await versionTabs.evaluateAll(tabs=>tabs.map(tab=>({pressed:tab.getAttribute('aria-pressed'),border:getComputedStyle(tab).borderBottomStyle,width:getComputedStyle(tab).borderBottomWidth})));
+      expect(borders.find(tab=>tab.pressed==='true').border).toBe('double');
+      expect(borders.filter(tab=>tab.pressed==='false').every(tab=>tab.border==='solid')).toBe(true);
+      expect(new Set(borders.map(tab=>tab.width)).size).toBe(1);
+    }
+    await dialog.getByRole('button',{name:'Original',exact:true}).click();
     await expect(dialog).toContainText('Captured title before YouTube retrieval');
     await expect(dialog).toContainText('First useful description');
     await expect(dialog).toContainText('Source: browser-tab');

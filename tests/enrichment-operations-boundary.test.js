@@ -15,6 +15,19 @@ function fixture(){
 async function save(library,browser,url){browser.captureUrl=url;return (await library.command({type:'save'})).record;}
 async function completed(library){for(let i=0;i<100;i++){const result=await library.command({type:'enrichmentOperation'});if(result.operation && result.operation.status!=='running')return result.operation;await new Promise(resolve=>setImmediate(resolve));}throw Error('operation did not finish');}
 
+test('blank key replacement preserves configured credentials and an in-flight retrieval',async()=>{
+  const browser=fixture(),library=createLibrary(browser);const record=await save(library,browser,'https://youtu.be/abcdefghijk');
+  await library.command({type:'setYoutubeKey',key:'fixture'});
+  const credential=await browser.readYoutubeCredential();
+  let release,arrived;const started=new Promise(resolve=>{arrived=resolve;});
+  browser.fetchYoutubeVideo=async()=>{arrived();return new Promise(resolve=>{release=resolve;});};
+  const retrieval=library.command({type:'pullMetadata',recordId:record.id});await started;
+  for(const key of ['', '   '])assert.equal((await library.command({type:'setYoutubeKey',key})).outcome,'invalidSetup');
+  assert.deepEqual(await browser.readYoutubeCredential(),credential);
+  release(browser.response);assert.equal((await retrieval).outcome,'retrieved');
+  assert.equal((await library.command({type:'setYoutubeKey',key:null})).configured,false);
+});
+
 test('Library retrieval freezes deduplicated targets including retained and skipped records without changing user state',async()=>{
   const browser=fixture(),library=createLibrary(browser);
   const first=await save(library,browser,'https://youtu.be/abcdefghijk');
@@ -43,11 +56,17 @@ test('cancel accounts for an in-flight result, repeated activation shares work, 
   const again=await library.command({type:'startEnrichment',scope:'library'});assert.equal(again.operation.id,job.operation.id);
   assert.equal((await library.command({type:'editTitle',recordId:first.id,expectedRevision:first.user.revision,personalTitle:'Concurrent title'})).ok,true);
   await library.command({type:'cancelEnrichment',operationId:job.operation.id});
+  let imageCalls=0;browser.fetchThumbnail=async()=>{imageCalls++;return {dataUrl:'data:image/png;base64,aGVsbG8=',bytes:5};};
   release(browser.response);
   const cancelled=await completed(library);assert.equal(cancelled.status,'cancelled');assert.equal(cancelled.counts.retrieved,1);assert.equal(cancelled.counts.notAttempted,1);
+  assert.equal(imageCalls,0);assert.equal(cancelled.counts.imageNotAttempted,1);assert.equal(cancelled.counts.imageFailed,0);
+  assert.equal(cancelled.targets[0].imageOutcome,'cancelled');
+  assert.equal((await library.command({type:'metadataDetails',recordId:first.id})).record.metadata.current.image.outcome,'cancelled');
   browser.fetchYoutubeVideo=async id=>{browser.calls.push(id);return browser.response;};
   await library.command({type:'retryEnrichment',operationId:job.operation.id});
   const finished=await completed(library);assert.equal(finished.counts.requested,2);assert.equal(finished.counts.retrieved,2);assert.deepEqual(browser.calls,['abcdefghijk','lmnopqrstuv']);
+  assert.equal(imageCalls,2);assert.equal(finished.counts.imageNotAttempted,0);
+  assert.equal((await library.command({type:'metadataDetails',recordId:first.id})).record.metadata.checks.length,1);
   assert.equal((await library.command({type:'metadataDetails',recordId:first.id})).record.user.personalTitle,'Concurrent title');
 });
 
@@ -63,6 +82,16 @@ test('quota pauses remaining targets and image-only retry retains one successful
   await library.command({type:'retryEnrichment',operationId:job.operation.id});const retried=await completed(library);
   assert.equal(retried.counts.retrieved,3);assert.equal(retried.counts.imageFailed,0);assert.deepEqual(browser.calls,['abcdefghijk','lmnopqrstuv','lmnopqrstuv','zyxwvutsrqp']);
   assert.equal((await library.command({type:'metadataDetails',recordId:first.id})).record.metadata.observations.length,2);
+});
+
+test('cancelling an already in-flight image retains its truthful successful outcome',async()=>{
+  const browser=fixture(),library=createLibrary(browser);await save(library,browser,'https://youtu.be/abcdefghijk');await library.command({type:'setYoutubeKey',key:'fixture'});
+  let release,arrived;const started=new Promise(resolve=>{arrived=resolve;});
+  browser.fetchThumbnail=async()=>{arrived();return new Promise(resolve=>{release=resolve;});};
+  const job=await library.command({type:'startEnrichment',scope:'library'});await started;
+  await library.command({type:'cancelEnrichment',operationId:job.operation.id});
+  release({dataUrl:'data:image/png;base64,aGVsbG8=',bytes:5});
+  const done=await completed(library);assert.equal(done.status,'cancelled');assert.equal(done.counts.retrieved,1);assert.equal(done.counts.imageNotAttempted,0);assert.equal(done.targets[0].imageOutcome,'retrieved');
 });
 
 test('restart explains interrupted targets without requests, then explicitly retries only unfinished work',async()=>{

@@ -7,7 +7,7 @@ export function createEnrichmentCommands(browser, transact) {
   async function credential(){return await browser.readYoutubeCredential?.() ?? {key:null,revision:null};}
   async function current(revision){return (await credential()).revision===revision;}
   const failure=(outcome,error)=>({ok:false,outcome,error});
-  async function pull(message,signal) {
+  async function pull(message,signal,shouldStop) {
     const record=await transact(state=>structuredClone(state.records.find(item=>item.id===message.recordId)));
     if(!record)return failure('notFound','This saved video no longer exists.');
     if(!/^youtube:[A-Za-z0-9_-]{11}$/.test(record.identity))return {ok:true,outcome:'skipped',record,imageOutcome:'notAttempted'};
@@ -23,7 +23,8 @@ export function createEnrichmentCommands(browser, transact) {
     let image={outcome:'missing',acquiredAt:null,url:null};
     if(['retrieved','imageOnly'].includes(response.outcome)) {
       const url=response.fields?.thumbnailReferences?.[0]?.url;
-      if(url) {
+      if(url && shouldStop())image={outcome:'cancelled',url,acquiredAt:null,error:'Thumbnail not requested because further retrieval was cancelled. Retry its image explicitly.'};
+      else if(url) {
         try {image={...await browser.fetchThumbnail(url,{signal}),outcome:'retrieved',url,acquiredAt:browser.now()};}
         catch {image={outcome:'failed',url,acquiredAt:browser.now(),error:'Thumbnail could not be saved. Retry its image explicitly.'};}
       }
@@ -65,15 +66,16 @@ export function createEnrichmentCommands(browser, transact) {
   function request(message) {
     if(pending.has(message.recordId))return pending.get(message.recordId);
     const abort=new AbortController(),requestId=browser.id();
-    const task=credentialQueue.then(()=>pull({...message,requestId},abort.signal)).finally(()=>{if(pending.get(message.recordId)?.task===task)pending.delete(message.recordId);});
-    const operation={task,abort,requestId};pending.set(message.recordId,operation);return operation;
+    let stopped=false;
+    const task=credentialQueue.then(()=>pull({...message,requestId},abort.signal,()=>stopped)).finally(()=>{if(pending.get(message.recordId)?.task===task)pending.delete(message.recordId);});
+    const operation={task,abort,requestId,stopFurther(){stopped=true;}};pending.set(message.recordId,operation);return operation;
   }
   function command(message) {
     if(message.type==='enrichmentSettings')return (async()=>({ok:true,configured:Boolean((await credential()).key),storageBytes:await transact(state=>new TextEncoder().encode(JSON.stringify(state.records.map(record=>record.metadata))).length)}))();
     if(message.type==='metadataDetails')return transact(state=>({ok:true,record:structuredClone(state.records.find(item=>item.id===message.recordId) ?? null)}));
     if(message.type==='setYoutubeKey') {
       const change=credentialQueue.then(async()=>{
-        if(message.key!==null && typeof message.key!=='string')return failure('invalidSetup','Enter a personal API key or remove it.');
+        if(message.key!==null && (typeof message.key!=='string' || !message.key.trim()))return failure('invalidSetup','Enter a non-empty personal API key. Use Remove key to remove it.');
         await transact(async()=>{
           await browser.writeYoutubeCredential({key:message.key?.trim() || null,revision:browser.id()});
           for(const operation of pending.values())operation.abort.abort();

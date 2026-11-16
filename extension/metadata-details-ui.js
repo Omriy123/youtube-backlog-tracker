@@ -95,7 +95,7 @@ export function showMetadataDetails(record,{onChanged,onOpen,onDismiss,selectedI
     onChanged?.();
   }
   const pull=button('Pull metadata',()=>retrieve());actions.append(pull);
-  if(record.metadata.current?.image?.outcome==='failed')actions.append(button('Retry thumbnail only',()=>retrieve(true)));
+  if(['failed','cancelled'].includes(record.metadata.current?.image?.outcome))actions.append(button('Retry thumbnail only',()=>retrieve(true)));
   if(record.user.status==='active') {
     actions.append(button('Open video',async()=>{
       if(onOpen){dialog.close();onOpen(record);return;}

@@ -1,5 +1,6 @@
 const supported=identity=>/^youtube:[A-Za-z0-9_-]{11}$/.test(identity);
-const unfinished=target=>!['retrieved','skipped'].includes(target.outcome) || target.imageOutcome==='failed';
+const unfinishedImage=target=>['failed','cancelled'].includes(target.imageOutcome);
+const unfinished=target=>!['retrieved','skipped'].includes(target.outcome) || unfinishedImage(target);
 const latest=state=>state.enrichmentOperations?.at(-1) ?? null;
 
 function snapshotTargets(state,message) {
@@ -20,12 +21,13 @@ function summary(operation,liveId,error) {
   const value=structuredClone(operation);
   if(value.status==='running' && value.id!==liveId){value.status=value.targets.every(target=>!unfinished(target))?'completed':'interrupted';value.explanation=value.status==='completed'?'Every target result was retained before retrieval stopped.':'Retrieval was interrupted. Completed information is retained; retry unfinished work explicitly.';}
   if(error)value.explanation=error;
-  const counts={requested:value.targets.length,retrieved:0,noResult:0,failed:0,skipped:0,notAttempted:0,imageFailed:0};
+  const counts={requested:value.targets.length,retrieved:0,noResult:0,failed:0,skipped:0,notAttempted:0,imageFailed:0,imageNotAttempted:0};
   for(const target of value.targets){
     if(['retrieved','noResult','skipped'].includes(target.outcome))counts[target.outcome]++;
     else if(target.outcome==='notAttempted')counts.notAttempted++;
     else counts.failed++;
     if(target.imageOutcome==='failed')counts.imageFailed++;
+    if(target.imageOutcome==='cancelled')counts.imageNotAttempted++;
   }
   value.counts=counts;return value;
 }
@@ -68,8 +70,9 @@ export function createEnrichmentOperationCommands(browser,transact,enrichment) {
         if(session.stop)break;
         if((await browser.readYoutubeCredential?.())?.revision!==session.credentialRevision){session.reason='setupChanged';break;}
         await update(session.id,value=>{value.targets.find(item=>item.recordId===target.recordId).inFlight=true;});
-        const message={type:'pullMetadata',recordId:target.recordId,imageOnly:target.outcome==='retrieved' && target.imageOutcome==='failed',operationId:session.id,operationAttempt:operation.attempt,expectedCredentialRevision:session.credentialRevision};
+        const message={type:'pullMetadata',recordId:target.recordId,imageOnly:target.outcome==='retrieved' && unfinishedImage(target),operationId:session.id,operationAttempt:operation.attempt,expectedCredentialRevision:session.credentialRevision};
         const retrieval=enrichment.request(message);
+        session.retrieval=retrieval;if(session.stop)retrieval.stopFurther();
         await update(session.id,value=>{const row=value.targets.find(item=>item.recordId===target.recordId);row.requestId=retrieval.requestId;row.imageOnly=message.imageOnly;});
         const response=await retrieval.task;
         // Successful acquisition commits its target outcome with its metadata.
@@ -127,7 +130,7 @@ export function createEnrichmentOperationCommands(browser,transact,enrichment) {
     if(message.type==='startEnrichment')return activate(message,false);
     if(message.type==='retryEnrichment')return activate(message,true);
     if(message.type==='enrichmentOperation')return result();
-    if(message.type==='cancelEnrichment')return (async()=>{if(live && live.id===message.operationId)live.stop=true;return result();})();
+    if(message.type==='cancelEnrichment')return (async()=>{if(live && live.id===message.operationId){live.stop=true;live.retrieval?.stopFurther();}return result();})();
     if(message.type==='retainedMetadataRecords')return transact(state=>({ok:true,records:state.records.filter(record=>record.user.status!=='active').map(record=>({id:record.id,title:record.user.personalTitle || record.metadata.observations.find(item=>item.title)?.title || record.url,status:record.user.status,url:record.url}))}));
     return null;
   }

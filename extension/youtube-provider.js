@@ -37,6 +37,8 @@ export async function fetchThumbnail(url,{signal}={}) {
   if(!['image/jpeg','image/png','image/webp','image/gif'].includes(mimeType))throw Error('Unusable image');
   const bytes=new Uint8Array(await response.arrayBuffer());
   if(!bytes.length)throw Error('Empty image');
+  const bitmap=await createImageBitmap(new Blob([bytes],{type:mimeType}));
+  bitmap.close();
   let binary='';for(let offset=0;offset<bytes.length;offset+=8192)binary+=String.fromCharCode(...bytes.subarray(offset,offset+8192));
   return {dataUrl:`data:${mimeType};base64,${btoa(binary)}`,mimeType,bytes:bytes.length};
 }
