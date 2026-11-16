@@ -42,7 +42,7 @@ export function showMetadataDetails(record,{onChanged}={}) {
 export function appendEnrichmentTools(parent,record,{onChanged}) {
   const tools=document.createElement('div');tools.className='title-tools metadata-tools';
   const inspect=button(metadataEvidence(record),()=>showMetadataDetails(record,{onChanged}));inspect.setAttribute('aria-label',`Metadata details: ${metadataEvidence(record)}`);
-  const status=paragraph('');status.setAttribute('role','status');
-  const pull=button('Pull metadata',async()=>{pull.disabled=true;status.textContent='Retrieving metadata and image…';const result=await command({type:'pullMetadata',recordId:record.id});pull.disabled=false;status.textContent=result.ok?`${outcomeLabel[result.outcome] ?? result.outcome}. Image: ${result.imageOutcome}`:result.error;if(result.ok)onChanged?.();});
+  const status=paragraph('');status.setAttribute('role','status');status.hidden=true;
+  const pull=button('Pull metadata',async()=>{pull.disabled=true;status.hidden=false;status.textContent='Retrieving metadata and image…';const result=await command({type:'pullMetadata',recordId:record.id});pull.disabled=false;status.textContent=result.ok?`${outcomeLabel[result.outcome] ?? result.outcome}. Image: ${result.imageOutcome}`:result.error;if(result.ok)onChanged?.();});
   tools.append(inspect,pull);parent.append(tools,status);
 }

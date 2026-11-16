@@ -8,12 +8,12 @@ export function createEnrichmentCommands(browser, transact) {
   async function current(revision){return (await credential()).revision===revision;}
   const failure=(outcome,error)=>({ok:false,outcome,error});
   async function pull(message,signal) {
-    const setup=await credential();
-    if(message.expectedCredentialRevision && message.expectedCredentialRevision!==setup.revision)return failure('credentialChanged','YouTube setup changed. Retry unfinished work explicitly.');
-    if(!setup.key)return failure('setupRequired','Configure your personal YouTube API key first.');
     const record=await transact(state=>structuredClone(state.records.find(item=>item.id===message.recordId)));
     if(!record)return failure('notFound','This saved video no longer exists.');
     if(!/^youtube:[A-Za-z0-9_-]{11}$/.test(record.identity))return {ok:true,outcome:'skipped',record,imageOutcome:'notAttempted'};
+    const setup=await credential();
+    if(message.expectedCredentialRevision && message.expectedCredentialRevision!==setup.revision)return failure('credentialChanged','YouTube setup changed. Retry unfinished work explicitly.');
+    if(!setup.key)return failure('setupRequired','Configure your personal YouTube API key first.');
     if(message.imageOnly && !record.metadata.current?.thumbnailReferences?.length)return failure('noImage','No retained thumbnail reference to retry.');
     let response;
     try {response=message.imageOnly ? {outcome:'imageOnly',fields:record.metadata.current} : await browser.fetchYoutubeVideo(record.identity.slice(8),setup.key,{signal});}
