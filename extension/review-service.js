@@ -1,22 +1,28 @@
+import {completeInitialPlacement} from './placement-state.js';
 // Rediscovery changes user placement separately from automatic observations.
 export function requeueForReview(state, record, browser) {
   if (!['watched', 'dismissed'].includes(record.user.status)) return false;
   const before = structuredClone(record.user);
   const event = before.watchEvents.at(-1);
   const opening = state.openings?.find(item => item.id === event?.openingId && item.recordId === record.id);
-  const activity = state.history.filter(item => item.recordId === record.id);
+  const activity = state.history.filter(item => item.recordId === record.id || item.changes?.some(change=>change.kind==='records' && change.id===record.id));
   const time = browser.now();
+  const previousDestination=before.destination ?? (before.status === 'watched' ? opening?.before.destination ?? event?.destination : before.lastDismissal?.destination) ?? null;
+  const destinationName=['Inbox','Backlog'].includes(previousDestination)?previousDestination:state.lists?.find(list=>list.id===previousDestination)?.name ?? event?.destinationName ?? before.lastDismissal?.destinationName ?? null;
   const previous = {
     status: before.status,
-    destination: before.destination ?? (before.status === 'watched' ? opening?.before.destination : before.lastDismissal?.destination) ?? null,
+    destination: previousDestination,
+    destinationName,
     lastActivityAt: activity.at(-1)?.at ?? event?.at ?? null,
-    lastOpenedAt: event?.at ?? null,
+    lastOpenedAt: [...before.watchEvents].reverse().find(item=>item.source!=='manual')?.at ?? null,
+    lastWatchedAt: event?.at ?? null,
     dismissedAt: before.lastDismissal?.at ?? null,
     user: before,
     // History itself remains durable. Retain its dated activity summaries here
     // without recursively copying earlier reviews' full history snapshots.
     activity: activity.map(({ id, type, at }) => ({ id, type, at })),
   };
+  completeInitialPlacement(state,record,time);
   record.user = { ...record.user, status: 'active', destination: 'Inbox', latestListEntryAt: time, revision: record.user.revision + 1, pendingReview: { queuedAt: time, previous } };
   const changeId = browser.id();
   state.history.push({ id: changeId, type: 'rediscovery', recordId: record.id, at: time, before });
@@ -36,12 +42,13 @@ export async function persistReviewChange(state, browser, changeId, recordId) {
 
 export async function review(state, browser, command) {
   const record = state.records.find(item => item.id === command.recordId);
-  if (!record || record.user.revision !== command.expectedRevision || record.user.status !== 'active' || record.user.destination !== 'Inbox' || !record.user.pendingReview) {
+  if (!record || record.user.revision !== command.expectedRevision || record.user.status !== 'active' || !record.user.pendingReview) {
     return { ok: false, outcome: 'conflict', error: 'This review changed. Close this dialog and refresh the Library before deciding.' };
   }
   if (!['keep', 'dismiss'].includes(command.decision)) return { ok: false, error: 'Choose a review decision.' };
   const before = structuredClone(record.user);
   const time = browser.now();
+  completeInitialPlacement(state,record,time);
   if (command.decision === 'dismiss') {
     record.user.lastDismissal = { at: time, destination: record.user.destination };
     record.user.status = 'dismissed';

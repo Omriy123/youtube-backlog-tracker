@@ -16,23 +16,25 @@ export function showReview(record, { onChanged }) {
   const before = previous.user ?? {};
   const dialog = document.createElement('dialog'); dialog.setAttribute('aria-label', 'Review prior activity');
   const heading = document.createElement('h2'); heading.textContent = 'Review prior activity';
-  const explanation = document.createElement('p'); explanation.textContent = 'Saved in Inbox with review pending. Keep confirms staying here. Opening or editing needs a separate action afterward. Watched records do not establish playback.';
+  const inInbox = record.user.destination === 'Inbox';
+  const explanation = document.createElement('p'); explanation.textContent = `Saved ${inInbox ? 'in Inbox' : 'in this destination'} with review pending. Keep confirms staying here. Opening, editing or moving needs a separate action afterward. Watched records do not establish playback.`;
   dialog.append(heading, explanation);
   function line(label, value) { const p = document.createElement('p'); p.textContent = `${label}: ${value}`; dialog.append(p); }
   const dateUpdates = [];
   function dateLine(label, value) { const p = document.createElement('p'); const update = () => { p.textContent = `${label}: ${time(value)}`; }; dateUpdates.push(update); update(); dialog.append(p); }
   const priorStatus = previous.status ?? pending.priorStatus;
   line('Previous status', priorStatus === 'watched' ? 'Watched' : priorStatus === 'dismissed' ? 'Dismissed' : 'Unknown');
-  line('Previous destination', previous.destination ?? 'Unknown');
+  line('Previous destination', previous.destinationName ?? (['Inbox','Backlog'].includes(previous.destination)?previous.destination:previous.destination?'Destination unavailable':'Unknown'));
   dateLine('Last activity', previous.lastActivityAt);
   dateLine('Last opened', previous.lastOpenedAt);
+  dateLine('Last watch event', previous.lastWatchedAt);
   dateLine('Last dismissed', previous.dismissedAt);
   dateLine('First saved', before.firstSavedAt);
   dateLine('First Inbox-exit', before.firstInboxExitAt);
   dateLine('Previous list-entry', before.latestListEntryAt);
   const events = before.watchEvents ?? [];
   line('Retained watch events', events.length);
-  for (const event of events) dateLine('Opened', event.at);
+  for (const event of events) dateLine(event.source==='manual'?'Marked watched':'Opened', event.at);
   if (previous.activity?.length) {
     const activity = document.createElement('details');
     const summary = document.createElement('summary'); summary.textContent = 'Prior Library activity';
@@ -52,9 +54,9 @@ export function showReview(record, { onChanged }) {
     saving = false; for (const item of actions.children) item.disabled = false;
     if (!result.ok) { status.textContent = result.error; return; }
     dialog.close();
-    onChanged(result.outcome === 'kept' ? 'Kept in Inbox. Choose Open or Edit when ready.' : 'Dismissed. Prior history retained.', result.record);
+    onChanged(result.outcome === 'kept' ? `Kept ${inInbox ? 'in Inbox' : 'here'}. Choose Open or Edit when ready.` : 'Dismissed. Prior history retained.', result.record);
   }
-  actions.append(button('Keep in Inbox', () => decide('keep')), button('Dismiss', () => decide('dismiss')), button('Cancel', () => dialog.close()));
+  actions.append(button(inInbox ? 'Keep in Inbox' : 'Leave here', () => decide('keep')), button('Dismiss', () => decide('dismiss')), button('Cancel', () => dialog.close()));
   dialog.addEventListener('cancel', event => { if (saving) event.preventDefault(); });
   const unsubscribe = onDateFormatChanged(() => { for (const update of dateUpdates) update(); });
   dialog.addEventListener('close', () => { unsubscribe(); dialog.remove(); }, { once: true });

@@ -35,8 +35,8 @@ This is a candidate organization/browsing planning contract. [Choose the next bo
 17. As a Library user, I want temporary arrangements to end when the view meaning changes, so that an old filtered arrangement does not leak into another search or destination.
 18. As a Library user, I want density, orientation, resizing and checkbox changes to retain applicable temporary order, so that presentation adjustments do not unexpectedly undo it.
 19. As a Library user, I want to drag from a video's row or title, so that rearranging does not depend on hitting a tiny handle.
-20. As a Library user, I want ordinary dragging to carry one video even when selected, so that I can adjust one row independently.
-21. As a Library user, I want Ctrl+drag to carry selected current results only, so that selections elsewhere remain untouched.
+20. As a Library user, I want ordinary dragging of a selected video to carry selected current results, so that moving a group does not require a modifier.
+21. As a Library user, I want Ctrl+drag to carry only the dragged video even when others are selected, so that I can adjust one row independently.
 22. As a Library user, I want current results to include matches beyond the viewport, so that scrolling or rendering does not accidentally define an action's scope.
 23. As a Library user, I want selected group arranging to preserve displayed relative order, so that a non-adjacent selection becomes a predictable block.
 24. As a Library user, I want arranging to retain selection, so that I can continue working with the same videos.
@@ -140,13 +140,16 @@ Selection survives query, channel, scope, list navigation, sort, density, Rows/C
 
 Dragging works from the row/title/body rather than requiring a small handle. Checkboxes and action controls keep their own behavior. Suppress a release click that would accidentally toggle selection. Supply equivalent button/menu Place and Move actions, including grouped Place where applicable.
 
+**Human-test amendment, 2026-11-05:** the owner explicitly reversed the previous modifier rule after trying the real extension. The affected-set table below incorporates that approved change. [Refine selection, dragging and contextual Library actions after human testing](https://github.com/Omriy123/youtube-backlog-tracker/issues/60) retains the other open interaction decisions; [the complete feedback](https://github.com/Omriy123/youtube-backlog-tracker/issues/58) distinguishes desired amendments from delivered behavior. This amendment does not claim that the production gesture has changed or settle selection retention after moves.
+
 | Action | Affected set |
 | --- | --- |
-| Ordinary drag | That one video, even if selected |
-| Ctrl+drag on a selected result | Selected videos in the current main result set |
+| Ordinary drag of a selected video | Selected videos in the current main result set |
+| Ordinary drag of an unselected video | That one video |
+| Ctrl+drag of any video | That one video, even if other videos are selected |
 | Panel Move or Place | The explicit All selected or Matches set shown by that panel |
 
-Current results means all matching results, not an incidental scroll/virtualization cutoff. The panel switch never broadens Ctrl+drag to selections elsewhere. Those other selections remain selected and unchanged. Do not restore Drag X together as a confusing toggle-like control.
+Current results means all matching results, not an incidental scroll/virtualization cutoff. The panel switch never broadens a drag to selections elsewhere. Those other selections remain selected and unchanged. Do not restore Drag X together as a confusing toggle-like control.
 
 Same-destination arranging moves the chosen rows as a block in their existing displayed relative order. Example: 1,2,3,4,5, select 2 and 4 and place after 5 gives **1,3,5,2,4**, retaining selection. Dropping onto a member of the block has no positional effect (bounded builder default). Mixed-source records use destination moves, not a global saved arrangement. Cross-destination drops highlight a destination and open its explicit affected-set preview; they do not promise before/after insertion.
 

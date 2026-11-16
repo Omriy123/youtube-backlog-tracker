@@ -1,4 +1,24 @@
 :root { font-family: system-ui, sans-serif; color: #243336; background: #f7f8f6; font-size: 15px; }
+#records.global-results { display:block; }
+#records.global-results .destination-records { display:block;overflow:visible; }
+#records.global-results .destination-records article { flex:initial;max-width:none; }
+#selection-controls { display:flex;flex-wrap:wrap;align-items:center;gap:12px;min-height:64px;margin:10px 0; }
+#selection-controls > span { flex-basis:100%;white-space:nowrap;font-size:12px;font-variant-numeric:tabular-nums; }
+#selection-controls label,#selection-panel label { display:inline-flex;align-items:center;gap:7px; }
+#selection-controls input,#selection-panel input,.record-selection input { width:auto;margin:0; }
+#selection-panel { border-top:1px solid #bdccc4;padding-top:18px;margin-top:20px; }
+#selection-panel fieldset { display:flex;flex-wrap:wrap;gap:12px;border:0;padding:0; }
+.selection-table { table-layout:fixed; }
+.selection-table th:first-child { width:65%; }
+.selection-title { display:flex;align-items:flex-start;gap:8px; }
+.selection-title span { min-width:0;overflow-wrap:anywhere; }
+.selection-deselect { flex:none;width:28px;height:28px;padding:0;line-height:1;font-size:20px; }
+.record-selection { flex:none;align-self:flex-start;min-width:22px;padding-top:2px; }
+.move-exclusion { display:flex;align-items:center;gap:6px;margin-top:8px; }
+.move-exclusion input { width:auto;margin:0; }
+.destination-drop { outline:3px solid #326857;outline-offset:-3px; }
+th:nth-child(2),td:nth-child(2) { min-width:5rem; }
+th:nth-child(2) { white-space:nowrap; }
 * { box-sizing: border-box; }
 body { margin: 0; }
 h1 { font-size: 30px; margin: 6px 0; letter-spacing: -.7px; }
@@ -57,3 +77,64 @@ dialog::backdrop { background: #17291f66; }
 .recovery + .recovery { border-top: 1px solid #d7dfd7; margin-top: 18px; padding-top: 12px; }
 @media (max-width: 700px) { aside { width: 145px; padding: 20px 10px; } .brand { font-size: 15px; } main { padding: 28px 20px; } .thumbnail { display: none; } }
 @media (max-width: 440px) { .library { display: block; } aside { width: 100%; padding: 15px; } .brand { margin-bottom: 10px; } nav { display: flex; } nav button { margin: 0; } }
+#organization-recovery { margin: 20px 0; }
+#organization-recovery:empty { display: none; }
+#organization-recovery select { max-width: 100%; margin: 8px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #dfe5df; overflow-wrap: anywhere; }
+td select { width: 100%; min-width: 100px; }
+.sort-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 15px 0; }
+.sort-controls button { padding: 8px 12px; }
+.sort-controls [aria-pressed=true], #overview-controls [aria-pressed=true] { background: #dce8de; }
+.sort-controls details { padding: 8px; }
+.sort-controls summary { cursor: pointer; }
+summary:focus-visible { outline: 3px solid #b68b2b; outline-offset: 3px; }
+[data-density=compact] .thumbnail { display: none; }
+[data-density=compact] article { padding: 12px 0; }
+.insert-before { box-shadow: 0 -4px #326857; }
+.insert-after { box-shadow: 0 4px #326857; }
+.dragging { opacity: .6; }
+nav small { display: block; font-size: 10px; font-weight: normal; margin-top: 5px; }
+#overview-controls { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+#overview-controls button { padding: 5px; font-size: 11px; }
+.overview-note { flex-basis:100%;margin:4px 0; }
+#overview-controls label, #overview-controls select { max-width: 100%; font-size: 12px; }
+#overview-controls select { display: block; }
+#list-management { flex-direction: column; }
+@media (max-width: 440px) { nav { flex-wrap: wrap; } nav button { width: auto; } #list-management { flex-direction: row; } }
+html { scrollbar-width:none; }
+html::-webkit-scrollbar { display:none; }
+.library main { min-width:0; max-width:none; }
+.library header { min-height:155px; }
+.scope-controls,.presentation-controls,.channel-controls { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; align-items:center; }
+.scope-toggle { width:205px; flex:0 0 205px; }
+.channel-controls button { font-variant-numeric:tabular-nums; }
+.channel-controls [aria-pressed=true],.presentation-controls [aria-pressed=true],.scope-controls [aria-pressed=true] {background:#dce8de;color:#234b3c;}
+#browse-controls { min-width:0; }
+.record-origin { font-size:13px; color:#50635b; overflow-wrap:anywhere; }
+.destination-group {min-width:0;}
+.destination-group > h2 {position:sticky;top:0;background:#f7f8f6;z-index:1;padding:8px 0;}
+.orientation-columns {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px;align-items:start;}
+.orientation-rows .destination-records {display:flex;overflow-x:auto;gap:20px;}
+.orientation-rows .destination-records article {flex:0 0 340px;max-width:100%;}
+.density-compact .thumbnail {display:none;}
+.thumbnail img {width:100%;height:100%;object-fit:cover;}
+.destination-records article {min-width:0;gap:14px;}
+.destination-records article button {max-width:100%;overflow-wrap:anywhere;}
+.destination-records .thumbnail {width:100px;height:70px;}
+nav [data-view=Inbox] {border-bottom:1px solid #bdccc4;margin-bottom:18px;}
+nav [data-view=Backlog] {border-top:1px solid #bdccc4;margin-top:18px;}
+button:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus-visible {outline:3px solid #b68b2b;outline-offset:3px;}
+@media(max-width:700px){.destination-records .thumbnail {display:grid;width:75px;height:52px;}.density-compact .thumbnail {display:none;}.scope-toggle {width:180px;flex-basis:180px;}.library main{padding:24px 14px;}}
+@media(max-width:440px){.library nav{display:block;}.library aside{position:static;}.library header{min-height:155px;}.orientation-rows .destination-records article{flex-basis:290px;}}
+.channel-count {display:inline-block;min-width:4ch;text-align:right;font-variant-numeric:tabular-nums;}
+.channel-identity {display:block;font-size:11px;overflow-wrap:anywhere;max-width:180px;text-align:left;}
+.removal-preview td:first-child {min-width:130px;}
+.removal-preview td:nth-child(2) {min-width:75px;}
+.removal-preview td button {display:block;margin-top:8px;}
+.removal-preview label {display:flex;gap:8px;align-items:center;margin-top:8px;}
+.removal-preview input {width:auto;margin:0;}
+.removal-dialog > label {display:block;margin:12px 0;}
+.removal-dialog > label select {display:block;max-width:100%;margin-top:6px;}
+.removal-dialog [hidden] {display:none!important;}
+#list-management details button {margin:6px 0;max-width:100%;overflow-wrap:anywhere;}
