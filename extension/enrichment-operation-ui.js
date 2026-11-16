@@ -22,8 +22,8 @@ export function appendEnrichmentOperations(parent,{getListId,onChanged}) {
     current=operation;if(!operation){progress.textContent='No metadata retrieval operation retained.';counts.textContent='';entries.replaceChildren();cancel.hidden=true;retry.hidden=true;more.hidden=true;return;}
     const running=operation.status==='running';const value=operation.counts;
     progress.textContent=`${operation.status==='cancelled'?'Cancelled':operation.status==='interrupted'?'Interrupted':operation.status==='paused'?'Paused':running?'Retrieving metadata':'Retrieval finished'}. ${operation.explanation ?? ''}`;
-    counts.textContent=`Requested: ${value.requested} · Retrieved: ${value.retrieved} · No result: ${value.noResult} · Failed: ${value.failed} · Skipped: ${value.skipped} · Not attempted/cancelled: ${value.notAttempted} · Image failures: ${value.imageFailed}`;
-    cancel.hidden=!running;retry.hidden=running || !(value.failed || value.noResult || value.notAttempted || value.imageFailed);
+    counts.textContent=`Requested: ${value.requested} · Retrieved: ${value.retrieved} · No result: ${value.noResult} · Failed: ${value.failed} · Skipped: ${value.skipped} · Not attempted/cancelled: ${value.notAttempted} · Image failures: ${value.imageFailed} · Images not attempted/cancelled: ${value.imageNotAttempted}`;
+    cancel.hidden=!running;retry.hidden=running || !(value.failed || value.noResult || value.notAttempted || value.imageFailed || value.imageNotAttempted);
     entries.replaceChildren();
     for(const target of operation.targets.slice(0,limit)){
       const row=document.createElement('li');const label=paragraph(`${target.title} — ${target.inFlight && running?'In flight':names[target.outcome] ?? 'Failed'}${target.outcome==='retrieved'?` · Image: ${target.imageOutcome}${target.imageOutcome==='failed'?'; text retained':''}`:''}${target.error?` · ${target.error}`:''}`);

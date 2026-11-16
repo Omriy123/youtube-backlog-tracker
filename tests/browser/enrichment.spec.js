@@ -5,7 +5,7 @@ import {launch,capture} from './helpers.js';
 
 // Controlled provider HTTP boundary; real production parser, UI, local storage,
 // runtime messaging and image encoding run inside the installed extension.
-async function providerExtension() {
+async function providerExtension({corruptImage=false,holdText=false}={}) {
   await mkdir(resolve('.scratch/extensions'),{recursive:true});
   const path=await mkdtemp(resolve('.scratch/extensions/enrichment-'));
   await cp(resolve('extension'),path,{recursive:true});
@@ -17,10 +17,11 @@ async function providerExtension() {
     globalThis.fetch=async(url,options)=>{
       const address=String(url);
       if(address.startsWith('https://www.googleapis.com/youtube/v3/videos')) {
+        if(${holdText})await new Promise(resolve=>{globalThis.releaseFixtureText=resolve;});
         if(options.headers['X-Goog-Api-Key']==='rejected-fixture')return new Response(JSON.stringify({error:{errors:[{reason:'keyInvalid'}]}}),{status:403});
         return new Response(JSON.stringify({items:[{id:new URL(address).searchParams.get('id'),snippet:{title:'Provider title with retained picture',description:'A retained provider description',channelId:'UC-fixture',channelTitle:'Example creator',publishedAt:'2026-10-01T12:00:00Z',thumbnails:{default:{url:'https://i.ytimg.com/vi/abcdefghijk/default.jpg',width:120,height:90}}},contentDetails:{duration:'PT2M5S'}}]}),{headers:{'Content-Type':'application/json'}});
       }
-      if(address.startsWith('https://i.ytimg.com/'))return new Response(Uint8Array.from(atob('${picture}'),c=>c.charCodeAt(0)),{headers:{'Content-Type':'image/jpeg'}});
+      if(address.startsWith('https://i.ytimg.com/'))return new Response(${corruptImage?"'not an image'":`Uint8Array.from(atob('${picture}'),c=>c.charCodeAt(0))`},{headers:{'Content-Type':'image/jpeg'}});
       return network(url,options);
     };
     export function createBrowserAdapter(){return actual();}
@@ -41,6 +42,10 @@ test('optional setup and deliberate acquisition present retained metadata and im
     await setup.getByLabel('Personal API key').fill('rejected-fixture');await setup.getByRole('button',{name:'Save key',exact:true}).click();
     await setup.getByRole('button',{name:'Test connection',exact:true}).click();await expect(setup.getByRole('status')).toContainText('rejected setup');
     await setup.getByLabel('Personal API key').fill('controlled-fixture');await setup.getByRole('button',{name:'Save key',exact:true}).click();
+    for(const blank of ['', '   ']) {
+      await setup.getByLabel('Personal API key').fill(blank);await setup.getByRole('button',{name:'Save key',exact:true}).click();
+      await expect(setup.getByRole('status')).toContainText('non-empty personal API key');
+    }
     await setup.getByRole('button',{name:'Test connection',exact:true}).click();await expect(setup.getByRole('status')).toContainText('Connection usable');
     await setup.getByRole('button',{name:'Close setup'}).click();
     await expect(page.getByRole('button',{name:'Metadata details: Not checked',exact:true})).toBeVisible();
@@ -63,4 +68,50 @@ test('optional setup and deliberate acquisition present retained metadata and im
     await reopened.getByRole('button',{name:/Metadata details: Metadata returned/}).click();
     await expect(reopened.getByRole('dialog',{name:'Metadata details'}).getByRole('img',{name:'Retained thumbnail'})).toBeVisible();
   } finally {await app.context.close();}
+});
+
+test('corrupt JPEG response retains successful text and offers explicit thumbnail retry',async()=>{
+  const app=await launch(undefined,{extensionPath:await providerExtension({corruptImage:true})});
+  try {
+    await capture(app,'https://youtu.be/abcdefghijk','Captured title');
+    const page=await app.context.newPage();await page.goto(`${app.base}/library.html`);
+    await page.evaluate(()=>chrome.runtime.sendMessage({type:'setYoutubeKey',key:'controlled-fixture'}));
+    await page.getByRole('button',{name:'Pull entire Library metadata',exact:true}).click();
+    const results=page.getByRole('region',{name:'Metadata retrieval results'});
+    await expect(results).toContainText('Retrieval finished');
+    await expect(results).toContainText('Image failures: 1');
+    await expect(results.getByRole('button',{name:'Retry unfinished retrieval'})).toBeVisible();
+    await results.getByRole('button',{name:'Inspect saved metadata'}).click();
+    const dialog=page.getByRole('dialog',{name:'Metadata details'});
+    await dialog.getByRole('button',{name:'Latest',exact:true}).click();
+    await expect(dialog).toContainText('A retained provider description');
+    await expect(dialog).toContainText('Image: failed');
+    await expect(dialog.getByRole('img')).toHaveCount(0);
+    await expect(dialog.getByRole('button',{name:'Retry thumbnail only'})).toBeVisible();
+  }finally{await app.context.close();}
+});
+
+test('cancelled text response offers unattempted image retry without reporting an image failure',async()=>{
+  const app=await launch(undefined,{extensionPath:await providerExtension({holdText:true})});
+  try {
+    await capture(app,'https://youtu.be/abcdefghijk','Cancelled image fixture');
+    const page=await app.context.newPage();await page.goto(`${app.base}/library.html`);
+    await page.evaluate(()=>chrome.runtime.sendMessage({type:'setYoutubeKey',key:'controlled-fixture'}));
+    await page.getByRole('button',{name:'Pull entire Library metadata',exact:true}).click();
+    await expect.poll(()=>app.worker.evaluate(()=>typeof globalThis.releaseFixtureText)).toBe('function');
+    const results=page.getByRole('region',{name:'Metadata retrieval results'});
+    await results.getByRole('button',{name:'Cancel further retrieval'}).click();
+    await app.worker.evaluate(()=>globalThis.releaseFixtureText());
+    await expect(results.getByRole('status')).toContainText('Cancelled');
+    await expect(results).toContainText('Images not attempted/cancelled: 1');
+    await expect(results).toContainText('Image failures: 0');
+    await expect(results.getByRole('button',{name:'Retry unfinished retrieval'})).toBeVisible();
+    await results.getByRole('button',{name:'Inspect saved metadata'}).click();
+    const dialog=page.getByRole('dialog',{name:'Metadata details'});
+    await dialog.getByRole('button',{name:'Latest',exact:true}).click();
+    await expect(dialog).toContainText('Image: cancelled');
+    await dialog.getByRole('button',{name:'Retry thumbnail only'}).click();
+    await expect(dialog.getByRole('status')).toContainText('Image: retrieved');
+    await expect(dialog.getByRole('img',{name:'Retained thumbnail'})).toBeVisible();
+  }finally{await app.context.close();}
 });
