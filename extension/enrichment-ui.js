@@ -1,11 +1,11 @@
 import { command } from './shared.js';
-import { formatDateTime } from './date-display.js';
+import {showMetadataDetails,metadataEvidence,metadataOutcomes} from './metadata-details-ui.js';
+export {showMetadataDetails,metadataEvidence} from './metadata-details-ui.js';
 
 function button(label,action){const item=document.createElement('button');item.type='button';item.className='secondary';item.textContent=label;item.addEventListener('click',action);return item;}
 function paragraph(text){const item=document.createElement('p');item.textContent=text;return item;}
 function dialog(label){const item=document.createElement('dialog');item.setAttribute('aria-label',label);const title=document.createElement('h2');title.textContent=label;item.append(title);item.addEventListener('close',()=>item.remove(),{once:true});document.body.append(item);return item;}
-const outcomeLabel={retrieved:'Metadata returned',noResult:'No resource returned',network:'Check failed: network',quota:'Check failed: request allowance',rejected:'Check failed: setup rejected',failed:'Check failed'};
-export function metadataEvidence(record){const check=record.metadata.checks?.at(-1);return check ? `${outcomeLabel[check.outcome] ?? 'Check failed'} · ${formatDateTime(check.observedAt)}`:'Not checked';}
+const outcomeLabel=metadataOutcomes;
 
 export function appendYoutubeSetup(parent,{onChanged}) {
   parent.append(button('YouTube setup',async()=>{
@@ -23,20 +23,6 @@ export function appendYoutubeSetup(parent,{onChanged}) {
     const remove=button('Remove key',async()=>{const saved=await command({type:'setYoutubeKey',key:null});input.value='';status.textContent=saved.ok?'Key removed. Retained information is unchanged.':saved.error;if(saved.ok)onChanged?.();});
     controls.append(save,test,remove,button('Close setup',()=>view.close()));view.append(label,status,usage,controls);view.showModal();input.focus();
   }));
-}
-
-export function showMetadataDetails(record,{onChanged}={}) {
-  const view=dialog('Metadata details');
-  view.append(paragraph(metadataEvidence(record)),paragraph('YouTube checks do not verify playback. No resource returned does not identify deletion or private status. Metadata history is separate from Library action History.'));
-  const latestSuccess=record.metadata.observations.filter(item=>item.source==='youtube-api').at(-1);
-  view.append(paragraph(latestSuccess?`Last successful retrieval: ${formatDateTime(latestSuccess.observedAt)}`:'No successful YouTube retrieval retained.'));
-  if(latestSuccess){view.append(paragraph(`Source: YouTube API · Observed ${formatDateTime(latestSuccess.observedAt)}`),paragraph(latestSuccess.description ?? 'Description missing'),paragraph(`Image: ${latestSuccess.image?.outcome ?? 'missing'} · ${formatDateTime(latestSuccess.image?.acquiredAt)}`));const data=record.metadata.current?.image?.dataUrl;if(data){const image=document.createElement('img');image.src=data;image.alt='Retained thumbnail';image.className='metadata-image';view.append(image);}}
-  const status=paragraph('');status.setAttribute('role','status');
-  const controls=document.createElement('div');controls.className='title-tools';
-  const retry=button('Pull metadata',async()=>{retry.disabled=true;status.textContent='Retrieving metadata and image…';const result=await command({type:'pullMetadata',recordId:record.id});retry.disabled=false;status.textContent=result.ok?`${outcomeLabel[result.outcome] ?? result.outcome}. Image: ${result.imageOutcome}.`:result.error;if(result.record){view.close();showMetadataDetails(result.record,{onChanged});}if(result.ok)onChanged?.();});
-  controls.append(retry);
-  if(record.metadata.current?.image?.outcome==='failed')controls.append(button('Retry thumbnail only',async()=>{const result=await command({type:'pullMetadata',recordId:record.id,imageOnly:true});status.textContent=result.ok?`Image: ${result.imageOutcome}`:result.error;onChanged?.();}));
-  controls.append(button('Close metadata',()=>view.close()));view.append(status,controls);view.showModal();
 }
 
 export function appendEnrichmentTools(parent,record,{onChanged}) {

@@ -140,3 +140,8 @@ button:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus
 #list-management details button {margin:6px 0;max-width:100%;overflow-wrap:anywhere;}
 dialog .metadata-image { display:block; max-width:100%; max-height:240px; object-fit:contain; }
 .metadata-tools { flex-wrap:wrap; }
+
+.metadata-dialog .metadata-version,.metadata-dialog .metadata-original-field,.metadata-dialog .metadata-latest-field {border-top:1px solid #bdccc4;padding:12px 0;overflow-wrap:anywhere;}
+.metadata-dialog .metadata-field {white-space:pre-wrap;}
+.metadata-dialog [aria-pressed=true] {background:#dce8de;}
+.metadata-dialog .matched-version {border:2px solid #326857;padding:12px;}
