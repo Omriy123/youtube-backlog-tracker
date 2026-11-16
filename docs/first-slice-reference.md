@@ -36,7 +36,7 @@ First saved and the original First Inbox-exit stay fixed. Actual requeue advance
 5. Restart Chrome and open the Library. **Undo opening** restores the reviewed Inbox state, retains the first watch and every captured title, and leaves existing browser tabs alone. It does not revive the resolved review.
 6. Open again, save again and choose **Dismiss** in the review. The record leaves active Inbox. Save it once more to inspect the retained dismissal and earlier watches; choose Keep or Dismiss explicitly. Requeue, review and later Personal edits protect against an older Undo overwriting those decisions.
 
-The automated combined walkthrough uses controlled title changes and exercises Enter/Escape and a 390-pixel Library viewport. For your own trial, no page title change or provider API is required; repeated equal observations are retained too. See the validation report in the repository (`docs/validation/first-slice.md`) for actual results and screenshots. This first-slice build does not start the later recovery/enrichment real-use review clocks.
+The automated combined walkthrough uses controlled title changes and exercises Enter/Escape and a 390-pixel Library viewport. For your own trial, no page title change or provider API is required; repeated equal observations are retained too. See the validation report in the repository (`docs/validation/first-slice.md`) for actual results and screenshots. The first-slice milestone alone does not start the later recovery/enrichment real-use review clocks. The current [manual enrichment guide](manual-enrichment-guide.md) explains the separate enrichment trial and actual-use trigger.
 
 ## Opening recovery
 
