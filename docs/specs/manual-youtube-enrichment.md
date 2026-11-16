@@ -1,6 +1,6 @@
 # Manual YouTube enrichment: first metadata delivery slice
 
-Status: **to-spec formalization published; complete-spec approval and workflow-ticket agreement pending**. On 2026-11-16 the owner selected real YouTube metadata, then approved the proposed manual-first boundary with “ok sure”. The owner subsequently invoked to-spec to synthesize and publish the discussion. This document records that boundary and marked builder defaults; publication does not approve unreviewed elaborations, workflow tickets or production implementation.
+Status: **approved for the agreed three-workflow delivery handoff, 2026-11-16**. The owner selected real YouTube metadata, approved the manual-first boundary with “ok sure”, invoked to-spec to formalize it, explicitly requested to-tickets, then approved the proposed three-workflow breakdown and dependencies with “ok sounds good”. This records approval of the focused contract and marked builder defaults for that delivery series, not implementation or delivery completion.
 
 Decision owner: [Choose the next bounded delivery slice from the first working build](https://github.com/Omriy123/youtube-backlog-tracker/issues/32). Delivery coverage stays in [Track remaining product scope after the first usable slice](https://github.com/Omriy123/youtube-backlog-tracker/issues/9). The organization PR merged on 2026-11-16; its historical repair-branch instructions do not apply to this work.
 
@@ -101,7 +101,7 @@ Carry forward [organization and browsing](library-organization.md), [the accepte
 
 ## Testing Decisions
 
-Use the installed Chrome extension's public workflows, durable Library state and real authorized YouTube requests. Controlled provider-boundary fixtures supplement real integration for deterministic changes/failures; they do not establish live provider outcomes. Reverify current official API setup, request fields, permissions, quotas and image acquisition facts during implementation planning; this draft makes no fresh API claim or live-lookup claim.
+Use the installed Chrome extension's public workflows, durable Library state and real authorized YouTube requests. Controlled provider-boundary fixtures supplement real integration for deterministic changes/failures; they do not establish live provider outcomes. Reverify current official API setup, request fields, permissions, quotas and image acquisition facts during implementation planning; this specification makes no fresh API claim or live-lookup claim.
 
 - **Primary boundary and prior agreement:** extend the existing installed-extension save/find/open/recover walkthrough and organization browser workflows. This is the real-browser boundary already approved in the first-slice and enrichment contracts; the to-spec invocation synthesizes that agreement without introducing a new testing interface or another interview.
 - **Tested responsibilities:** exercise setup and browser/provider integration, durable retrieval/archive/image persistence, Library browse/search/details and existing review/recovery together through visible actions and observable records/tabs. Good tests assert user outcomes, not helper calls, schema layout, component nesting or a storage engine.
@@ -132,4 +132,14 @@ Twitch/generic enrichment, scraping, similarity detection, playback checks, sync
 
 Framework/storage choices, migration representation, queue coordination, image sharing/compression, least browser permissions, request batching, indexing, test automation and exact settings/control placement are builder choices constrained by these observable behaviors. Inspect existing modules before choosing seams; no large foundation rewrite is prescribed.
 
-After complete-spec approval, propose bounded vertical workflow tickets and genuine native dependencies under the remaining-scope roadmap. Every ticket must expose a usable user workflow and include its applicable validation; do not split into schema/API/UI layers that cannot be tried independently. Obtain agreement on that breakdown before publishing it as ready work. The chosen planning checkpoint closes only after the approved spec and agreed workflow tickets are published and its map/roadmap pointers are verified.
+### Approved delivery workflows
+
+The owner approved these vertical workflows and dependencies on 2026-11-16. All are native delivery children of the remaining-scope roadmap, with planning provenance in the chosen checkpoint:
+
+1. [Connect YouTube and enrich one saved video](https://github.com/Omriy123/youtube-backlog-tracker/issues/65): personal-key setup, real single-video acquisition, durable observations/images, initial metadata presentation, failure/retry and recovery protection. No open prerequisite. Retention and safe persistence apply from this first workflow.
+2. [Browse and find videos using retained YouTube metadata](https://github.com/Omriy123/youtube-backlog-tracker/issues/66): real channel/date/duration browsing and full version inspection/historical search. Blocked only by Connect YouTube and enrich one saved video.
+3. [Enrich lists and the entire Library with resumable results](https://github.com/Omriy123/youtube-backlog-tracker/issues/67): explicit batch targets, progress, cancellation, durable interrupted results and retry, plus representative-scale validation and actual-use handoff. Blocked only by Connect YouTube and enrich one saved video; independent of the browsing workflow.
+
+Each workflow includes applicable installed-Chrome validation and protects the Library from its first delivery. User testing may begin with the first usable enrichment build. The existing four-week metadata review has that first workflow as its native delivery prerequisite; the clock starts only on actual first use, with recorded build and dates. Later workflows preserve any genuine earlier start date. No broader-recovery review clock is started by this handoff.
+
+Implementation plans remain delivery-owned. The planning checkpoint may close after publication and verification of this approved specification, tickets and map/roadmap pointers; neither that closure nor ticket creation claims production completion. Deferred automatic retrieval, clearing, backups and provider-color settings remain in the roadmap and their approved contracts.
