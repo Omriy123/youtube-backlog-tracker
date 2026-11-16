@@ -90,7 +90,15 @@ async function render() {
   latest=result;
   enrichmentOperations.update();
   browse.density=preferences.density ?? 'thumbnails';browse.orientation=preferences.orientation ?? 'columns';
-  if(!browse.anchor)browse.anchor=anchorChannels(result.records,browse.scopeId);
+  if(!browse.anchor){browse.anchor=anchorChannels(result.records,browse.scopeId);browse.anchorScopeId=browse.scopeId;}
+  else {
+    // Keep existing shortcut positions while adding newly acquired identities.
+    // Scope toggles retain the original shortcut population and ordering.
+    const known=new Map(anchorChannels(result.records,browse.anchorScopeId).map(item=>[item.id,item]));
+    const ids=new Set(browse.anchor.map(item=>item.id));
+    browse.anchor=browse.anchor.map(item=>({...item,...known.get(item.id)}));
+    for(const item of known.values())if(!ids.has(item.id))browse.anchor.push(item);
+  }
   const content=deriveBrowse({records:result.records,lists:result.lists,state:browse});
   const derived=deriveBrowse({records:result.records,lists:result.lists,state:browse,selectedIds:selection.selectedIds,selectedOnly:selection.selectedOnly});
   const context={scopeId:browse.scopeId,originListId:browse.originListId,query:browse.query,titleScopes:browse.titleScopes,channelId:browse.channelId,selectedOnly:selection.selectedOnly,reviewSelected:false,contentRecords:content.currentResults,sort:preferences.videoSort,preferences,lists:result.lists};
