@@ -1,3 +1,4 @@
+import { recordEnrichmentCompletion } from './enrichment-operation-service.js';
 // Provider requests never hold the Library's mutation queue. Accepted results
 // reread the newest document before committing, preserving concurrent user work.
 export function createEnrichmentCommands(browser, transact) {
@@ -11,6 +12,7 @@ export function createEnrichmentCommands(browser, transact) {
     if(!record)return failure('notFound','This saved video no longer exists.');
     if(!/^youtube:[A-Za-z0-9_-]{11}$/.test(record.identity))return {ok:true,outcome:'skipped',record,imageOutcome:'notAttempted'};
     const setup=await credential();
+    if(message.expectedCredentialRevision && message.expectedCredentialRevision!==setup.revision)return failure('credentialChanged','YouTube setup changed. Retry unfinished work explicitly.');
     if(!setup.key)return failure('setupRequired','Configure your personal YouTube API key first.');
     if(message.imageOnly && !record.metadata.current?.thumbnailReferences?.length)return failure('noImage','No retained thumbnail reference to retry.');
     let response;
@@ -26,6 +28,7 @@ export function createEnrichmentCommands(browser, transact) {
         catch {image={outcome:'failed',url,acquiredAt:browser.now(),error:'Thumbnail could not be saved. Retry its image explicitly.'};}
       }
     }
+    image.requestId=message.requestId;
     if(!await current(setup.revision))return failure('credentialChanged','YouTube setup changed. This response was not accepted.');
     try {
       return await transact(async state=>{
@@ -40,13 +43,14 @@ export function createEnrichmentCommands(browser, transact) {
           metadata.imageAcquisitions.push(image);
           if(image.outcome==='retrieved' && metadata.current?.observedAt===record.metadata.current?.observedAt)metadata.current.image=image;
         } else {
-          metadata.checks.push({id:browser.id(),source:'youtube-api',observedAt,outcome:response.outcome,error:response.error ?? null});
+          metadata.checks.push({id:browser.id(),requestId:message.requestId,source:'youtube-api',observedAt,outcome:response.outcome,imageOutcome:image.outcome,error:response.error ?? null});
           if(response.outcome==='retrieved') {
             const fields=response.fields ?? {};
             const observation={source:'youtube-api',observedAt,title:fields.title ?? null,description:fields.description ?? null,channel:fields.channel ?? null,publicationDate:fields.publicationDate ?? null,durationSeconds:fields.durationSeconds ?? null,thumbnailReferences:fields.thumbnailReferences ?? [],image};
             metadata.observations.push(observation);metadata.current=structuredClone(observation);
           }
         }
+        recordEnrichmentCompletion(state,message,{outcome:response.outcome,imageOutcome:image.outcome,error:response.error ?? null});
         try {await browser.write(state);}
         catch(error) {
           // A rejected acknowledgement can follow a successful durable write.
@@ -57,6 +61,12 @@ export function createEnrichmentCommands(browser, transact) {
         return {ok:success,outcome:response.outcome,record:target,imageOutcome:image.outcome,error:response.error ?? null};
       });
     } catch {return failure('storage','Metadata was not saved. Prior information is retained. Free local disk space or browser storage and retry.');}
+  }
+  function request(message) {
+    if(pending.has(message.recordId))return pending.get(message.recordId);
+    const abort=new AbortController(),requestId=browser.id();
+    const task=credentialQueue.then(()=>pull({...message,requestId},abort.signal)).finally(()=>{if(pending.get(message.recordId)?.task===task)pending.delete(message.recordId);});
+    const operation={task,abort,requestId};pending.set(message.recordId,operation);return operation;
   }
   function command(message) {
     if(message.type==='enrichmentSettings')return (async()=>({ok:true,configured:Boolean((await credential()).key),storageBytes:await transact(state=>new TextEncoder().encode(JSON.stringify(state.records.map(record=>record.metadata))).length)}))();
@@ -80,11 +90,9 @@ export function createEnrichmentCommands(browser, transact) {
       return {ok:['retrieved','noResult'].includes(result.outcome),outcome:result.outcome,error:result.error ?? null};
     })();
     if(message.type==='pullMetadata') {
-      if(pending.has(message.recordId))return pending.get(message.recordId).task;
-      const abort=new AbortController();
-      const task=credentialQueue.then(()=>pull(message,abort.signal)).finally(()=>{if(pending.get(message.recordId)?.task===task)pending.delete(message.recordId);});pending.set(message.recordId,{task,abort});return task;
+      return request(message).task;
     }
     return null;
   }
-  return {command};
+  return {command,request};
 }

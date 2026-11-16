@@ -1,5 +1,6 @@
 import {showRemoval} from './removal-ui.js';
 import { appendYoutubeSetup, appendEnrichmentTools } from './enrichment-ui.js';
+import { appendEnrichmentOperations } from './enrichment-operation-ui.js';
 import { renderOrganizationControls, showMove, organizationButton } from './organization-ui.js';
 import { createArrangementController, appendLibraryDates, renderOverviewControls } from './arrangement-ui.js';
 import { orderLists, isGlobalValueView } from './arrangement-service.js';
@@ -22,6 +23,8 @@ const dateFormat=document.querySelector('#date-format');
 const browser=createBrowserAdapter();
 const browse=createBrowseState();
 const youtubeSetup=document.createElement('div');youtubeSetup.className='title-tools';document.querySelector('main').prepend(youtubeSetup);appendYoutubeSetup(youtubeSetup,{onChanged:()=>render()});
+const enrichmentHeader=document.createElement('div');youtubeSetup.after(enrichmentHeader);
+const enrichmentOperations=appendEnrichmentOperations(enrichmentHeader,{getListId:()=>browse.scopeId,onChanged:()=>render()});
 const selection=createSelectionController({onChanged:()=>render(),onMove:records=>moveRecords(records),onPlace:(records,current,context)=>placeRecords(records,current,context),onStatus:(records,effect)=>showStatus(orderedSelection(records),latest.lists,effect,{onChanged:organizationChanged,onProcessed:selection.processed})});
 const arrangements=createArrangementController({onChanged:message=>organizationChanged(message ?? ''),onError:message=>{document.querySelector('main > [role=status]').textContent=message;},getMovedIds:(event,record,records)=>event.ctrlKey && selection.selectedIds.has(record.id)?records.filter(item=>selection.selectedIds.has(item.id)).map(item=>item.id):[record.id],onMove:(ids,to)=>moveRecords(latest.records.filter(record=>ids.includes(record.id)),to)});
 const sortControls=document.createElement('div');sortControls.id='arrangement-controls';container.before(sortControls);
@@ -85,6 +88,7 @@ async function render() {
   const preferences=result.organizationPreferences ?? {};
   result.lists=orderLists(result.lists,result.listStatistics,preferences.overviewSort);
   latest=result;
+  enrichmentOperations.update();
   browse.density=preferences.density ?? 'thumbnails';browse.orientation=preferences.orientation ?? 'columns';
   if(!browse.anchor)browse.anchor=anchorChannels(result.records,browse.scopeId);
   const content=deriveBrowse({records:result.records,lists:result.lists,state:browse});
