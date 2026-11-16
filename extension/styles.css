@@ -140,3 +140,5 @@ button:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus
 #list-management details button {margin:6px 0;max-width:100%;overflow-wrap:anywhere;}
 dialog .metadata-image { display:block; max-width:100%; max-height:240px; object-fit:contain; }
 .metadata-tools { flex-wrap:wrap; }
+.enrichment-operation-results{border:1px solid #a6b7ae;border-radius:.5rem;padding:1rem;margin-block:1rem;max-height:65vh;overflow:auto;overflow-wrap:anywhere}
+.enrichment-operation-results ol{padding-inline-start:1.5rem}.enrichment-operation-results li{border-top:1px solid #d4ddd6;padding-block:.5rem}.enrichment-operation-controls{flex-wrap:wrap}
