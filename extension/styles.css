@@ -145,3 +145,5 @@ dialog .metadata-image { display:block; max-width:100%; max-height:240px; object
 .metadata-dialog .metadata-field {white-space:pre-wrap;}
 .metadata-dialog [aria-pressed=true] {background:#dce8de;}
 .metadata-dialog .matched-version {border:2px solid #326857;padding:12px;}
+.enrichment-operation-results{border:1px solid #a6b7ae;border-radius:.5rem;padding:1rem;margin-block:1rem;max-height:65vh;overflow:auto;overflow-wrap:anywhere}
+.enrichment-operation-results ol{padding-inline-start:1.5rem}.enrichment-operation-results li{border-top:1px solid #d4ddd6;padding-block:.5rem}.enrichment-operation-controls{flex-wrap:wrap}
