@@ -102,3 +102,27 @@ test('disconnect during a request rejects late results and leaves independent us
   const {record:latest}=await library.command({type:'metadataDetails',recordId:record.id});
   assert.equal(latest.user.personalTitle,'My title');assert.equal(latest.metadata.observations.length,1);
 });
+
+test('unsupported saved links are skipped without requiring setup or changing the record',async()=>{
+  const browser=fixture();
+  browser.capture=async()=>({url:'https://example.org/video',title:'Fallback title',source:'browser-tab',observedAt:null});
+  const {library,record}=await saved(browser);
+  const result=await library.command({type:'pullMetadata',recordId:record.id});
+  assert.equal(result.outcome,'skipped');
+  assert.equal(browser.calls.length,0);
+  assert.deepEqual((await library.command({type:'metadataDetails',recordId:record.id})).record,record);
+});
+
+test('no resource is retained as check evidence without erasing last successful metadata or changing review',async()=>{
+  const browser=fixture();const {library,record}=await saved(browser);
+  await library.command({type:'setYoutubeKey',key:'fixture'});
+  await library.command({type:'pullMetadata',recordId:record.id});
+  const before=(await library.command({type:'metadataDetails',recordId:record.id})).record;
+  browser.response={outcome:'noResult'};
+  assert.equal((await library.command({type:'pullMetadata',recordId:record.id})).outcome,'noResult');
+  const after=(await createLibrary(browser).command({type:'metadataDetails',recordId:record.id})).record;
+  assert.deepEqual(after.metadata.current,before.metadata.current);
+  assert.equal(after.metadata.checks.at(-1).outcome,'noResult');
+  assert.equal(after.metadata.observations.length,before.metadata.observations.length);
+  assert.deepEqual(after.user,before.user);
+});
