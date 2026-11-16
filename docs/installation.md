@@ -24,6 +24,7 @@ There is no need to select **Load unpacked** again. Keep the existing extension 
 
 ## More detail
 
+- [Retrieve YouTube information](manual-enrichment-guide.md): optional personal-key setup, deliberate retrieval, retained versions and retry.
 - [Organize your Library](library-organization-guide.md): watch lists, sorting, channels, selection, moving and recovery.
 - [First-slice behavior reference](first-slice-reference.md): identity, review, titles, and opening recovery.
 - [Development and validation commands](development.md): building the supplied folder and running checks. These are for the person preparing the build; they are not needed to install it.
