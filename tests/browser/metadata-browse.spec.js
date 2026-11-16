@@ -3,6 +3,7 @@ import {resolve} from 'node:path';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {launch,capture,browserTabs} from './helpers.js';
 import {metadataProviderFixture} from './metadata-provider-fixture.js';
+test.use({actionTimeout:10000});
 
 test('retrieved channels appear immediately and metadata details expose per-field originals and exact historical matches offline',async()=>{
   const extensionPath=await metadataProviderFixture();let app=await launch(undefined,{extensionPath});
@@ -97,18 +98,16 @@ test('retained metadata browsing scales and both densities keep selected/history
       await page.getByRole('button',{name:'Close metadata'}).click();
       evidence.measurements.push({...workload,loadMs,searchMs});
     }
-    console.log('metadata workload: starting rendered checks');
     await page.getByRole('searchbox').fill('00000000000');await expect(page.getByRole('article')).toHaveCount(1);
-    console.log('metadata workload: one result');
-    await page.getByRole('checkbox',{name:'Select all',exact:true}).check();
-    console.log('metadata workload: selected');
+    await page.getByRole('checkbox',{name:'Select all current results',exact:true}).check();
     for(const density of ['Thumbnails','Compact']) {
       await page.getByRole('button',{name:density,exact:true}).click();
-      console.log('metadata workload: density',density);
       for(const width of [1440,390]) {
         await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
         await page.screenshot({path:resolve(output,`${density}-${width}-selected.png`),fullPage:true});
-        await page.getByRole('button',{name:/Metadata details: Metadata returned/}).focus();await page.keyboard.press('Enter');
+        const details=page.getByRole('button',{name:/Metadata details: Metadata returned/});
+        await expect(page.locator('#records')).toHaveAttribute('aria-busy','false');
+        await details.focus();await expect(details).toBeFocused();await details.press('Enter');
         const dialog=page.getByRole('dialog',{name:'Metadata details'});await dialog.getByRole('button',{name:'History',exact:true}).click();
         await dialog.getByRole('button',{name:'Close metadata'}).focus();await expect(dialog.getByRole('button',{name:'Close metadata'})).toBeFocused();
         await page.screenshot({path:resolve(output,`${density}-${width}-history.png`),fullPage:true});await page.keyboard.press('Escape');
