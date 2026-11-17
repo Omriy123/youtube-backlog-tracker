@@ -33,6 +33,8 @@ The production Chrome restart evidence is retained in [chrome-restarts.json](man
 
 ## Independent review
 
+The [final combined-branch review](final-enrichment-review.md) rechecks the complete delivered implementation after all owner-test repairs. The review below records the initial implementation findings and their fixes.
+
 ### Standards
 
 One documented-standard finding: selected metadata tabs originally depended on background color. A stable double border now distinguishes selection independently of color and preserves `aria-pressed` and control dimensions. The reviewer inspected desktop/narrow rendered evidence and confirmed resolution. No substantive Fowler heuristic findings remained.

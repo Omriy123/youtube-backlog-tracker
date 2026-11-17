@@ -112,6 +112,9 @@ test('retained metadata browsing scales and both densities keep selected/history
     await page.getByRole('checkbox',{name:'Select all current results',exact:true}).check();
     for(const density of ['Thumbnails','Compact']) {
       await page.getByRole('button',{name:density,exact:true}).click();
+      await expect(page.getByRole('button',{name:density,exact:true})).toHaveAttribute('aria-pressed','true');
+      await expect(page.locator('#records')).toHaveClass(new RegExp(`\\bdensity-${density.toLowerCase()}\\b`));
+      await expect(page.locator('#records')).toHaveAttribute('aria-busy','false');
       for(const width of [1440,390]) {
         await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
         await page.screenshot({path:resolve(output,`${density}-${width}-selected.png`),fullPage:true});
