@@ -22,6 +22,7 @@ test('Personal title saves durably and clearing restores the captured Original',
     await library.getByRole('button', { name: 'Edit Personal title', exact: true }).click();
     await expect(library.getByRole('textbox', { name: 'Personal title', exact: true })).toHaveValue('My deliberate lesson');
     await library.getByRole('button', { name: 'Clear Personal title', exact: true }).click();
+    await expect(library.getByRole('dialog', { name: 'Edit Personal title', exact: true })).not.toBeVisible();
     await expect(library.getByRole('status')).toContainText('Personal title cleared');
     await expect(library.getByRole('heading', { name: 'Original lecture', exact: true })).toBeVisible();
     await library.reload();

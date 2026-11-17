@@ -4,7 +4,7 @@ export function appendOpenActions(title, content, record, { onChanged, onReviewR
   async function open() {
     const result = await command({ type: 'open', recordId: record.id, expectedRevision: record.user.revision, attemptId: crypto.randomUUID() });
     if (result.outcome === 'reviewRequired') { onReviewRequired(result.record); return; }
-    document.querySelector('[role=status]').textContent = result.ok ? 'Opened in a new tab · Playback not verified' : result.error;
+    document.querySelector('main > [role=status]').textContent = result.ok ? 'Opened in a new tab · Playback not verified' : result.error;
     await onChanged();
   }
   const target = document.createElement('button'); target.className = 'title-target'; target.textContent = displayTitle(record); target.addEventListener('click', open);
@@ -23,7 +23,7 @@ export function renderOpeningRecovery(result, { onChanged, onReviewRequired }) {
       repair.disabled = !recovery.canRepair;
       repair.addEventListener('click', async () => {
         const response = await command({ type: 'repairOpening', attemptId: recovery.attemptId });
-        document.querySelector('[role=status]').textContent = response.ok ? 'Library update saved · No additional tab opened' : response.error;
+        document.querySelector('main > [role=status]').textContent = response.ok ? 'Library update saved · No additional tab opened' : response.error;
         await onChanged();
       }); section.append(repair);
     } else {
@@ -32,14 +32,14 @@ export function renderOpeningRecovery(result, { onChanged, onReviewRequired }) {
       const inspect = document.createElement('button'); inspect.textContent = 'Inspect existing tabs';
       inspect.addEventListener('click', async () => {
         const response = await command({ type: 'inspectOpening', attemptId: recovery.attemptId });
-        if (!response.ok) { document.querySelector('[role=status]').textContent = response.error; return; }
+        if (!response.ok) { document.querySelector('main > [role=status]').textContent = response.error; return; }
         inspectedTabs.replaceChildren(); inspectedTabs.hidden = false;
         for (const tab of response.tabs) {
           const item = document.createElement('li');
           const focus = document.createElement('button'); focus.textContent = `Focus existing tab: ${tab.title || tab.url || 'Untitled tab'}`;
           focus.addEventListener('click', async () => {
             const focused = await command({ type: 'focusOpeningTab', attemptId: recovery.attemptId, tabId: tab.id });
-            document.querySelector('[role=status]').textContent = focused.ok ? 'Existing tab focused · Opening outcome remains uncertain' : focused.error;
+            document.querySelector('main > [role=status]').textContent = focused.ok ? 'Existing tab focused · Opening outcome remains uncertain' : focused.error;
           });
           const url = document.createElement('span'); url.textContent = ` ${tab.url || 'URL unavailable'}`;
           item.append(focus, url); inspectedTabs.append(item);
@@ -49,7 +49,7 @@ export function renderOpeningRecovery(result, { onChanged, onReviewRequired }) {
       fresh.addEventListener('click', async () => {
         const response = await command({ type: 'newOpening', attemptId: recovery.attemptId, newAttemptId: crypto.randomUUID(), expectedRevision: recovery.record.user.revision, acknowledgePossibleDuplicate: true });
         if (response.outcome === 'reviewRequired') { onReviewRequired(response.record); return; }
-        document.querySelector('[role=status]').textContent = response.ok ? 'Opened a new tab · The earlier attempt remains unverified' : response.error;
+        document.querySelector('main > [role=status]').textContent = response.ok ? 'Opened a new tab · The earlier attempt remains unverified' : response.error;
         await onChanged();
       });
       section.append(warning, inspect, inspectedTabs, fresh);
@@ -62,13 +62,13 @@ export function renderOpeningRecovery(result, { onChanged, onReviewRequired }) {
     const undo = document.createElement('button'); undo.textContent = 'Undo opening';
     undo.addEventListener('click', async () => {
       const response = await command({ type: 'undoOpening', attemptId: result.latestOpening.attemptId });
-      document.querySelector('[role=status]').textContent = response.ok ? 'Opening undone · Browser tabs left open' : response.error;
+      document.querySelector('main > [role=status]').textContent = response.ok ? 'Opening undone · Browser tabs left open' : response.error;
       await onChanged();
     });
     const close = document.createElement('button'); close.type = 'button'; close.className = 'close-opening-notice'; close.textContent = '×'; close.setAttribute('aria-label', 'Close opening notice');
     close.addEventListener('click', async () => {
       const response = await command({ type: 'dismissOpeningNotice', attemptId: result.latestOpening.attemptId });
-      document.querySelector('[role=status]').textContent = response.ok ? 'Opening notice closed' : response.error;
+      document.querySelector('main > [role=status]').textContent = response.ok ? 'Opening notice closed' : response.error;
       await onChanged();
     });
     container.append(label, undo, close);
