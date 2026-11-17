@@ -3,7 +3,7 @@ import {formatDateTime,onDateFormatChanged} from './date-display.js';
 import {showReview} from './review-ui.js';
 import {showStatus} from './status-ui.js';
 
-export const metadataOutcomes={retrieved:'Metadata returned',noResult:'No resource returned',network:'Check failed: network',quota:'Check failed: request allowance',rejected:'Check failed: setup rejected',failed:'Check failed'};
+export const metadataOutcomes={retrieved:'Metadata returned',noResult:'No resource returned',network:'Check failed: network',quota:'Check failed: request allowance',rejected:'Check failed: setup rejected',requestRejected:'Check failed: request rejected',failed:'Check failed'};
 export function metadataEvidence(record) {
   const check=record.metadata.checks?.at(-1);
   return check?`${metadataOutcomes[check.outcome] ?? 'Check failed'} · ${formatDateTime(check.observedAt)}`:'Not checked';

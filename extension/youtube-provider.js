@@ -10,7 +10,7 @@ export async function fetchYoutubeVideo(videoId,key,{signal}={}) {
   try {
     const url=new URL('https://www.googleapis.com/youtube/v3/videos');
     url.searchParams.set('part','snippet,contentDetails');url.searchParams.set('id',videoId);
-    url.searchParams.set('fields','items(id,snippet(title,description,channelId,channelTitle,publishedAt,thumbnails),contentDetails(duration)),error(code,errors(reason))');
+    url.searchParams.set('fields','items(id,snippet(title,description,channelId,channelTitle,publishedAt,thumbnails),contentDetails(duration))');
     // Keep the credential out of request URLs and error messages.
     const response=await fetch(url,{headers:{'X-Goog-Api-Key':key},credentials:'omit',redirect:'error',signal:timeout(signal)});
     const data=await response.json();
@@ -18,7 +18,9 @@ export async function fetchYoutubeVideo(videoId,key,{signal}={}) {
       const reasons=data.error?.errors?.map(error=>error.reason) ?? [];
       const quota=response.status===429 || reasons.some(reason=>['quotaExceeded','dailyLimitExceeded','rateLimitExceeded','userRateLimitExceeded'].includes(reason));
       if(quota)return {outcome:'quota',error:'YouTube request allowance is exhausted. Completed information is retained; retry explicitly later.'};
-      if(response.status===400 || response.status===401 || response.status===403)return {outcome:'rejected',error:'YouTube rejected setup. Check the API key, enabled YouTube Data API and key restrictions.'};
+      const setup=reasons.some(reason=>['keyInvalid','accessNotConfigured'].includes(reason)) || (data.error?.details ?? []).some(detail=>['API_KEY_INVALID','SERVICE_DISABLED','API_KEY_SERVICE_BLOCKED','API_KEY_HTTP_REFERRER_BLOCKED','API_KEY_IP_ADDRESS_BLOCKED'].includes(detail.reason));
+      if(setup || response.status===401 || response.status===403)return {outcome:'rejected',error:'YouTube rejected setup. Check the API key, enabled YouTube Data API and key restrictions.'};
+      if(response.status===400)return {outcome:'requestRejected',error:'YouTube rejected the metadata request format. Update the extension and retry.'};
       return {outcome:'failed',error:'YouTube could not complete the request. Retry explicitly later.'};
     }
     if(!Array.isArray(data.items))return {outcome:'failed',error:'YouTube returned an incomplete response. Retry explicitly.'};

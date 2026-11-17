@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createLibrary } from '../extension/library-service.js';
+import { fetchYoutubeVideo } from '../extension/youtube-provider.js';
 
 function fixture() {
   let state=null,credential=null,id=0,clock=0;
@@ -20,6 +21,20 @@ function fixture() {
   return browser;
 }
 async function saved(browser){const library=createLibrary(browser);const result=await library.command({type:'save'});return {library,record:result.record};}
+
+test('a structured invalid-key HTTP 400 remains a setup rejection without exposing provider text',async()=>{
+  const browser=fixture();browser.fetchYoutubeVideo=fetchYoutubeVideo;
+  const {library}=await saved(browser);await library.command({type:'setYoutubeKey',key:'private-fixture-key'});
+  const before=await browser.read();const originalFetch=globalThis.fetch;
+  globalThis.fetch=async()=>new Response(JSON.stringify({error:{message:'Reflected private-fixture-key',errors:[{reason:'badRequest'}],details:[{reason:'API_KEY_INVALID'}]}}),{status:400});
+  try {
+    const result=await library.command({type:'testYoutubeConnection'});
+    assert.equal(result.outcome,'rejected');assert.equal(result.ok,false);
+    assert.equal(result.error.includes('private-fixture-key'),false);
+    assert.equal((await library.command({type:'enrichmentSettings'})).configured,true);
+    assert.deepEqual(await browser.read(),before);
+  }finally{globalThis.fetch=originalFetch;}
+});
 
 test('optional setup makes no requests and single-video retrieval retains coherent source information and image offline',async()=>{
   const browser=fixture();const {library,record}=await saved(browser);

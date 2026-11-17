@@ -5,7 +5,7 @@ import {launch,capture} from './helpers.js';
 
 // Controlled provider HTTP boundary; real production parser, UI, local storage,
 // runtime messaging and image encoding run inside the installed extension.
-async function providerExtension({corruptImage=false,holdText=false}={}) {
+async function providerExtension({corruptImage=false,holdText=false,invalidRequest=false}={}) {
   await mkdir(resolve('.scratch/extensions'),{recursive:true});
   const path=await mkdtemp(resolve('.scratch/extensions/enrichment-'));
   await cp(resolve('extension'),path,{recursive:true});
@@ -19,6 +19,10 @@ async function providerExtension({corruptImage=false,holdText=false}={}) {
       if(address.startsWith('https://www.googleapis.com/youtube/v3/videos')) {
         if(${holdText})await new Promise(resolve=>{globalThis.releaseFixtureText=resolve;});
         if(options.headers['X-Goog-Api-Key']==='rejected-fixture')return new Response(JSON.stringify({error:{errors:[{reason:'keyInvalid'}]}}),{status:403});
+        if(${invalidRequest})return new Response(JSON.stringify({error:{code:400,message:'Invalid request '+options.headers['X-Goog-Api-Key'],errors:[{reason:'invalidParameter'}]}}),{status:400});
+        // Google rejects error-envelope fields in a successful VideoListResponse
+        // selector. This reproduces the live HTTP 400 seen in the setup trial.
+        if((new URL(address).searchParams.get('fields') ?? '').includes('error('))return new Response(JSON.stringify({error:{code:400,message:'Invalid field selection error',errors:[{reason:'invalidParameter'}]}}),{status:400});
         return new Response(JSON.stringify({items:[{id:new URL(address).searchParams.get('id'),snippet:{title:'Provider title with retained picture',description:'A retained provider description',channelId:'UC-fixture',channelTitle:'Example creator',publishedAt:'2026-10-01T12:00:00Z',thumbnails:{default:{url:'https://i.ytimg.com/vi/abcdefghijk/default.jpg',width:120,height:90}}},contentDetails:{duration:'PT2M5S'}}]}),{headers:{'Content-Type':'application/json'}});
       }
       if(address.startsWith('https://i.ytimg.com/'))return new Response(${corruptImage?"'not an image'":`Uint8Array.from(atob('${picture}'),c=>c.charCodeAt(0))`},{headers:{'Content-Type':'image/jpeg'}});
@@ -70,10 +74,45 @@ test('optional setup and deliberate acquisition present retained metadata and im
   } finally {await app.context.close();}
 });
 
+test('request errors do not blame setup or expose provider text and pause a batch before its next video',async()=>{
+  const app=await launch(undefined,{extensionPath:await providerExtension({invalidRequest:true})});
+  try {
+    const first=await capture(app,'https://youtu.be/abcdefghijk','First request record');
+    await expect(first.popup.getByRole('status')).toContainText('Saved to Inbox');
+    const second=await capture(app,'https://youtu.be/lmnopqrstuv','Second request record');
+    await expect(second.popup.getByRole('status')).toContainText('Saved to Inbox');
+    const page=await app.context.newPage();await page.goto(`${app.base}/library.html`);
+    await page.getByRole('button',{name:'YouTube setup',exact:true}).click();
+    const setup=page.getByRole('dialog',{name:'YouTube setup'});
+    await setup.getByLabel('Personal API key').fill('controlled-fixture');
+    await setup.getByRole('button',{name:'Save key',exact:true}).click();
+    await expect(setup.getByRole('status')).toContainText('Key saved');
+    await setup.getByRole('button',{name:'Test connection',exact:true}).click();
+    await expect(setup.getByRole('status')).toContainText('metadata request format');
+    await expect(setup.getByRole('status')).not.toContainText('controlled-fixture');
+    await expect(setup.getByRole('status')).not.toContainText('rejected setup');
+    for(const width of [1440,390]){
+      await page.setViewportSize({width,height:900});
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+      await page.screenshot({path:resolve(`.scratch/setup-request-error-${width}.png`),fullPage:true});
+    }
+    await setup.getByRole('button',{name:'Close setup',exact:true}).click();
+    await page.getByRole('button',{name:'Pull list metadata',exact:true}).click();
+    const results=page.getByRole('region',{name:'Metadata retrieval results'});
+    await expect(results.getByRole('status')).toContainText('Paused');
+    await expect(results).toContainText('Failed: 1');
+    await expect(results).toContainText('Not attempted/cancelled: 1');
+    await expect(results).toContainText('Request rejected');
+    await expect(results).not.toContainText('controlled-fixture');
+    await expect(page.getByRole('heading',{name:'First request record',exact:true})).toBeVisible();
+  }finally{await app.context.close();}
+});
+
 test('corrupt JPEG response retains successful text and offers explicit thumbnail retry',async()=>{
   const app=await launch(undefined,{extensionPath:await providerExtension({corruptImage:true})});
   try {
-    await capture(app,'https://youtu.be/abcdefghijk','Captured title');
+    const saved=await capture(app,'https://youtu.be/abcdefghijk','Captured title');
+    await expect(saved.popup.getByRole('status')).toContainText('Saved to Inbox');
     const page=await app.context.newPage();await page.goto(`${app.base}/library.html`);
     await page.evaluate(()=>chrome.runtime.sendMessage({type:'setYoutubeKey',key:'controlled-fixture'}));
     await page.getByRole('button',{name:'Pull entire Library metadata',exact:true}).click();
@@ -94,7 +133,8 @@ test('corrupt JPEG response retains successful text and offers explicit thumbnai
 test('cancelled text response offers unattempted image retry without reporting an image failure',async()=>{
   const app=await launch(undefined,{extensionPath:await providerExtension({holdText:true})});
   try {
-    await capture(app,'https://youtu.be/abcdefghijk','Cancelled image fixture');
+    const saved=await capture(app,'https://youtu.be/abcdefghijk','Cancelled image fixture');
+    await expect(saved.popup.getByRole('status')).toContainText('Saved to Inbox');
     const page=await app.context.newPage();await page.goto(`${app.base}/library.html`);
     await page.evaluate(()=>chrome.runtime.sendMessage({type:'setYoutubeKey',key:'controlled-fixture'}));
     await page.getByRole('button',{name:'Pull entire Library metadata',exact:true}).click();

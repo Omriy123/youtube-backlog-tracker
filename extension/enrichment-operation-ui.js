@@ -3,7 +3,7 @@ import {showMetadataDetails} from './enrichment-ui.js';
 
 function button(label,action){const item=document.createElement('button');item.type='button';item.className='secondary';item.textContent=label;item.addEventListener('click',action);return item;}
 function paragraph(text){const item=document.createElement('p');item.textContent=text;return item;}
-const names={retrieved:'Retrieved',noResult:'No resource returned',skipped:'Skipped',notAttempted:'Not attempted',network:'Network failure',quota:'Request allowance exhausted',storage:'Storage failure',credentialChanged:'Setup changed',setupRequired:'Setup required',rejected:'Setup rejected'};
+const names={retrieved:'Retrieved',noResult:'No resource returned',skipped:'Skipped',notAttempted:'Not attempted',network:'Network failure',quota:'Request allowance exhausted',storage:'Storage failure',credentialChanged:'Setup changed',setupRequired:'Setup required',rejected:'Setup rejected',requestRejected:'Request rejected'};
 
 export function appendEnrichmentOperations(parent,{getListId,onChanged}) {
   const controls=document.createElement('div');controls.className='title-tools enrichment-operation-controls';

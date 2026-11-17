@@ -82,11 +82,11 @@ export function createEnrichmentOperationCommands(browser,transact,enrichment) {
           const row=durable.targets.find(item=>item.recordId===target.recordId);
           if(row.inFlight){recordEnrichmentCompletion(state,message,response);await persist(state);}
         });
-        if(['quota','credentialChanged','setupRequired','rejected','storage'].includes(response.outcome)){session.reason=response.outcome;break;}
+        if(['quota','credentialChanged','setupRequired','rejected','requestRejected','storage'].includes(response.outcome)){session.reason=response.outcome;break;}
       }
       await update(session.id,value=>{
         value.status=session.stop?'cancelled':session.reason?'paused':'completed';value.finishedAt=browser.now();
-        value.explanation=session.stop?'Further requests stopped. Any completed in-flight result is retained.':session.reason==='quota'?'Request allowance exhausted. Retry unfinished work explicitly later.':session.reason?'Check setup or storage and retry unfinished work explicitly.':'Image failures are reported separately.';
+        value.explanation=session.stop?'Further requests stopped. Any completed in-flight result is retained.':session.reason==='quota'?'Request allowance exhausted. Retry unfinished work explicitly later.':session.reason==='requestRejected'?'The provider request format was rejected. Update the extension before retrying unfinished work.':session.reason?'Check setup or storage and retry unfinished work explicitly.':'Image failures are reported separately.';
       });
     } catch {
       lastError='Operation results could not be saved. Prior information is retained. Free local storage and retry explicitly; completed metadata will not be repeated.';
