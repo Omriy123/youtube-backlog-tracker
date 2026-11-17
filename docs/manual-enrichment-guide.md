@@ -21,6 +21,8 @@ If a supplied thumbnail size is unavailable, retrieval tries the remaining suppl
 
 The normal title remains your Personal title, then the first usable recorded automatic title, then the latest title or saved URL. A different latest YouTube title appears separately. Metadata details show source/time and retained Original, Latest and History information. Previously captured browser titles keep their actual provenance.
 
+Use **Close metadata** beside the dialog heading to return to the Library. It stays reachable while scrolling long descriptions or History; Escape also closes the dialog.
+
 After retrieval, real channel names, publication dates and durations feed the existing browsing, sorting and totals. Unknown values remain unknown. Titles and descriptions from retained versions are searchable through the independent Personal, Original, Intermediate and Latest scopes; all scopes off means URL-only search. A dated historical match opens its retained source version.
 
 ## Lists, the Library and retry
@@ -28,6 +30,8 @@ After retrieval, real channel names, publication dates and durations feed the ex
 Choose **Pull list metadata** for the selected list's members at invocation, or **Pull entire Library metadata** to include retained watched and dismissed videos. Later moves do not change the requested targets. **Retained video metadata** opens a searchable inspector for those retained records without returning them to active lists.
 
 Use **Retrieval results** to inspect requested, retrieved, no-result, failed, skipped and unfinished records. Image failures have their own explanation. **Cancel further retrieval** retains completed results; **Retry unfinished retrieval** addresses unsuccessful or unfinished work. An image-only retry does not repeat a successful text lookup.
+
+Use **Hide retrieval results** beside the results heading to dismiss that section, including after scrolling its entries. Hiding results does not cancel retrieval or remove saved outcomes. Select **Retrieval results** again to reopen them.
 
 If cancellation happens during a text request, returned text can still be retained while its image is reported as not attempted/cancelled. Retry unfinished retrieval or **Retry thumbnail only** acquires that image without repeating the successful text request. An image already in flight may finish and is reported truthfully.
 

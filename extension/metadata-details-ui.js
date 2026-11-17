@@ -42,6 +42,8 @@ function selectedValues(observation) {
 export function showMetadataDetails(record,{onChanged,onOpen,onDismiss,selectedIndex=null}={}) {
   const dialog=document.createElement('dialog');dialog.className='metadata-dialog';dialog.setAttribute('aria-label','Metadata details');
   const heading=document.createElement('h2');heading.textContent='Metadata details';
+  const close=button('Close metadata',()=>dialog.close());
+  const headingBar=document.createElement('div');headingBar.className='metadata-dialog-heading';headingBar.append(heading,close);
   const summary=document.createElement('div');
   const tabs=document.createElement('div');tabs.className='title-tools';tabs.setAttribute('aria-label','Metadata versions');
   const panel=document.createElement('section');panel.setAttribute('aria-label','Saved metadata');
@@ -108,8 +110,7 @@ export function showMetadataDetails(record,{onChanged,onOpen,onDismiss,selectedI
       dialog.close();showStatus([record],result.lists,'dismissed',{onChanged:onChanged ?? (()=>{}),onProcessed:()=>{}});
     }));
   }
-  actions.append(button('Close metadata',()=>dialog.close()));
-  dialog.append(heading,summary,tabs,panel,status,actions);document.body.append(dialog);render();
+  dialog.append(headingBar,summary,tabs,panel,status,actions);document.body.append(dialog);render();
   const unsubscribe=onDateFormatChanged(render);dialog.addEventListener('close',()=>{unsubscribe();dialog.remove();},{once:true});dialog.showModal();
   if(selectedIndex!==null){const matched=panel.querySelector('.matched-version');matched?.focus();matched?.scrollIntoView({block:'nearest'});}
 }

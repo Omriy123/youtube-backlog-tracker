@@ -8,7 +8,8 @@ test.use({actionTimeout:10000});
 test('retrieved channels appear immediately and metadata details expose per-field originals and exact historical matches offline',async()=>{
   const extensionPath=await metadataProviderFixture();let app=await launch(undefined,{extensionPath});
   try {
-    await capture(app,'https://youtu.be/abcdefghijk','Captured title before YouTube retrieval');
+    const saved=await capture(app,'https://youtu.be/abcdefghijk','Captured title before YouTube retrieval');
+    await expect(saved.popup.getByRole('status')).toContainText('Saved to Inbox');
     const page=await app.context.newPage();await page.goto(`${app.base}/library.html`);
     await page.evaluate(()=>chrome.runtime.sendMessage({type:'setYoutubeKey',key:'controlled-fixture'}));
     await page.getByRole('button',{name:'Pull metadata',exact:true}).click();

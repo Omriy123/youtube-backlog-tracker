@@ -10,14 +10,16 @@ export function appendEnrichmentOperations(parent,{getListId,onChanged}) {
   const status=paragraph('');status.setAttribute('role','status');status.hidden=true;
   const results=document.createElement('section');results.className='enrichment-operation-results';results.setAttribute('role','region');results.setAttribute('aria-label','Metadata retrieval results');results.hidden=true;
   const heading=document.createElement('h2');heading.textContent='Metadata retrieval results';
+  const headingBar=document.createElement('div');headingBar.className='enrichment-operation-heading';
+  headingBar.append(heading,button('Hide retrieval results',()=>{results.hidden=true;}));
   const progress=paragraph('');progress.setAttribute('role','status');
   const counts=paragraph('');const actions=document.createElement('div');actions.className='title-tools';
   const entries=document.createElement('ol');const more=button('Show 100 more results',()=>{limit+=100;paint(current);});
   let current=null,limit=100,timer=null,request=0;
   const cancel=button('Cancel further retrieval',async()=>{const result=await command({type:'cancelEnrichment',operationId:current.id});if(result.operation)paint(result.operation);});
   const retry=button('Retry unfinished retrieval',async()=>{retry.disabled=true;const result=await command({type:'retryEnrichment',operationId:current.id});retry.disabled=false;if(result.operation)paint(result.operation);else status.textContent=result.error;});
-  actions.append(cancel,retry,button('Hide retrieval results',()=>{results.hidden=true;}));
-  results.append(heading,progress,counts,actions,entries,more);
+  actions.append(cancel,retry);
+  results.append(headingBar,progress,counts,actions,entries,more);
   function paint(operation){
     current=operation;if(!operation){progress.textContent='No metadata retrieval operation retained.';counts.textContent='';entries.replaceChildren();cancel.hidden=true;retry.hidden=true;more.hidden=true;return;}
     const running=operation.status==='running';const value=operation.counts;
