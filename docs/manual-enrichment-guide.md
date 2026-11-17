@@ -17,6 +17,8 @@ You can replace or remove the key in the same setup control. Existing informatio
 
 Use a saved video's **Pull metadata** control to retrieve its YouTube information and thumbnail. Its check-evidence button opens **Metadata details**. The result distinguishes text retrieval from image acquisition; **Retry thumbnail only** retries a failed image. Unsupported links are skipped; missing information remains unknown. A failed lookup preserves the last successful information and does not establish that a video was deleted, made private or playable.
 
+If a supplied thumbnail size is unavailable, retrieval tries the remaining supplied references in order until an image can be saved. If all fail, text stays retained and the image can be retried explicitly. After updating from an earlier build, use **Retry thumbnail only** on affected videos or **Retry unfinished retrieval** in the saved batch results.
+
 The normal title remains your Personal title, then the first usable recorded automatic title, then the latest title or saved URL. A different latest YouTube title appears separately. Metadata details show source/time and retained Original, Latest and History information. Previously captured browser titles keep their actual provenance.
 
 After retrieval, real channel names, publication dates and durations feed the existing browsing, sorting and totals. Unknown values remain unknown. Titles and descriptions from retained versions are searchable through the independent Personal, Original, Intermediate and Latest scopes; all scopes off means URL-only search. A dated historical match opens its retained source version.

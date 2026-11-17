@@ -5,7 +5,7 @@ import {launch,capture} from './helpers.js';
 
 // Controlled provider HTTP boundary; real production parser, UI, local storage,
 // runtime messaging and image encoding run inside the installed extension.
-async function providerExtension({corruptImage=false,holdText=false,invalidRequest=false}={}) {
+async function providerExtension({corruptImage=false,holdText=false,invalidRequest=false,fallbackImage=false}={}) {
   await mkdir(resolve('.scratch/extensions'),{recursive:true});
   const path=await mkdtemp(resolve('.scratch/extensions/enrichment-'));
   await cp(resolve('extension'),path,{recursive:true});
@@ -23,8 +23,10 @@ async function providerExtension({corruptImage=false,holdText=false,invalidReque
         // Google rejects error-envelope fields in a successful VideoListResponse
         // selector. This reproduces the live HTTP 400 seen in the setup trial.
         if((new URL(address).searchParams.get('fields') ?? '').includes('error('))return new Response(JSON.stringify({error:{code:400,message:'Invalid field selection error',errors:[{reason:'invalidParameter'}]}}),{status:400});
-        return new Response(JSON.stringify({items:[{id:new URL(address).searchParams.get('id'),snippet:{title:'Provider title with retained picture',description:'A retained provider description',channelId:'UC-fixture',channelTitle:'Example creator',publishedAt:'2026-10-01T12:00:00Z',thumbnails:{default:{url:'https://i.ytimg.com/vi/abcdefghijk/default.jpg',width:120,height:90}}},contentDetails:{duration:'PT2M5S'}}]}),{headers:{'Content-Type':'application/json'}});
+        globalThis.fixtureMetadataRequests=(globalThis.fixtureMetadataRequests ?? 0)+1;
+        return new Response(JSON.stringify({items:[{id:new URL(address).searchParams.get('id'),snippet:{title:'Provider title with retained picture',description:'A retained provider description',channelId:'UC-fixture',channelTitle:'Example creator',publishedAt:'2026-10-01T12:00:00Z',thumbnails:{...(${fallbackImage}?{fullHD:{url:'https://i.ytimg.com/vi/abcdefghijk/fhddefault.jpg',width:1920,height:1080}}:{}),default:{url:'https://i.ytimg.com/vi/abcdefghijk/default.jpg',width:120,height:90}}},contentDetails:{duration:'PT2M5S'}}]}),{headers:{'Content-Type':'application/json'}});
       }
+      if(address.startsWith('https://i.ytimg.com/') && (address.endsWith('/fhddefault.jpg') || globalThis.fixtureImagesUnavailable))return new Response('Unavailable',{status:404});
       if(address.startsWith('https://i.ytimg.com/'))return new Response(${corruptImage?"'not an image'":`Uint8Array.from(atob('${picture}'),c=>c.charCodeAt(0))`},{headers:{'Content-Type':'image/jpeg'}});
       return network(url,options);
     };
@@ -32,6 +34,37 @@ async function providerExtension({corruptImage=false,holdText=false,invalidReque
   `);
   return path;
 }
+
+test('an unavailable highest-resolution reference falls back and image-only retry retains a usable thumbnail',async()=>{
+  const app=await launch(undefined,{extensionPath:await providerExtension({fallbackImage:true})});
+  try {
+    const saved=await capture(app,'https://youtu.be/abcdefghijk','Thumbnail fallback');
+    await expect(saved.popup.getByRole('status')).toContainText('Saved to Inbox');
+    const page=await app.context.newPage();await page.goto(`${app.base}/library.html`);
+    await page.getByRole('button',{name:'YouTube setup',exact:true}).click();
+    const setup=page.getByRole('dialog',{name:'YouTube setup'});
+    await setup.getByLabel('Personal API key').fill('controlled-fixture');
+    await setup.getByRole('button',{name:'Save key',exact:true}).click();
+    await setup.getByRole('button',{name:'Close setup'}).click();
+    await app.worker.evaluate(()=>{globalThis.fixtureImagesUnavailable=true;});
+    await page.getByRole('button',{name:'Pull metadata',exact:true}).click();
+    await page.getByRole('button',{name:/Metadata details: Metadata returned/}).click();
+    let details=page.getByRole('dialog',{name:'Metadata details'});
+    await details.getByRole('button',{name:'Latest',exact:true}).click();
+    await expect(details).toContainText('Image: failed');
+    await app.worker.evaluate(()=>{globalThis.fixtureImagesUnavailable=false;});
+    await details.getByRole('button',{name:'Retry thumbnail only'}).click();
+    await expect(details.getByRole('status')).toContainText('Image: retrieved');
+    await expect(details.getByRole('img',{name:'Retained thumbnail'})).toBeVisible();
+    expect(await app.worker.evaluate(()=>globalThis.fixtureMetadataRequests)).toBe(1);
+    await details.getByRole('button',{name:'Close metadata'}).click();
+    await page.getByRole('button',{name:'Pull metadata',exact:true}).click();
+    await expect.poll(()=>app.worker.evaluate(()=>globalThis.fixtureMetadataRequests)).toBe(2);
+    await expect(page.locator('article .thumbnail img')).toBeVisible();
+    await page.reload();
+    await expect(page.locator('article .thumbnail img')).toBeVisible();
+  }finally{await app.context.close();}
+});
 
 test('optional setup and deliberate acquisition present retained metadata and image after process restart',async()=>{
   const extensionPath=await providerExtension();let app=await launch(undefined,{extensionPath});let profile=app.profile;

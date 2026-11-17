@@ -22,11 +22,12 @@ export function createEnrichmentCommands(browser, transact) {
     const observedAt=browser.now();
     let image={outcome:'missing',acquiredAt:null,url:null};
     if(['retrieved','imageOnly'].includes(response.outcome)) {
-      const url=response.fields?.thumbnailReferences?.[0]?.url;
-      if(url && shouldStop())image={outcome:'cancelled',url,acquiredAt:null,error:'Thumbnail not requested because further retrieval was cancelled. Retry its image explicitly.'};
-      else if(url) {
+      for(const {url} of response.fields?.thumbnailReferences ?? []) {
+        if(!await current(setup.revision))return failure('credentialChanged','YouTube setup changed. This response was not accepted.');
+        if(shouldStop() || signal.aborted){image={outcome:'cancelled',url,acquiredAt:null,error:'Thumbnail not requested because further retrieval was cancelled. Retry its image explicitly.'};break;}
         try {image={...await browser.fetchThumbnail(url,{signal}),outcome:'retrieved',url,acquiredAt:browser.now()};}
         catch {image={outcome:'failed',url,acquiredAt:browser.now(),error:'Thumbnail could not be saved. Retry its image explicitly.'};}
+        if(image.outcome==='retrieved')break;
       }
     }
     image.requestId=message.requestId;

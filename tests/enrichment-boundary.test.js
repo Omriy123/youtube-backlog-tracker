@@ -36,6 +36,40 @@ test('a structured invalid-key HTTP 400 remains a setup rejection without exposi
   }finally{globalThis.fetch=originalFetch;}
 });
 
+test('thumbnail acquisition falls back to another retained reference, including image-only retry',async()=>{
+  const browser=fixture();const {library,record}=await saved(browser);
+  await library.command({type:'setYoutubeKey',key:'fixture'});
+  const first='https://i.ytimg.com/vi/abcdefghijk/fhddefault.jpg';
+  const next='https://i.ytimg.com/vi/abcdefghijk/maxresdefault.jpg';
+  browser.response.fields.thumbnailReferences=[{url:first},{url:next}];
+  let available=false;const attempts=[];
+  browser.fetchThumbnail=async url=>{attempts.push(url);if(url===first || !available)throw Error('Image unavailable');return {dataUrl:'data:image/png;base64,aGVsbG8=',bytes:5};};
+  assert.equal((await library.command({type:'pullMetadata',recordId:record.id})).imageOutcome,'failed');
+  available=true;attempts.length=0;
+  const retried=await library.command({type:'pullMetadata',recordId:record.id,imageOnly:true});
+  assert.equal(retried.imageOutcome,'retrieved');
+  assert.deepEqual(attempts,[first,next]);
+  assert.equal(retried.record.metadata.current.image.url,next);
+  assert.equal(browser.calls.length,1);
+  attempts.length=0;
+  const pulled=await library.command({type:'pullMetadata',recordId:record.id});
+  assert.equal(pulled.imageOutcome,'retrieved');
+  assert.deepEqual(attempts,[first,next]);
+  const reopened=createLibrary(browser);
+  assert.equal((await reopened.command({type:'metadataDetails',recordId:record.id})).record.metadata.current.image.url,next);
+});
+
+test('thumbnail fallback stops when the key changes between image attempts',async()=>{
+  const browser=fixture();const {library,record}=await saved(browser);
+  await library.command({type:'setYoutubeKey',key:'fixture'});
+  browser.response.fields.thumbnailReferences=[{url:'https://i.ytimg.com/first.jpg'},{url:'https://i.ytimg.com/next.jpg'}];
+  const attempts=[];
+  browser.fetchThumbnail=async url=>{attempts.push(url);await library.command({type:'setYoutubeKey',key:'replacement-fixture'});throw Error('Image unavailable');};
+  const result=await library.command({type:'pullMetadata',recordId:record.id});
+  assert.equal(result.outcome,'credentialChanged');assert.equal(attempts.length,1);
+  assert.equal((await library.command({type:'metadataDetails',recordId:record.id})).record.metadata.current,undefined);
+});
+
 test('optional setup makes no requests and single-video retrieval retains coherent source information and image offline',async()=>{
   const browser=fixture();const {library,record}=await saved(browser);
   assert.equal((await library.command({type:'enrichmentSettings'})).configured,false);

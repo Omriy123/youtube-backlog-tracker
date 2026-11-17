@@ -4,6 +4,8 @@ Validated 2026-11-17 for [PR #68](https://github.com/Omriy123/youtube-backlog-tr
 
 These full-slice results are the baseline. The subsequent [setup-request repair](youtube-setup-request.md) records the corrected API field selection, newer targeted checks and an accepted authenticated connection test.
 
+The owner's subsequent real-use report confirmed working metadata retrieval with partial thumbnail failures. The [thumbnail fallback repair](thumbnail-fallback.md) records that report, its reproduction and the repair's checks. That report supersedes the connectivity-only status below; owner acceptance of the repaired thumbnails remains pending.
+
 ## Evidence boundary
 
 **The full live saved-video/image workflow still needs owner retesting.** The initial trial had no personal API key. After the owner supplied one for bounded diagnostics, the corrected connection request was accepted with HTTP 200 in installed Chrome; see the [repair evidence](youtube-setup-request.md). Controlled provider responses still establish most persistence, image and browsing cases, not a completed live owner workflow. The PR remains draft for that remaining check.

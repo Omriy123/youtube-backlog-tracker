@@ -94,6 +94,24 @@ test('cancelling an already in-flight image retains its truthful successful outc
   const done=await completed(library);assert.equal(done.status,'cancelled');assert.equal(done.counts.retrieved,1);assert.equal(done.counts.imageNotAttempted,0);assert.equal(done.targets[0].imageOutcome,'retrieved');
 });
 
+test('cancelling during a failed image prevents another fallback request until explicit retry',async()=>{
+  const browser=fixture(),library=createLibrary(browser);
+  const record=await save(library,browser,'https://youtu.be/abcdefghijk');
+  await library.command({type:'setYoutubeKey',key:'fixture'});
+  browser.response.fields.thumbnailReferences=[{url:'https://i.ytimg.com/first.jpg'},{url:'https://i.ytimg.com/next.jpg'}];
+  let reject,arrived;const started=new Promise(resolve=>{arrived=resolve;});const images=[];
+  browser.fetchThumbnail=async url=>{images.push(url);arrived();return new Promise((resolve,fail)=>{reject=fail;});};
+  const job=await library.command({type:'startEnrichment',scope:'library'});await started;
+  await library.command({type:'cancelEnrichment',operationId:job.operation.id});reject(Error('Image unavailable'));
+  const done=await completed(library);
+  assert.equal(done.status,'cancelled');assert.equal(done.targets[0].imageOutcome,'cancelled');assert.equal(images.length,1);
+  browser.fetchThumbnail=async url=>{images.push(url);if(url.endsWith('/first.jpg'))throw Error('Image unavailable');return {dataUrl:'data:image/png;base64,aGVsbG8=',bytes:5};};
+  await library.command({type:'retryEnrichment',operationId:job.operation.id});
+  const retried=await completed(library);assert.equal(retried.targets[0].imageOutcome,'retrieved');
+  assert.equal(browser.calls.length,1);
+  assert.equal((await library.command({type:'metadataDetails',recordId:record.id})).record.metadata.current.image.url,'https://i.ytimg.com/next.jpg');
+});
+
 test('restart explains interrupted targets without requests, then explicitly retries only unfinished work',async()=>{
   const browser=fixture(),library=createLibrary(browser);
   await save(library,browser,'https://youtu.be/abcdefghijk');await save(library,browser,'https://youtu.be/lmnopqrstuv');
