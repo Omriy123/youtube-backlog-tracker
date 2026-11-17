@@ -1,0 +1,20 @@
+[
+  {
+    "total": 1000,
+    "active": 1000,
+    "channels": 100,
+    "snapshotMs": 132,
+    "cancelMs": 849,
+    "browser": "157.0.8103.50",
+    "limitations": "Synthetic fixtures, controlled provider responses, no authenticated provider capacity claim."
+  },
+  {
+    "total": 3000,
+    "active": 1900,
+    "channels": 550,
+    "snapshotMs": 481,
+    "cancelMs": 874,
+    "browser": "157.0.8103.50",
+    "limitations": "Synthetic fixtures, controlled provider responses, no authenticated provider capacity claim."
+  }
+]

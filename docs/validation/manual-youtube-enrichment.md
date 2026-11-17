@@ -1,37 +1,76 @@
-# Manual YouTube enrichment validation
+﻿# Manual YouTube enrichment validation
 
-Delivery: [PR #68](https://github.com/Omriy123/youtube-backlog-tracker/pull/68), implementing the [approved manual-first slice](../specs/manual-youtube-enrichment.md) through #65–#67. The [trial guide](../manual-enrichment-guide.md) explains setup and public workflows.
+Validated 2026-11-17 for [PR #68](https://github.com/Omriy123/youtube-backlog-tracker/pull/68), implementing [the approved manual-first slice](../specs/manual-youtube-enrichment.md) through #65–#67. Application and test source: `9dbb8af`. The [trial guide](../manual-enrichment-guide.md) covers setup and supported actions.
 
 ## Evidence boundary
 
-The owner confirmed that no personal YouTube API key is currently available and requested setup instructions. Those instructions are included in the Library and portable build. **Authenticated live YouTube acquisition is pending.** Controlled provider responses establish parser, UI, persistence and failure behavior; they do not establish an authorized API request or live resource availability.
+**Authenticated live YouTube acquisition is pending.** The owner has no personal API key yet and requested setup instructions. Those instructions are in the Library and portable build. Controlled provider responses establish parsing, UI, local persistence and failure behavior; they do not establish an authorized API request or live resource availability. The PR remains draft for that live check.
 
-The recognizable thumbnail fixture was downloaded from a public YouTube image URL and supplied at the controlled HTTP boundary. The extension's real image acquisition/encoding and local persistence code processed it. Fictional titles, descriptions and channels accompany it; this is image-byte/rendering evidence, not metadata acquisition evidence. Fixture provenance is recorded in `tests/fixtures/README.md`.
+The recognizable JPEG fixture was retrieved from a public YouTube thumbnail URL, then supplied at the controlled HTTP boundary. Production image fetching, native decoding, encoding and local persistence process those bytes. Associated titles, descriptions and channels are fictional. Fixture provenance is in `tests/fixtures/README.md`; screenshots contain no owner Library data or credentials.
 
-## Initial single-video checkpoint
+## Final checks
 
-- Baseline before implementation: 40 public-command tests and 117 bundled-Chromium browser tests passed.
-- The first integrated single-video implementation passed 46 public-command tests and an installed desktop-Chrome fixture walkthrough including setup rejection/acceptance, explicit Test connection, retrieval, unchanged original display title, local image bytes, browser-process restart and offline details.
-- Additional checks brought the boundary count to 48 and verified unsupported links skip before setup and no-resource checks preserve prior successful values.
-- Full regression caught empty per-row status regions making the page status ambiguous. Revealing those regions only during deliberate retrieval fixed all 14 targeted installed-Chrome opening/recovery/browsing/enrichment cases. The final integrated run below supersedes this intermediate checkpoint.
-- Early independent core review found corrupt MIME-labelled image bytes accepted as retrieved. Resolution and final verification must be recorded before readiness.
+| Check | Result |
+| --- | --- |
+| Public Library command boundary | 62 passed |
+| Complete installed-Chrome browser suite | 126 passed in the final complete run (4.3 minutes) |
+| Production extension save/find/open/recover | Passed on Chrome 157.0.8103.50 through two process restarts |
+| Focused independent-review fixes | 20 boundary and nine installed-Chrome tests passed |
+| Portable build | Passed; manifest 0.1.0, installation instructions and enrichment guide included |
+| Authenticated YouTube known-ID request | Pending owner API setup |
 
-## Reference comparison
+The complete suite covers ordinary no-key capture/opening/organization, optional setup, retained metadata and image bytes, restart/offline inspection, independent version scopes, historical descriptions and exact-version navigation, missing fields, key replacement, quota/network/no-resource and storage failures, cancellation, image-only retry, interrupted operations, concurrent user actions and recovery. It verifies public workflows and observable retained records rather than private helpers.
 
-References: [accepted Library layout](../design/library-layout.md) and [pinned provider prototype A](../prototypes/provider-availability.md). Actual archived desktop/narrow reference images were inspected alongside rendered extension screenshots. The product retains sidebar/list navigation, existing density and scope controls, original-first row title, retained image target and a compact check-evidence button opening details. The prototype's fictional image blocks are replaced with retained image bytes or an honest missing-image state. No theme/color decision is inferred.
+A preceding run encountered one 30-second close-notice timeout without a diagnostic location. That case passed three subsequent isolated traced runs and the final complete run passed all 126 cases. Earlier integrated failures exposed global notice selectors targeting a prepended hidden status, and unstable test interaction timing. Main-notice scoping, exact-tab URL polling, completed-dialog waits and explicitly visible native drag endpoints corrected those reproductions without weakening their outcome assertions.
 
-The initial desktop screenshot shows the acquired image, original capture title and differing latest provider title. The initial narrow dialog shows last-success/check evidence and source/time. These are intermediate #65 views; final full-version and operation views belong below once integrated.
+The production Chrome restart evidence is retained in [chrome-restarts.json](manual-enrichment/chrome-restarts.json). Automation registers the unpacked extension on each launch in an isolated profile; it does not establish manual installation persistence or provider playback.
 
-![Single-video retained thumbnail and source evidence](manual-enrichment/single-video-desktop.png)
+## Independent review
 
-![Initial narrow metadata details](manual-enrichment/single-video-details-narrow.png)
+### Standards
 
-## Final integrated checks
+One documented-standard finding: selected metadata tabs originally depended on background color. A stable double border now distinguishes selection independently of color and preserves `aria-pressed` and control dimensions. The reviewer inspected desktop/narrow rendered evidence and confirmed resolution. No substantive Fowler heuristic findings remained.
 
-Pending completion of browsing/search and batch workflows, whole-branch review, final checks and packaging. This report does not yet claim PR readiness or all ticket acceptance criteria satisfied.
+### Spec
 
-## Human-test and real-use follow-up
+Three confirmed findings were fixed in one implementer branch and independently rechecked:
 
-Use the exact final portable folder named in the PR handoff and keep the existing extension installed when updating. Copy into the same loaded extension directory, Reload in `chrome://extensions`, then close/reopen Library views. No metadata backups exist in this slice.
+- Empty/whitespace Save key now rejects replacement and preserves the configured key and in-flight work. Explicit Remove key remains separate.
+- Cancelling during a text request permits its returned text to persist, stops a later image request, records the image as cancelled/not attempted and offers image-only retry. An image already in flight retains its truthful outcome.
+- Corrupt MIME-labelled image bytes now fail native decoding before acquisition is accepted, while successful text remains retained and the image can be retried.
 
-[Metadata storage review #35](https://github.com/Omriy123/youtube-backlog-tracker/issues/35) remains unstarted until actual owner use of a qualifying build. No first-use or +28-day date is invented from implementation, fixtures or packaging. Weekly-refresh and backup evidence remains postponed. The separate recovery review is not started by this delivery.
+The final notice-targeting and test-stability patch also received a read-only review with no concrete remaining finding. Review resolution does not substitute for the pending authenticated integration check.
+
+## Rendered reference comparison
+
+References: [accepted Library layout](../design/library-layout.md) and [pinned provider prototype A](../prototypes/provider-availability.md). Actual archived desktop/narrow reference images were compared with the rendered extension.
+
+Sidebar navigation, independent scope controls and existing row actions remain recognizable. Thumbnails use retained image bytes or honest missing-image text; Compact preserves readable channel/date/duration values. Original-first titles stay stable beside a differing latest title. The quiet check-evidence control opens Original/Latest/History with factual source/time and every retained observation. Historical-only excerpts lead to their exact version. Version selection now has a non-color border marker.
+
+Desktop/narrow checks cover both densities, long titles, selected rows, unknown values, metadata/history dialogs and paused/retry results without root horizontal overflow. Keyboard activation and dialog-end controls are exercised. Native drag evidence explicitly keeps both endpoints visible; offscreen scrolling and physical mouse/trackpad comfort remain human checks under the existing interaction follow-up.
+
+![Retained thumbnail and original-first title](manual-enrichment/single-video-desktop.png)
+
+![Narrow metadata details](manual-enrichment/single-video-details-narrow.png)
+
+![Selected Compact row at narrow width](manual-enrichment/metadata-compact-narrow.png)
+
+![Retained history and non-color selected tab](manual-enrichment/metadata-history-desktop.png)
+
+![Desktop batch results](manual-enrichment/batch-results-desktop.png)
+
+![Narrow quota pause with explicit retry](manual-enrichment/batch-paused-narrow.png)
+
+## Representative workloads
+
+Synthetic workloads cover 1,000 active/1,000 total records across 100 channel slots, and 1,900 active/3,000 total records across up to 550 channel slots. They include retained statuses, unsupported links, multiple versions and missing values. Results render 100 targets initially with explicit expansion, while counts account for the whole frozen set.
+
+Measured observations are retained in [metadata browse measurements](manual-enrichment/metadata-scale.json) and [batch snapshot/cancel measurements](manual-enrichment/batch-scale.json). They are individual headless-browser samples, not authenticated provider throughput, storage capacity or latency guarantees. Real-use memory/storage/request evidence remains with the four-week review.
+
+## Human-test handoff
+
+Use the exact portable folder identified in the PR/final handoff. For an existing installation, copy its new `extension/` contents into the same folder already loaded in Chrome, choose Reload in `chrome://extensions`, then close/reopen Library views. Keep the extension installed and preserve its storage. This slice has no metadata backup/export, automatic refresh or clearing control.
+
+Try no-key saving first. Then create a personal key following YouTube setup, Test connection, pull one real saved video, inspect metadata/history, and reopen offline. Try list/Library retrieval, cancellation and explicit retry. Report visible versus expected results without including the key.
+
+[Metadata review #35](https://github.com/Omriy123/youtube-backlog-tracker/issues/35) remains unstarted until actual owner use of a qualifying build. No first-use or +28-day date is inferred from fixtures, packaging or issue closure. Weekly-refresh and backup evidence awaits later delivery; the separate recovery review is not started here.

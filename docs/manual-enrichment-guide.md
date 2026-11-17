@@ -25,6 +25,8 @@ Choose **Pull list metadata** for the selected list's members at invocation, or 
 
 Use **Retrieval results** to inspect requested, retrieved, no-result, failed, skipped and unfinished records. Image failures have their own explanation. **Cancel further retrieval** retains completed results; **Retry unfinished retrieval** addresses unsuccessful or unfinished work. An image-only retry does not repeat a successful text lookup.
 
+If cancellation happens during a text request, returned text can still be retained while its image is reported as not attempted/cancelled. Retry unfinished retrieval or **Retry thumbnail only** acquires that image without repeating the successful text request. An image already in flight may finish and is reported truthfully.
+
 After an interruption or browser restart, inspect the retained results and retry deliberately. Restart and quota recovery do not resume requests automatically. Ordinary Library actions remain available during retrieval.
 
 ## Local data and feedback
