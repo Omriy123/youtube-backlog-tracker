@@ -9,6 +9,8 @@ Saving, organizing and opening videos works without an API key. This build retri
 3. Open the extension's Library, choose **YouTube setup**, enter the key in **Personal API key**, then choose **Save key**. Keep it out of screenshots and feedback.
 4. Choose **Test connection**. This performs one bounded known-video lookup and leaves saved records unchanged. A valid response with no resource differs from rejected setup, quota exhaustion and a network failure.
 
+A request-format error asks you to update the extension. It does not establish that your API key or its restrictions are wrong.
+
 You can replace or remove the key in the same setup control. Existing information and images remain available. Setup alone never scans the Library.
 
 ## Retrieve and inspect

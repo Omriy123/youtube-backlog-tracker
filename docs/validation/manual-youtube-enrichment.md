@@ -2,13 +2,15 @@
 
 Validated 2026-11-17 for [PR #68](https://github.com/Omriy123/youtube-backlog-tracker/pull/68), implementing [the approved manual-first slice](../specs/manual-youtube-enrichment.md) through #65–#67. Application and test source: `9dbb8af`. The [trial guide](../manual-enrichment-guide.md) covers setup and supported actions.
 
+These full-slice results are the baseline. The subsequent [setup-request repair](youtube-setup-request.md) records the corrected API field selection, newer targeted checks and an accepted authenticated connection test.
+
 ## Evidence boundary
 
-**Authenticated live YouTube acquisition is pending.** The owner has no personal API key yet and requested setup instructions. Those instructions are in the Library and portable build. Controlled provider responses establish parsing, UI, local persistence and failure behavior; they do not establish an authorized API request or live resource availability. The PR remains draft for that live check.
+**The full live saved-video/image workflow still needs owner retesting.** The initial trial had no personal API key. After the owner supplied one for bounded diagnostics, the corrected connection request was accepted with HTTP 200 in installed Chrome; see the [repair evidence](youtube-setup-request.md). Controlled provider responses still establish most persistence, image and browsing cases, not a completed live owner workflow. The PR remains draft for that remaining check.
 
 The recognizable JPEG fixture was retrieved from a public YouTube thumbnail URL, then supplied at the controlled HTTP boundary. Production image fetching, native decoding, encoding and local persistence process those bytes. Associated titles, descriptions and channels are fictional. Fixture provenance is in `tests/fixtures/README.md`; screenshots contain no owner Library data or credentials.
 
-## Final checks
+## Baseline full-slice checks
 
 | Check | Result |
 | --- | --- |
@@ -17,7 +19,7 @@ The recognizable JPEG fixture was retrieved from a public YouTube thumbnail URL,
 | Production extension save/find/open/recover | Passed on Chrome 157.0.8103.50 through two process restarts |
 | Focused independent-review fixes | 20 boundary and nine installed-Chrome tests passed |
 | Portable build | Passed; manifest 0.1.0, installation instructions and enrichment guide included |
-| Authenticated YouTube known-ID request | Pending owner API setup |
+| Authenticated YouTube known-ID request | Not performed in the baseline; later connection check accepted, see repair report |
 
 The complete suite covers ordinary no-key capture/opening/organization, optional setup, retained metadata and image bytes, restart/offline inspection, independent version scopes, historical descriptions and exact-version navigation, missing fields, key replacement, quota/network/no-resource and storage failures, cancellation, image-only retry, interrupted operations, concurrent user actions and recovery. It verifies public workflows and observable retained records rather than private helpers.
 
