@@ -63,10 +63,13 @@ test('retrieved channels appear immediately and metadata details expose per-fiel
 test('metadata Open preserves pending rediscovery review and Dismiss uses its existing confirmation',async()=>{
   const app=await launch(undefined,{extensionPath:await metadataProviderFixture()});
   try {
-    await capture(app,'https://youtu.be/abcdefghijk','Review fixture');
+    const saved=await capture(app,'https://youtu.be/abcdefghijk','Review fixture');
+    await expect(saved.popup.getByRole('status')).toContainText('Saved to Inbox');
     const page=await app.context.newPage();await page.goto(`${app.base}/library.html`);
     await page.getByRole('button',{name:'Open video',exact:true}).click();await expect(page.getByRole('article')).toHaveCount(0);
-    await capture(app,'https://youtu.be/abcdefghijk','Review fixture again');await expect(page.getByRole('article')).toHaveCount(1);
+    const savedAgain=await capture(app,'https://youtu.be/abcdefghijk','Review fixture again');
+    await expect(savedAgain.popup.getByRole('status')).toContainText('Saved to Inbox');
+    await expect(page.getByRole('article')).toHaveCount(1);
     await page.getByRole('button',{name:'Metadata details: Not checked',exact:true}).click();
     const before=(await browserTabs(app)).length;
     await page.getByRole('dialog',{name:'Metadata details'}).getByRole('button',{name:'Open video',exact:true}).click();

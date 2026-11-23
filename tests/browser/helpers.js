@@ -54,7 +54,11 @@ export async function capture(app, url, title) {
   const popup = await app.context.newPage();
   await popup.goto(`${app.base}/popup.html`);
   await source.bringToFront();
-  await popup.getByRole('button', { name: 'Save to Inbox', exact: true }).evaluate(button => button.click());
+  const save = popup.getByRole('button', { name: 'Save to Inbox', exact: true });
+  await save.evaluate(button => button.click());
+  // The handler disables Save synchronously and re-enables it after success or
+  // failure. Keep the captured tab active until that public operation finishes.
+  await expect(save).toBeEnabled();
   return { source, popup };
 }
 
