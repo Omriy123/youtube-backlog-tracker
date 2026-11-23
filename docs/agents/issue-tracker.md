@@ -4,6 +4,8 @@ Tasks, bugs, acceptance criteria, dependencies, and task discussion live in GitH
 
 Durable specs live in `docs/specs/`. The current product spec is `docs/specs/video-backlog.md`. Issues link to specs; do not maintain duplicate task status in `.scratch/`.
 
+When creating or materially revising an implementation spec, or resuming ticket creation from one, follow [spec publication and ticket approval](../workflow.md#spec-publication-and-ticket-approval): automatic `to-spec` and relevant wayfinder updates, then the owner's explicit ticketing authorization. Record the spec revision and both approval states in the source issue so the handoff survives sessions.
+
 ## Issue contents
 
 Include the concrete problem or outcome, scope, acceptance criteria, relevant spec links, dependencies, and validation expectations. Record task kind in the body when useful (research, prototype, grilling, or implementation).

@@ -1,6 +1,7 @@
 import { command } from './shared.js';
 import { titleVersions } from './title-service.js';
 import { formatDateTime, onDateFormatChanged } from './date-display.js';
+import {showMetadataDetails} from './metadata-details-ui.js';
 
 function button(label, action) {
   const element = document.createElement('button'); element.type = 'button'; element.className = 'secondary'; element.textContent = label;
@@ -24,7 +25,9 @@ function inspectTitles(record, selectedIndex = null) {
   const dialog = document.createElement('dialog'); dialog.setAttribute('aria-label', 'Captured titles');
   const heading = document.createElement('h2'); heading.textContent = 'Captured titles';
   const explanation = document.createElement('p'); explanation.className = 'muted';
-  explanation.textContent = 'This build captures the current browser-tab title on Save. Original and Latest can be the same observation. Captured title history is separate from Personal title edits and Library History. Latest means the most recent capture, not a fresh YouTube API lookup. Editing a Personal title does not create an Intermediate capture.';
+  explanation.textContent = record.metadata.observations.some(item=>item.source==='youtube-api')
+    ? 'Automatic title observations include browser captures and deliberate YouTube retrievals, each with its actual source and time. Original is the first usable title; Latest is the most recent observation. Metadata history is separate from Personal title edits and Library History.'
+    : 'This build captures the current browser-tab title on Save. Original and Latest can be the same observation. Captured title history is separate from Personal title edits and Library History. Latest means the most recent capture, not a fresh YouTube API lookup. Editing a Personal title does not create an Intermediate capture.';
   const controls = document.createElement('div'); controls.className = 'title-tools';
   const panel = document.createElement('div'); panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'Title observations');
   const selections = [];
@@ -67,7 +70,7 @@ export function appendTitleTools(content, record, { onChanged, onReviewRequired 
   }
   if (record.historicalMatch) {
     const match = record.historicalMatch;
-    const link = button(`Matched ${match.field ?? 'title'} from ${observedTime(match.observedAt)}: ${match.excerpt}`, () => inspectTitles(record, match.index));
+    const link = button(`Matched ${match.field ?? 'title'} from ${observedTime(match.observedAt)}: ${match.excerpt}`, () => record.metadata.checks?.length ? showMetadataDetails(record,{onChanged,selectedIndex:match.index}) : inspectTitles(record, match.index));
     link.classList.add('historical-match'); content.append(link);
   }
   tools.append(button('Captured titles', () => inspectTitles(record)));

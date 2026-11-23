@@ -1,4 +1,6 @@
 import {showRemoval} from './removal-ui.js';
+import { appendYoutubeSetup, appendEnrichmentTools } from './enrichment-ui.js';
+import { appendEnrichmentOperations } from './enrichment-operation-ui.js';
 import { renderOrganizationControls, showMove, organizationButton } from './organization-ui.js';
 import { createArrangementController, appendLibraryDates, renderOverviewControls } from './arrangement-ui.js';
 import { orderLists, isGlobalValueView } from './arrangement-service.js';
@@ -20,6 +22,9 @@ const scopeInputs=[...document.querySelectorAll('.search-scopes input')];
 const dateFormat=document.querySelector('#date-format');
 const browser=createBrowserAdapter();
 const browse=createBrowseState();
+const youtubeSetup=document.createElement('div');youtubeSetup.className='title-tools';document.querySelector('main').prepend(youtubeSetup);appendYoutubeSetup(youtubeSetup,{onChanged:()=>render()});
+const enrichmentHeader=document.createElement('div');youtubeSetup.after(enrichmentHeader);
+const enrichmentOperations=appendEnrichmentOperations(enrichmentHeader,{getListId:()=>browse.scopeId,onChanged:()=>render()});
 const selection=createSelectionController({onChanged:()=>render(),onMove:records=>moveRecords(records),onPlace:(records,current,context)=>placeRecords(records,current,context),onStatus:(records,effect)=>showStatus(orderedSelection(records),latest.lists,effect,{onChanged:organizationChanged,onProcessed:selection.processed})});
 const arrangements=createArrangementController({onChanged:message=>organizationChanged(message ?? ''),onError:message=>{document.querySelector('main > [role=status]').textContent=message;},getMovedIds:(event,record,records)=>event.ctrlKey && selection.selectedIds.has(record.id)?records.filter(item=>selection.selectedIds.has(item.id)).map(item=>item.id):[record.id],onMove:(ids,to)=>moveRecords(latest.records.filter(record=>ids.includes(record.id)),to)});
 const sortControls=document.createElement('div');sortControls.id='arrangement-controls';container.before(sortControls);
@@ -83,8 +88,17 @@ async function render() {
   const preferences=result.organizationPreferences ?? {};
   result.lists=orderLists(result.lists,result.listStatistics,preferences.overviewSort);
   latest=result;
+  enrichmentOperations.update();
   browse.density=preferences.density ?? 'thumbnails';browse.orientation=preferences.orientation ?? 'columns';
-  if(!browse.anchor)browse.anchor=anchorChannels(result.records,browse.scopeId);
+  if(!browse.anchor){browse.anchor=anchorChannels(result.records,browse.scopeId);browse.anchorScopeId=browse.scopeId;}
+  else {
+    // Keep existing shortcut positions while adding newly acquired identities.
+    // Scope toggles retain the original shortcut population and ordering.
+    const known=new Map(anchorChannels(result.records,browse.anchorScopeId).map(item=>[item.id,item]));
+    const ids=new Set(browse.anchor.map(item=>item.id));
+    browse.anchor=browse.anchor.map(item=>({...item,...known.get(item.id)}));
+    for(const item of known.values())if(!ids.has(item.id))browse.anchor.push(item);
+  }
   const content=deriveBrowse({records:result.records,lists:result.lists,state:browse});
   const derived=deriveBrowse({records:result.records,lists:result.lists,state:browse,selectedIds:selection.selectedIds,selectedOnly:selection.selectedOnly});
   const context={scopeId:browse.scopeId,originListId:browse.originListId,query:browse.query,titleScopes:browse.titleScopes,channelId:browse.channelId,selectedOnly:selection.selectedOnly,reviewSelected:false,contentRecords:content.currentResults,sort:preferences.videoSort,preferences,lists:result.lists};
@@ -151,6 +165,7 @@ function renderRecord(record,lists) {
   appendOpenActions(title,content,record,{onChanged:render,onReviewRequired});
   if(image){thumbnail.tabIndex=0;thumbnail.setAttribute('role','button');thumbnail.setAttribute('aria-label',`Open ${displayTitle(record)}`);thumbnail.addEventListener('click',()=>title.querySelector('button')?.click());thumbnail.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();title.querySelector('button')?.click();}});}
   appendTitleTools(content,record,{onChanged:organizationChanged,onReviewRequired});
+  appendEnrichmentTools(content,record,{onChanged:()=>render()});
   content.append(organizationButton('Move video',()=>moveRecords([record])));
   for(const [effect,label] of [['watched','Mark watched'],['dismissed','Dismiss']])content.append(organizationButton(label,()=>showStatus([record],lists,effect,{onChanged:organizationChanged,onProcessed:selection.processed})));
   row.append(thumbnail,content);return row;

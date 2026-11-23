@@ -1,9 +1,13 @@
+import { fetchYoutubeVideo, fetchThumbnail } from './youtube-provider.js';
 const STORAGE_KEY = 'library';
 const DATE_FORMAT_KEY = 'libraryDateFormat';
 
 // All browser-specific access lives here; Library commands depend on this boundary.
 export function createBrowserAdapter(api = chrome) {
   return {
+    fetchYoutubeVideo, fetchThumbnail,
+    async readYoutubeCredential() { return (await api.storage.local.get('youtubeCredential')).youtubeCredential ?? null; },
+    async writeYoutubeCredential(value) { await api.storage.local.set({youtubeCredential:value}); },
     async capture() {
       const [tab] = await api.tabs.query({ active: true, currentWindow: true });
       if (!tab?.url) throw new Error('No usable current tab.');

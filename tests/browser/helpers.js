@@ -54,7 +54,11 @@ export async function capture(app, url, title) {
   const popup = await app.context.newPage();
   await popup.goto(`${app.base}/popup.html`);
   await source.bringToFront();
-  await popup.getByRole('button', { name: 'Save to Inbox', exact: true }).evaluate(button => button.click());
+  const save = popup.getByRole('button', { name: 'Save to Inbox', exact: true });
+  await save.evaluate(button => button.click());
+  // The handler disables Save synchronously and re-enables it after success or
+  // failure. Keep the captured tab active until that public operation finishes.
+  await expect(save).toBeEnabled();
   return { source, popup };
 }
 
@@ -71,8 +75,13 @@ export async function expectNewFocusedTab(app, before, url) {
   const created = after.filter(tab => !before.some(item => item.id === tab.id));
   expect(created).toHaveLength(1);
   expect(created[0].active).toBe(true);
-  expect(created[0].pendingUrl || created[0].url).toBe(url);
-  return created[0];
+  // A created tab can briefly expose neither URL on desktop Chrome. Keep
+  // checking that exact tab, without accepting a blank tab as an opening.
+  await expect.poll(async () => {
+    const current = (await browserTabs(app)).find(tab => tab.id === created[0].id);
+    return current?.pendingUrl || current?.url;
+  }).toBe(url);
+  return (await browserTabs(app)).find(tab => tab.id === created[0].id);
 }
 
 

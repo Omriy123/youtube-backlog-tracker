@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-11-17T08:55:05.518Z",
+  "executablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "extensionPath": "C:\\Users\\omriy\\OneDrive\\Desktop\\Code\\Misc\\Youtube_Backlog_Tracking\\extension",
+  "browser": "Chrome/157.0.8103.50",
+  "recordId": "ecd39bd1-66a5-499a-bc96-e3b160f4a827",
+  "retainedTitles": 3,
+  "retainedEarlierWatches": 1,
+  "openings": 2,
+  "restarts": 2,
+  "viewport": "390x780",
+  "screenshots": [
+    "C:\\Users\\omriy\\OneDrive\\Desktop\\Code\\Misc\\Youtube_Backlog_Tracking\\.scratch\\validation\\actual-chrome\\run-PzrKsU\\01-populated-library.png",
+    "C:\\Users\\omriy\\OneDrive\\Desktop\\Code\\Misc\\Youtube_Backlog_Tracking\\.scratch\\validation\\actual-chrome\\run-PzrKsU\\02-pending-prior-activity.png",
+    "C:\\Users\\omriy\\OneDrive\\Desktop\\Code\\Misc\\Youtube_Backlog_Tracking\\.scratch\\validation\\actual-chrome\\run-PzrKsU\\03-retained-title-match.png",
+    "C:\\Users\\omriy\\OneDrive\\Desktop\\Code\\Misc\\Youtube_Backlog_Tracking\\.scratch\\validation\\actual-chrome\\run-PzrKsU\\04-opening-recovery.png",
+    "C:\\Users\\omriy\\OneDrive\\Desktop\\Code\\Misc\\Youtube_Backlog_Tracking\\.scratch\\validation\\actual-chrome\\run-PzrKsU\\05-compact-restored-library.png"
+  ]
+}

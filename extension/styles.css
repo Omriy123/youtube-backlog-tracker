@@ -138,3 +138,17 @@ button:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus
 .removal-dialog > label select {display:block;max-width:100%;margin-top:6px;}
 .removal-dialog [hidden] {display:none!important;}
 #list-management details button {margin:6px 0;max-width:100%;overflow-wrap:anywhere;}
+dialog .metadata-image { display:block; max-width:100%; max-height:240px; object-fit:contain; }
+.metadata-tools { flex-wrap:wrap; }
+.metadata-dialog-heading,.enrichment-operation-heading {position:sticky;top:0;z-index:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding-block:8px;background:#fff;border-bottom:1px solid #bdccc4;}
+.metadata-dialog-heading h2,.enrichment-operation-heading h2 {margin:0;font-size:1.2rem;}
+.metadata-dialog-heading {top:-26px;}
+.enrichment-operation-heading {top:-1rem;background:#f7f8f6;}
+
+.metadata-dialog .metadata-version,.metadata-dialog .metadata-original-field,.metadata-dialog .metadata-latest-field {border-top:1px solid #bdccc4;padding:12px 0;overflow-wrap:anywhere;}
+.metadata-dialog .metadata-field {white-space:pre-wrap;}
+.metadata-dialog [aria-label="Metadata versions"] button {border:3px solid transparent;}
+.metadata-dialog [aria-label="Metadata versions"] button[aria-pressed=true] {background:#dce8de;border:3px double currentColor;}
+.metadata-dialog .matched-version {border:2px solid #326857;padding:12px;}
+.enrichment-operation-results{border:1px solid #a6b7ae;border-radius:.5rem;padding:1rem;margin-block:1rem;max-height:65vh;overflow:auto;overflow-wrap:anywhere}
+.enrichment-operation-results ol{padding-inline-start:1.5rem}.enrichment-operation-results li{border-top:1px solid #d4ddd6;padding-block:.5rem}.enrichment-operation-controls{flex-wrap:wrap}

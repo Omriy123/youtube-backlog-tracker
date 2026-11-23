@@ -10,7 +10,8 @@ await cp(resolve('extension'), resolve(output, 'extension'), { recursive: true }
 await cp(resolve('docs/installation.md'), resolve(output, 'INSTALLATION.md'));
 await cp(resolve('docs/first-slice-reference.md'), resolve(output, 'first-slice-reference.md'));
 await cp(resolve('docs/library-organization-guide.md'), resolve(output, 'library-organization-guide.md'));
+await cp(resolve('docs/manual-enrichment-guide.md'), resolve(output, 'manual-enrichment-guide.md'));
 await cp(resolve('docs/development.md'), resolve(output, 'development.md'));
 await cp(resolve('docs/validation'), resolve(output, 'validation'), { recursive: true });
-await writeFile(resolve(output, 'README.txt'), 'Video Backlog Tracker test build\n\nIn desktop Chrome, open chrome://extensions, enable Developer mode, choose Load unpacked, and select the extension folder beside this file. See INSTALLATION.md for the short save/find/open/Undo trial and library-organization-guide.md for watch lists, browsing, selection, arranging and recovery.\n');
+await writeFile(resolve(output, 'README.txt'), 'Video Backlog Tracker test build\n\nIn desktop Chrome, open chrome://extensions, enable Developer mode, choose Load unpacked, and select the extension folder beside this file. See INSTALLATION.md for the short save/find/open/Undo trial, library-organization-guide.md for organization, and manual-enrichment-guide.md for personal-key setup and deliberate YouTube retrieval. Keep credentials out of feedback and screenshots.\n');
 console.log(output);

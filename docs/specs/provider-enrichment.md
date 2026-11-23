@@ -2,6 +2,8 @@
 
 Status: **approved on 2026-10-19** through the [complete-contract approval](https://github.com/Omriy123/youtube-backlog-tracker/issues/31#issuecomment-6264328786). Originating decision: [Choose provider setup, enrichment, availability, and lifetime behavior](https://github.com/Omriy123/youtube-backlog-tracker/issues/31). This is a focused planning contract; it does not select the next delivery slice or authorize production implementation.
 
+Delivery-timing amendment, 2026-11-16: at [Choose the next bounded delivery slice from the first working build](https://github.com/Omriy123/youtube-backlog-tracker/issues/32), the owner selected manual-first real YouTube metadata and approved the [focused slice specification and three-workflow delivery handoff](manual-youtube-enrichment.md#approved-delivery-workflows). Automatic acquisition/weekly refresh, clearing, backup integration and provider-color settings are postponed for this first metadata delivery; their broader approved contracts remain intact. In particular, the automatic-on-after-setup behavior below is later delivery scope, not a requirement to start automatic work in the manual-first slice.
+
 ## Problem Statement
 
 The Library must remain useful with saved URLs and Personal titles, while optionally retrieving YouTube details for recognition, channel browsing, date/duration sorting and description search. A creator can rename a video or change its description/thumbnail. Refresh must preserve the information the user saw earlier, including intermediate versions, rather than silently replacing the only recognizable title.

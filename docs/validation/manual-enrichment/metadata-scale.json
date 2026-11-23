@@ -1,0 +1,22 @@
+{
+  "measurements": [
+    {
+      "total": 1000,
+      "active": 1000,
+      "channels": 100,
+      "loadMs": 722,
+      "searchMs": 215
+    },
+    {
+      "total": 3000,
+      "active": 1900,
+      "channels": 550,
+      "loadMs": 2238,
+      "searchMs": 612
+    }
+  ],
+  "limits": [
+    "Controlled provider responses and synthetic workloads; not authenticated API or capacity guarantees.",
+    "Headless installed Chrome; physical input comfort and manual installation remain human checks."
+  ]
+}

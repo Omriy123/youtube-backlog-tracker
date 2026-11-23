@@ -3,7 +3,8 @@
   "name": "Video Backlog Tracker",
   "version": "0.1.0",
   "description": "Organize saved video links in a durable personal Library.",
-  "permissions": ["tabs", "storage"],
+  "permissions": ["tabs", "storage", "unlimitedStorage"],
+  "host_permissions": ["https://www.googleapis.com/*", "https://i.ytimg.com/*"],
   "background": { "service_worker": "background.js", "type": "module" },
   "action": { "default_popup": "popup.html", "default_title": "Video Backlog Tracker" }
 }

@@ -4,9 +4,17 @@ import { identify } from './identity.js';
 import { createOpeningCommands } from './opening-service.js';
 import { editTitle, matchRecordTitles } from './title-service.js';
 import { requeueForReview, review, persistReviewChange } from './review-service.js';
+import { createEnrichmentCommands } from './enrichment-service.js';
+import { createEnrichmentOperationCommands } from './enrichment-operation-service.js';
 export function createLibrary(browser) {
   const openings = createOpeningCommands(browser);
   let queue = Promise.resolve();
+  function transact(action) {
+    const result=queue.then(async()=>action(await browser.read() ?? {version:1,records:[],history:[]}));
+    queue=result.catch(()=>{});return result;
+  }
+  const enrichment=createEnrichmentCommands(browser,transact);
+  const enrichmentOperations=createEnrichmentOperationCommands(browser,transact,enrichment);
   async function execute(command, captured) {
     const state = await browser.read() ?? { version: 1, records: [], history: [] };
     const preference = await executeArrangementPreferences(state, browser, command);
@@ -57,6 +65,10 @@ export function createLibrary(browser) {
   }
   return {
     command(command) {
+      const operation=enrichmentOperations.command(command);
+      if(operation)return operation;
+      const enriched=enrichment.command(command);
+      if(enriched)return enriched;
       // Freeze capture facts immediately; only durable state mutations wait for earlier commands.
       const captured = command.type === 'save' ? browser.capture().then(value => ({ value }), error => ({ error })) : null;
       const pending = queue.then(() => execute(command, captured));

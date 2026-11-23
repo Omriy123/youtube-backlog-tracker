@@ -8,6 +8,10 @@ Tasks live in GitHub Issues; durable specs live in `docs/specs/`. Read `docs/age
 
 Use the five default triage roles. Read `docs/agents/triage-labels.md` when assigning task status.
 
+### Specs and ticket approval
+
+Whenever implementation work requires creating or materially revising a spec, automatically use `to-spec` and update the relevant `wayfinder` map. Read `docs/workflow.md#spec-publication-and-ticket-approval` before writing the spec or resuming its ticket handoff. Publish the spec and map update before asking for approval; wait for explicit authorization to proceed with `to-tickets`. Spec approval alone does not authorize ticketing.
+
 ### Domain docs
 
 Use a single-context layout. Read `docs/agents/domain.md` before exploring the codebase.

@@ -32,7 +32,13 @@ test('Enter creates and renames once, keeps validation open, and cancels safely'
 
 test('dropped move target and later mixed overrides describe the actual included move',async()=>{
   const app=await launch();try {
-    const page=await fixture(app);await row(page,'one').getByRole('checkbox').check();await row(page,'two').getByRole('checkbox').check();
+    const page=await fixture(app);await page.setViewportSize({width:1440,height:1200});
+    await row(page,'one').getByRole('checkbox').check();await row(page,'two').getByRole('checkbox').check();
+    await page.evaluate(()=>window.scrollTo(0,0));
+    // Native drag evidence covers visible endpoints; offscreen auto-scrolling
+    // and physical-pointer comfort remain the separate human-test boundary.
+    await expect(row(page,'one').locator('.title-target')).toBeInViewport();
+    await expect(page.getByRole('navigation').getByRole('button',{name:'Zebra',exact:true})).toBeInViewport();
     await page.keyboard.down('Control');await row(page,'one').locator('.title-target').dragTo(page.getByRole('navigation').getByRole('button',{name:'Zebra',exact:true}));await page.keyboard.up('Control');
     const dialog=page.getByRole('dialog',{name:'Move videos',exact:true});const shared=dialog.getByRole('combobox',{name:'Shared destination',exact:true});
     await expect(shared).toHaveValue('z');
