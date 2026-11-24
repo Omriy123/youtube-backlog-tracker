@@ -18,21 +18,7 @@ Prepare a fresh handoff each time a human receives a new test build:
 1. Run the checks appropriate to the changed behavior using the commands below. Record actual results and any manual checks still needed.
 2. Run `npm run build` and use the exact output folder it prints. Confirm the packaged `extension/manifest.json` version and included `INSTALLATION.md`; identify the source revision as well, since development builds can share a manifest version.
 3. Give the tester the whole portable folder or an archive of it, with a clickable location. Use the [installation guide](installation.md) for first installation or updating the existing loaded folder. State which route applies, whether files need copying, and the exact source/destination paths when known. Reload the extension and close/reopen its Library views after an update. Retain the installed extension and its storage to preserve trial data.
-4. Send a short handoff using the template below. Include a few actions with expected results for this build's changes, plus the location of any relevant setting. Separate known limitations from behavior the tester should report as a failure.
-
-```text
-Build: <manifest version>, source <revision>
-Get it: <clickable artifact location; extract first if archived>
-Install/update: <concrete steps for this tester, including copy paths and Chrome Reload>
-Try:
-- <action> → <expected result>
-- <action> → <expected result; setting location if relevant>
-Known limits / data notices: <material limitations and any effect on existing trial data>
-Verified: <checks actually run; what still needs human testing>
-Feedback: <what happened versus what you expected; screenshot if useful>
-```
-
-Keep the tester's steps self-contained and brief; link the guides for detail. Describe a build as ready for testing separately from human acceptance or approval to merge.
+4. Send a short handoff in the format shared across the owner's repos: read `../home/docs/process/human-test-handoff.md` for the message template and the rule on what "ready for testing" means.
 
 ## Run the automated checks
 

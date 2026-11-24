@@ -1,6 +1,6 @@
 # Issue tracker: GitHub Issues
 
-Tasks, bugs, acceptance criteria, dependencies, and task discussion live in GitHub Issues. Determine the repository from the `origin` remote. Use the connected GitHub tools or authenticated `gh` CLI to read and update it.
+Tasks, bugs, acceptance criteria, dependencies, and task discussion live in GitHub Issues. Determine the repository from the `origin` remote. Use the authenticated `gh` CLI to read and update it. In a cloud session, where `gh issue` and `gh pr` are blocked, use `gh api`.
 
 Durable specs live in `docs/specs/`. The current product spec is `docs/specs/video-backlog.md`. Issues link to specs; do not maintain duplicate task status in `.scratch/`.
 
@@ -8,38 +8,19 @@ When creating or materially revising an implementation spec, or resuming ticket 
 
 ## Issue contents
 
-Include the concrete problem or outcome, scope, acceptance criteria, relevant spec links, dependencies, and validation expectations. Record task kind in the body when useful (research, prototype, grilling, or implementation).
-
-Use the five triage labels defined in `triage-labels.md` for delivery tasks. Keep one current triage role per open delivery issue. Wayfinder planning issues use the separate labels below. GitHub open/closed state records completion or disposition; do not invent `claimed` or `resolved` triage labels.
-
-Before starting, read the issue, linked spec, and dependencies. Identify ongoing ownership through its assignee, linked branch/PR, and latest comments so parallel sessions do not duplicate work. Record material findings and handoffs in issue comments. Link the implementation PR to its issue, and close the issue only when its criteria are met or an explicit decision makes it non-actionable.
+Shared across the owner's repos: read `../home/docs/process/tickets.md#issue-contents`. Wayfinder planning issues use the separate labels below.
 
 ## Human-test feedback
 
-1. Preserve every observation in a GitHub intake linked to the tested build/PR. A local draft is temporary; describe it as unpublished until the issue or comment has been written and read back.
-2. Classify each observation: reported defect needing reproduction, confirmed mismatch with an approved contract/reference, explicit new behavior, unresolved choice, or already-planned capability outside this build. Preserve the user's wording and distinguish evidence from a hypothesis.
-3. Route each item to a concrete existing/new repair ticket, decision owner, or explicit scope/deferment decision. For current-PR defects, define a bounded repair checklist before recommending another feature-planning session. State what belongs in this PR and what still needs agreement; an umbrella alone is not an executable repair ticket.
-4. Record explicit human amendments when they occur. Link them from affected contracts; preserve unanswered choices as open. Archive accepted prototype assets on a separate branch and publish the decision/source pointer. Prototype approval and production delivery have separate completion criteria.
-5. Apply agreed priorities and gates through native dependencies. When work must finish first, make that issue visible in the task picker and block the agreed subsequent tasks on it. Use the tracker's required labels/relationships and ensure the handoff permits the issue's actual work under the map Notes. Preserve current ownership.
-6. Verify through fresh tracker reads: all observations accounted for; intended parents, labels and assignees; open blockers; the intended next item visible and takeable in the actual picker. Include blockers outside the map. Report unknown access/state as unknown. A file under `.scratch/` does not make an issue discoverable.
-
-The intake is reconciled when every observation has a route and scope disposition, not when every requested feature has shipped. A repair is complete when its acceptance/checks pass. A PR is ready when its agreed current scope and review criteria are met. State which conclusion the evidence supports.
-
-When asked what to do next, follow the agreed priority and native blockers, and show the next takeable task. Verify that the actual picker includes it and that its handoff matches its scope. Recheck ownership and state before claiming. For fixes to an open PR, use an isolated branch/worktree from its latest head and merge reviewed fixes back to that same PR branch unless the owner chooses another integration path.
+Shared across the owner's repos: read `../home/docs/process/tickets.md#human-test-feedback`.
 
 ## References and retirement
 
-Treat approved specs as snapshots of agreed scope, rather than running implementation logs. Later approved decisions can live in linked issue resolutions or a successor spec. Keep the active issue's references explicit about which source governs the work; routine implementation does not require rewriting every earlier spec.
-
-When replacing agreed scope:
-
-- Link the successor from the old issue's closing comment and identify what it replaces in the new issue. Close the old issue as superseded rather than completed implementation, and carry forward any still-actionable scope.
-- Mark a superseded spec near its top with its replacement or decision link and the affected scope. Preserve the historical content; distinguish a partial replacement from retirement of the whole spec.
-- Update active entry points and affected issue references, parents, and blockers so the next session reaches the current work. Preserve historical links as provenance, clearly identified as such.
+Shared across the owner's repos: read `../home/docs/process/tickets.md#references-and-retirement`.
 
 ## Follow-ups
 
-When the user agrees to defer work or revisit a decision, create or reuse a GitHub issue and report its link. Record the outcome to revisit and the prerequisite or real-use trigger; connect it to the relevant roadmap or feature. For a timed review, record when the clock starts and add actual start/due dates when that trigger occurs. Keep the follow-up actionable until the work or review happens, or the user explicitly drops it.
+Shared across the owner's repos: read `../home/docs/process/tickets.md#follow-ups`.
 
 ## Wayfinding operations
 
