@@ -61,3 +61,27 @@ test('no Playwright config switches on automatic screenshots, videos or traces',
   assert.ok(configs.length > 0, 'expected at least playwright.config.js');
   assert.deepEqual(await offendingLines(configs, /\b(screenshot|video|trace)\s*:(?!\s*['"`]off['"`])/), []);
 });
+
+// A spec file can switch the same options on for itself with
+// test.use({ video: 'on' }) or a `use: { ... }` block, which no config shows.
+// The block can span lines and hold nested objects, so read it whole by
+// matching its braces, then report the line of the offending option.
+test('no test or script switches on automatic screenshots, videos or traces in a use block', async () => {
+  const found = [];
+  for (const file of await codeOutsideHelper()) {
+    const source = await readFile(file, 'utf8');
+    for (const start of source.matchAll(/\buse\s*(?:\(|:)\s*\{/g)) {
+      let depth = 0, end = start.index + start[0].length - 1;
+      for (; end < source.length; end++) {
+        if (source[end] === '{') depth++;
+        else if (source[end] === '}' && --depth === 0) break;
+      }
+      const block = source.slice(start.index, end + 1);
+      for (const option of block.matchAll(/\b(screenshot|video|trace)\s*:(?!\s*['"`]off['"`])/g)) {
+        const line = source.slice(0, start.index + option.index).split('\n').length;
+        found.push(`${relative(resolve('.'), file)}:${line}`);
+      }
+    }
+  }
+  assert.deepEqual(found, []);
+});
