@@ -1,3 +1,12 @@
+## Home repo
+
+This is one of the owner's app repos. The shared parts of his software factory live in his home repo, checked out beside this one at `../home`. Start sessions there. This file governs work inside this repo.
+
+- Before asking the owner anything or showing him results, read `../home/docs/owner-profile.md`.
+- Factory terms (run report, trail, board, carry on): `../home/docs/factory/GLOSSARY.md`.
+- Working rules shared by every app repo: `../home/docs/process/`.
+- If the home repo is missing, or a skill named in this file is not available in the session (`to-spec`, `to-tickets`, `wayfinder`), stop and tell the owner.
+
 ## Agent skills
 
 ### Issue tracker
