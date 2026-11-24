@@ -32,3 +32,7 @@ Read `docs/agents/design.md` before design interviews, UI implementation/review,
 ### Human testing
 
 Read `docs/development.md#handoff-for-human-testing` whenever preparing a build for a human to test.
+
+### Security
+
+Read `SECURITY.md` before touching network requests, stored data, the YouTube key, `extension/manifest.json` or dependencies, and before any security pass. Update it in the same PR when one of its facts changes.
