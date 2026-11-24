@@ -2,7 +2,7 @@ import { chromium, expect } from '@playwright/test';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { completeWorkflow } from '../tests/workflows/complete-workflow.js';
-import { openActionPopup } from '../tests/browser/helpers.js';
+import { openActionPopup, takeScreenshot } from '../tests/browser/helpers.js';
 
 const validationRoot = resolve('.scratch/validation/actual-chrome');
 await mkdir(validationRoot, { recursive: true });
@@ -40,7 +40,7 @@ async function save(app, url, title) {
 const screenshots = [];
 const result = await completeWorkflow({ launch, save, screenshot: async (page, name) => {
   const path = resolve(output, `${name}.png`);
-  await page.screenshot({ path, fullPage: true }); screenshots.push(path);
+  await takeScreenshot(page, { path, fullPage: true }); screenshots.push(path);
 } });
 const evidence = { checkedAt: new Date().toISOString(), executablePath, extensionPath, browser: version.product, ...result, screenshots };
 await writeFile(resolve(output, 'result.json'), JSON.stringify(evidence, null, 2) + '\n');

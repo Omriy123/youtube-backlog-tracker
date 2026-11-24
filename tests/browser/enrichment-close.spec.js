@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {mkdtemp,mkdir,cp,rename,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {launch,capture} from './helpers.js';
+import {launch,capture,takeScreenshot} from './helpers.js';
 
 async function fixture(){
   await mkdir(resolve('.scratch/extensions'),{recursive:true});
@@ -42,7 +42,7 @@ test('metadata close remains pointer reachable with long Original Latest and His
         await reachable(close);
         await dialog.evaluate(node=>{node.scrollTop=node.scrollHeight;});
         await reachable(close);
-        if(version==='History')await dialog.screenshot({path:resolve(`.scratch/close-metadata-${density}-${width}.png`)});
+        if(version==='History')await takeScreenshot(dialog,{path:resolve(`.scratch/close-metadata-${density}-${width}.png`)});
         await close.click();await expect(dialog).toHaveCount(0);
       }
     }
@@ -69,7 +69,7 @@ test('retrieval results can be pointer closed after scrolling and reopened witho
       await results.scrollIntoViewIfNeeded();await results.evaluate(node=>{node.scrollTop=node.scrollHeight;});
       const close=results.getByRole('button',{name:'Hide retrieval results',exact:true});
       await reachable(close);
-      await results.screenshot({path:resolve(`.scratch/close-results-${density}-${width}.png`)});
+      await takeScreenshot(results,{path:resolve(`.scratch/close-results-${density}-${width}.png`)});
       await close.click();await expect(results).toBeHidden();
       await page.getByRole('button',{name:'Retrieval results',exact:true}).click();
       await expect(results).toBeVisible();await expect(results).toContainText('Retrieved: 20');

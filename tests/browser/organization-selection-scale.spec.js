@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {launch} from './helpers.js';
+import {launch,takeScreenshot} from './helpers.js';
 
 for(const fixture of [{name:'baseline',active:1000,total:1000,channels:100,lists:8},{name:'growth',active:1900,total:3000,channels:550,lists:24}])test(`collect and filter selection at ${fixture.name} workload`,async({},testInfo)=>{
   test.setTimeout(120000);const app=await launch();try{
@@ -23,6 +23,6 @@ for(const viewport of [{width:2560,height:1440},{width:1440,height:900},{width:1
     const page=await app.context.newPage();await page.setViewportSize(viewport);await page.goto(`${app.base}/library.html`);
     await page.evaluate(async()=>{await chrome.storage.local.set({library:{version:1,history:[],records:[{id:'one',identity:'fixture:one',url:'https://example.org/one',user:{status:'active',destination:'Inbox',firstSavedAt:'2026-01-01T00:00:00Z',firstInboxExitAt:null,latestListEntryAt:'2026-01-01T00:00:00Z',revision:1,personalTitle:null,watchEvents:[],pendingReview:null},metadata:{observations:[{title:'Responsive selection fixture',source:'test-fixture',observedAt:'2026-01-01T00:00:00Z'}]}}]}});});await page.reload();
     await page.getByRole('article').getByRole('checkbox').focus();await page.keyboard.press('Space');const panel=page.getByRole('region',{name:'Selected videos',exact:true});await panel.getByRole('button',{name:'Move selected (1)',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Move videos',exact:true});await dialog.getByRole('combobox').selectOption('Backlog');const confirm=dialog.getByRole('button',{name:'Confirm move',exact:true});await confirm.focus();await expect(confirm).toBeFocused();const box=await confirm.boundingBox();expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(viewport.width);
-    await page.screenshot({path:testInfo.outputPath('selection-responsive.png')});await confirm.press('Enter');await expect(dialog).not.toBeVisible();await expect(panel).toContainText('0 selected');await testInfo.attach('viewport.json',{body:JSON.stringify(await page.evaluate(()=>({width:innerWidth,height:innerHeight,devicePixelRatio}))),contentType:'application/json'});
+    await takeScreenshot(page,{path:testInfo.outputPath('selection-responsive.png')});await confirm.press('Enter');await expect(dialog).not.toBeVisible();await expect(panel).toContainText('0 selected');await testInfo.attach('viewport.json',{body:JSON.stringify(await page.evaluate(()=>({width:innerWidth,height:innerHeight,devicePixelRatio}))),contentType:'application/json'});
   }finally{await app.context.close();}
 });
