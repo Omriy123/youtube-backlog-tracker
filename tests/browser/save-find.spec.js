@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { launch, capture, openActionPopup } from './helpers.js';
+import { launch, capture, openActionPopup, takeScreenshot } from './helpers.js';
 
 test('toolbar save leaves source open and finds the persisted video in Inbox', async () => {
   // Catches a missing durable capture, false success, implicit Library tab, or lost read.
@@ -129,7 +129,7 @@ test('the action opens its actual popup and captures the current browser tab', a
     expect(source.isClosed()).toBe(false);
     const library = await app.context.newPage(); await library.goto(`${app.base}/library.html`);
     await expect(library.getByRole('article')).toContainText('Action capture');
-    await library.screenshot({ path: '.scratch/populated-library.png', fullPage: true });
+    await takeScreenshot(library, { path: '.scratch/populated-library.png', fullPage: true });
   } finally { await app.context.close(); }
 });
 

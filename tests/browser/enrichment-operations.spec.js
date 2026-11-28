@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {mkdtemp,mkdir,cp,rename,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {launch,capture} from './helpers.js';
+import {launch,capture,takeScreenshot} from './helpers.js';
 
 async function fixtureExtension({quotaFirst=false}={}){
   await mkdir(resolve('.scratch/extensions'),{recursive:true});const path=await mkdtemp(resolve('.scratch/extensions/batch-'));
@@ -23,7 +23,7 @@ test('list and Library retrieval expose cancel, retry and retained records while
     await results.getByRole('button',{name:'Cancel further retrieval'}).click();await expect(results.getByRole('status')).toContainText('Cancelled');
     await results.getByRole('button',{name:'Retry unfinished retrieval'}).click();await expect(results.getByRole('status')).toContainText('Retrieval finished');
     await expect(results).toContainText('Retrieved: 2');await expect(results).toContainText('Skipped: 1');
-    for(const density of ['Thumbnails','Compact']){await page.getByRole('button',{name:density,exact:true}).click();for(const width of [1440,390]){await page.setViewportSize({width,height:900});await page.screenshot({path:resolve(`.scratch/batch-${density}-${width}.png`),fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}}
+    for(const density of ['Thumbnails','Compact']){await page.getByRole('button',{name:density,exact:true}).click();for(const width of [1440,390]){await page.setViewportSize({width,height:900});await takeScreenshot(page,{path:resolve(`.scratch/batch-${density}-${width}.png`),fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}}
     await page.getByRole('button',{name:'Pull entire Library metadata',exact:true}).click();await expect(results.getByRole('status')).toContainText('Retrieval finished');
     await page.getByRole('button',{name:'Retained video metadata',exact:true}).click();await expect(page.getByRole('dialog',{name:'Retained video metadata'})).toContainText('No retained watched or dismissed videos');
   }finally{await app.context.close();}
@@ -35,7 +35,7 @@ test('quota results show paused and unfinished work for deliberate retry with re
     await capture(app,'https://youtu.be/abcdefghijk','Quota first');await capture(app,'https://youtu.be/lmnopqrstuv','Quota unfinished');const page=await app.context.newPage();await page.goto(`${app.base}/library.html`);
     await page.getByRole('button',{name:'YouTube setup',exact:true}).click();const setup=page.getByRole('dialog',{name:'YouTube setup'});await setup.getByLabel('Personal API key').fill('controlled-fixture');await setup.getByRole('button',{name:'Save key',exact:true}).click();await expect(setup.getByRole('status')).toContainText('Key saved');await setup.getByRole('button',{name:'Close setup'}).click();
     await page.getByRole('button',{name:'Pull list metadata',exact:true}).click();const results=page.getByRole('region',{name:'Metadata retrieval results'});await expect(results.getByRole('status')).toContainText('Paused');await expect(results).toContainText('Failed: 1');await expect(results).toContainText('Not attempted/cancelled: 1');
-    for(const density of ['Thumbnails','Compact']){await page.getByRole('button',{name:density,exact:true}).click();for(const width of [1440,390]){await page.setViewportSize({width,height:900});await results.getByRole('button',{name:'Retry unfinished retrieval'}).focus();await expect(results.getByRole('button',{name:'Retry unfinished retrieval'})).toBeFocused();await page.screenshot({path:resolve(`.scratch/batch-quota-${density}-${width}.png`),fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}}
+    for(const density of ['Thumbnails','Compact']){await page.getByRole('button',{name:density,exact:true}).click();for(const width of [1440,390]){await page.setViewportSize({width,height:900});await results.getByRole('button',{name:'Retry unfinished retrieval'}).focus();await expect(results.getByRole('button',{name:'Retry unfinished retrieval'})).toBeFocused();await takeScreenshot(page,{path:resolve(`.scratch/batch-quota-${density}-${width}.png`),fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}}
     await results.getByRole('button',{name:'Retry unfinished retrieval'}).click();await expect(results.getByRole('status')).toContainText('Retrieval finished');await expect(results).toContainText('Retrieved: 2');
   }finally{await app.context.close();}
 });

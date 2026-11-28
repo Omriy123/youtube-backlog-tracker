@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {mkdtemp,mkdir,cp,rename,writeFile,readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {launch,capture} from './helpers.js';
+import {launch,capture,takeScreenshot} from './helpers.js';
 
 // Controlled provider HTTP boundary; real production parser, UI, local storage,
 // runtime messaging and image encoding run inside the installed extension.
@@ -93,11 +93,11 @@ test('optional setup and deliberate acquisition present retained metadata and im
     await expect(page.locator('article')).toContainText('Example creator');await expect(page.locator('article')).toContainText('2:05');
     for(const density of ['Thumbnails','Compact']) {
       await page.getByRole('button',{name:density,exact:true}).click();
-      for(const width of [1440,640]) {await page.setViewportSize({width,height:900});await page.screenshot({path:resolve(`.scratch/enrichment-${density}-${width}.png`),fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
+      for(const width of [1440,640]) {await page.setViewportSize({width,height:900});await takeScreenshot(page,{path:resolve(`.scratch/enrichment-${density}-${width}.png`),fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
     }
     await page.getByRole('button',{name:/Metadata details: Metadata returned/}).click();
     await expect(page.getByRole('dialog',{name:'Metadata details'})).toContainText('A retained provider description');
-    await page.screenshot({path:resolve('.scratch/enrichment-details-640.png'),fullPage:true});
+    await takeScreenshot(page,{path:resolve('.scratch/enrichment-details-640.png'),fullPage:true});
     await app.context.close();
     app=await launch(profile,{extensionPath});await app.context.setOffline(true);
     const reopened=await app.context.newPage();await reopened.goto(`${app.base}/library.html`);
@@ -127,7 +127,7 @@ test('request errors do not blame setup or expose provider text and pause a batc
     for(const width of [1440,390]){
       await page.setViewportSize({width,height:900});
       expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-      await page.screenshot({path:resolve(`.scratch/setup-request-error-${width}.png`),fullPage:true});
+      await takeScreenshot(page,{path:resolve(`.scratch/setup-request-error-${width}.png`),fullPage:true});
     }
     await setup.getByRole('button',{name:'Close setup',exact:true}).click();
     await page.getByRole('button',{name:'Pull list metadata',exact:true}).click();

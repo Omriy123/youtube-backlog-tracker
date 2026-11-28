@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {resolve} from 'node:path';
 import {mkdir,writeFile} from 'node:fs/promises';
-import {launch,capture,browserTabs} from './helpers.js';
+import {launch,capture,browserTabs,takeScreenshot} from './helpers.js';
 import {metadataProviderFixture} from './metadata-provider-fixture.js';
 test.use({actionTimeout:10000});
 
@@ -120,12 +120,12 @@ test('retained metadata browsing scales and both densities keep selected/history
       await expect(page.locator('#records')).toHaveAttribute('aria-busy','false');
       for(const width of [1440,390]) {
         await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-        await page.screenshot({path:resolve(output,`${density}-${width}-selected.png`),fullPage:true});
+        await takeScreenshot(page,{path:resolve(output,`${density}-${width}-selected.png`),fullPage:true});
         const details=page.getByRole('button',{name:/Metadata details: Metadata returned/});
         await expect(page.locator('#records')).toHaveAttribute('aria-busy','false');
         await details.focus();await expect(details).toBeFocused();await details.press('Enter');
         const dialog=page.getByRole('dialog',{name:'Metadata details'});await dialog.getByRole('button',{name:'History',exact:true}).click();
-        await page.screenshot({path:resolve(output,`${density}-${width}-history.png`),fullPage:true});
+        await takeScreenshot(page,{path:resolve(output,`${density}-${width}-history.png`),fullPage:true});
         await dialog.getByRole('button',{name:'Close metadata'}).focus();await expect(dialog.getByRole('button',{name:'Close metadata'})).toBeFocused();await page.keyboard.press('Escape');
       }
     }

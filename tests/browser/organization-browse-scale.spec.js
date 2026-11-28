@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { launch, capture } from './helpers.js';
+import { launch, capture, takeScreenshot } from './helpers.js';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
@@ -27,7 +27,7 @@ test('representative browse distributions retain responsive controls and record 
       const expectedChannelCount=await app.worker.evaluate(async id=>{const {library}=await chrome.storage.local.get('library');return library.records.filter(record=>record.user.status==='active' && record.metadata.channelId===id).length;},channelId);
       started=Date.now();await channelButton.click();await expect(page.getByRole('article')).toHaveCount(expectedChannelCount);const channelMs=Date.now()-started;
       evidence.measurements.push({...workload,retainedObservationsPerRecord:3,loadMs,queryMs,scopeMs,densityMs,channelMs,activeDomRows:await page.getByRole('article').count()});
-      await page.getByRole('button',{name:'Rows',exact:true}).click();await page.screenshot({path:resolve(output,`workload-${workload.total}.png`),fullPage:true});
+      await page.getByRole('button',{name:'Rows',exact:true}).click();await takeScreenshot(page,{path:resolve(output,`workload-${workload.total}.png`),fullPage:true});
       expect(await page.locator('[data-channel-id]').first().boundingBox()).toEqual(before);
     }
     for(const viewport of [{width:2560,height:1440},{width:1440,height:900},{width:1280,height:500},{width:390,height:844},{width:768,height:1200}]){
@@ -39,14 +39,14 @@ test('representative browse distributions retain responsive controls and record 
       const measured=await page.evaluate(()=>({width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,devicePixelRatio,scrollbarWidth:innerWidth-document.documentElement.clientWidth}));
       expect(measured.scrollWidth).toBeLessThanOrEqual(measured.width);expect(measured.scrollbarWidth).toBe(0);
       await page.getByRole('button',{name:'Search entire Library',exact:true}).focus();await expect(page.getByRole('button',{name:'Search entire Library',exact:true})).toBeFocused();
-      evidence.viewports.push({...viewport,measured});await page.screenshot({path:resolve(output,`viewport-${viewport.width}x${viewport.height}.png`),fullPage:true});
+      evidence.viewports.push({...viewport,measured});await takeScreenshot(page,{path:resolve(output,`viewport-${viewport.width}x${viewport.height}.png`),fullPage:true});
     }
     for(const zoom of [1.25,1.5]){
       await page.evaluate(async factor=>{const tab=await chrome.tabs.getCurrent();await chrome.tabs.setZoom(tab.id,factor);},zoom);
       evidence.viewports.push({zoom,measured:await page.evaluate(()=>({width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,devicePixelRatio}))});
       expect(evidence.viewports.at(-1).measured.scrollWidth).toBeLessThanOrEqual(evidence.viewports.at(-1).measured.width);
       await page.getByRole('button',{name:'Clear filters',exact:true}).focus();await expect(page.getByRole('button',{name:'Clear filters',exact:true})).toBeFocused();
-      await page.screenshot({path:resolve(output,`zoom-${zoom}.png`),fullPage:true});
+      await takeScreenshot(page,{path:resolve(output,`zoom-${zoom}.png`),fullPage:true});
     }
   } finally {await writeFile(resolve(output,'evidence.json'),JSON.stringify(evidence,null,2));await app.context.close();}
 });

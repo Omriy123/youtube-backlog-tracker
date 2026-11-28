@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {launch,capture} from './helpers.js';
+import {launch,capture,takeScreenshot} from './helpers.js';
 
 const request=(page,message)=>page.evaluate(message=>chrome.runtime.sendMessage(message),message);
 async function fixture(app) {
@@ -89,11 +89,11 @@ for(const width of [390,1440])test(`selection columns align and compact deselect
     expect(positions[0]).toEqual(positions[1]);expect(positions[0]).toHaveLength(2);
     const deselect=panel.getByRole('button',{name:'Deselect Short title',exact:true});await expect(deselect).toHaveText('×');
     expect(await deselect.evaluate(b=>b.closest('td').cellIndex)).toBe(0);await deselect.scrollIntoViewIfNeeded();const bounds=await deselect.boundingBox();expect(bounds.x+bounds.width).toBeLessThanOrEqual(width);
-    await page.screenshot({path:`.scratch/repair-selection-${width}.png`,fullPage:true});
-    await panel.screenshot({path:`.scratch/repair-selection-panel-${width}.png`});
+    await takeScreenshot(page,{path:`.scratch/repair-selection-${width}.png`,fullPage:true});
+    await takeScreenshot(panel,{path:`.scratch/repair-selection-panel-${width}.png`});
     await page.getByRole('button',{name:'Compact',exact:true}).click();
     await expect.poll(()=>tables.evaluateAll(tables=>tables.map(t=>[...t.querySelectorAll('thead th')].map(th=>th.getBoundingClientRect().x)))).toEqual(positions);
-    await panel.screenshot({path:`.scratch/repair-selection-compact-${width}.png`});
+    await takeScreenshot(panel,{path:`.scratch/repair-selection-compact-${width}.png`});
     await deselect.click();await expect(panel).toContainText('2 selected');await expect(row(page,'three').getByRole('checkbox')).toBeChecked();
     await panel.getByRole('radio',{name:'Matches current filters (1)',exact:true}).check();await panel.getByRole('button',{name:'Deselect (1)',exact:true}).click();await expect(panel).toContainText('1 selected');
     await panel.getByRole('button',{name:'Clear selection',exact:true}).click();await expect(panel).toContainText('0 selected');

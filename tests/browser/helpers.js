@@ -62,6 +62,16 @@ export async function capture(app, url, title) {
   return { source, popup };
 }
 
+// Every test and validation screenshot goes through here, so no image can show
+// a key: any password field, and the key field by its label even if it ever
+// shows plain text, is covered by a solid box whatever it contains.
+// `target` is a Page or a Locator; options are Playwright's screenshot options.
+export async function takeScreenshot(target, options = {}) {
+  const page = typeof target.page === 'function' ? target.page() : target;
+  const keyFields = page.locator('input[type="password"]').or(page.getByLabel(/API key/i));
+  return target.screenshot({ ...options, mask: [...(options.mask ?? []), keyFields] });
+}
+
 export function browserTabs(app) {
   return app.worker.evaluate(() => chrome.tabs.query({}));
 }
